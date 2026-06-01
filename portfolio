@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seamless Photo Dump with Back-Button Links</title>
+    <title>Seamless Photo Dump</title>
     <style>
-        /* Reset margins completely */
         body {
             margin: 0;
             padding: 0;
             background-color: #000;
             overflow-x: hidden;
         }
-
-        /* Seamless grid layout */
         .collage-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -21,24 +18,18 @@
             grid-auto-flow: dense;
             gap: 0; 
         }
-
-        /* Make the link containers fill their entire grid cells */
         .collage-grid a {
             width: 100%;
             height: 100%;
             display: block;
             text-decoration: none;
         }
-
-        /* Image styling inside the link tags */
         .collage-grid img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Prevents stretching in grid mode */
+            object-fit: cover;
             display: block;
         }
-
-        /* Grid item size modifiers applied to the <a> tags */
         .wide { grid-column: span 2; }
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
@@ -47,49 +38,26 @@
 <body>
 
     <div class="collage-grid">
-        <!-- 
-          To add photos:
-          1. Set the href="..." to your high-resolution full image file.
-          2. Set the src="..." of the <img> to the same file.
-        -->
-
-        <!-- Normal Size Image Link -->
+        <!-- Normal Size -->
         <a href="https://picsum.photos">
             <img src="https://picsum.photos" alt="Photo">
         </a>
         
-        <!-- Tall Size Image Link -->
+        <!-- Tall Size -->
         <a class="tall" href="https://picsum.photos">
             <img src="https://picsum.photos" alt="Photo">
         </a>
         
-        <!-- Wide Size Image Link -->
+        <!-- Wide Size -->
         <a class="wide" href="https://picsum.photos">
             <img src="https://picsum.photos" alt="Photo">
         </a>
         
-        <!-- Normal Size Image Link -->
-        <a href="https://picsum.photos">
-            <img src="https://picsum.photos" alt="Photo">
-        </a>
-        
-        <!-- Big Size Image Link -->
+        <!-- Big Size -->
         <a class="big" href="https://picsum.photos">
-            <img src="https://picsum.photos" alt="Photo">
-        </a>
-        
-        <!-- More layout variations below -->
-        <a class="wide" href="https://picsum.photos">
-            <img src="https://picsum.photos" alt="Photo">
-        </a>
-        <a href="https://picsum.photos">
-            <img src="https://picsum.photos" alt="Photo">
-        </a>
-        <a class="tall" href="https://picsum.photos">
             <img src="https://picsum.photos" alt="Photo">
         </a>
     </div>
 
 </body>
 </html>
-initial upload
