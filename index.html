@@ -95,18 +95,19 @@
             top: 0;
             width: 50%; /* Divides the viewing window perfectly down the center */
             height: 100%;
-            z-index: 10; /* Sits cleanly over the image layer */
+            z-index: 99999 !important; /* Forces the touch boxes to sit completely above the image layer */
         }
+
         .nav-zone-left {
             left: 0;
-            /* Fully encrypted ultra-thin black left chevron (<) - forces absolute Safari compatibility */
+            /* Fully encrypted ultra-thin black left chevron (<) */
             cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuMjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTE1IDE4bC02LTYgNi02Ii8+PC9zdmc+'), 16 16, auto;
         }
 
         .nav-zone-right {
             right: 0;
-            /* Fully encrypted ultra-thin black right chevron (>) - forces absolute Safari compatibility */
-            cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuMjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTkgMThsNi02LTYtNiIvPjwvc3ZnPg=='), 16 16, auto;
+            /* Fully encrypted ultra-thin black right chevron (>) */
+            cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuMjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTkgMThsNi02LTYgNiIvPjwvc3ZnPg=='), 16 16, auto;
         }
 
         /* Aligns metadata block lines precisely with the right border edge of the image */
