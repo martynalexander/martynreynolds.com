@@ -450,24 +450,21 @@
 
     <!-- Seamless Subpage Transition Script Logic -->
     <script>
-          const archiveView = document.getElementById('archive-view');
+                 const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
         const titleTarget = document.getElementById('title-target');
         const infoTarget = document.getElementById('info-target');
 
-        // Dynamically scans your actual grid elements every time the site opens
         let currentArtworkIndex = 0;
         let allArtworkElements = [];
 
         function refreshArtworkList() {
-            // Gathers every link anchor and video loop inside your grid wrapper
             allArtworkElements = Array.from(document.querySelectorAll('.collage-grid > a, .collage-grid > video'));
         }
 
         function showArtworkPage(element, mediaType) {
             refreshArtworkList();
-            // Records the index position of the specific clicked element
             currentArtworkIndex = allArtworkElements.indexOf(element);
             if (currentArtworkIndex === -1) currentArtworkIndex = 0;
 
@@ -484,7 +481,9 @@
         function loadArtworkData(element) {
             let rawText = "";
             
-            // Checks if the active item is a plain link image or a looping video block
+            // Retains the interactive tap overlay zones while swapping out underlying image/video nodes
+            const existingZones = mediaTarget.querySelectorAll('.nav-zone');
+            
             if (element.tagName.toLowerCase() === 'video') {
                 const source = element.querySelector('source');
                 mediaTarget.innerHTML = `<video autoplay loop muted playsinline controls><source src="${source.src}" type="video/mp4"></video>`;
@@ -497,7 +496,9 @@
                 }
             }
 
-            // Parses metadata sashes smoothly
+            // Re-injects the invisible touch pads back over the fresh media element seamlessly
+            existingZones.forEach(zone => mediaTarget.appendChild(zone));
+
             const textSegments = rawText.split('|');
             titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
             
@@ -509,17 +510,16 @@
             }
         }
 
-        function navigateToNextArtwork(event) {
-            if (event) event.stopPropagation(); // Prevents the white background click-exit script from firing
+        function navigateToAdjacentArtwork(event, direction) {
+            if (event) event.stopPropagation(); // Prevents layout pop-back dismissals
             refreshArtworkList();
 
-            // Advances index by 1; loops cleanly back to 0 if it hits the end of your 40+ list
-            currentArtworkIndex = (currentArtworkIndex + 1) % allArtworkElements.length;
-            const nextElement = allArtworkElements[currentArtworkIndex];
+            // Computes adjacent pagination indexes securely; handles looping backwards cleanly past zero
+            currentArtworkIndex = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
+            const targetElement = allArtworkElements[currentArtworkIndex];
 
-            // Updates the imagery and textual descriptions instantly without reload flashes
-            loadArtworkData(nextElement);
-            window.scrollTo(0, 0);
+            loadArtworkData(targetElement);
+            window.scrollTo(0, 0); // Centers scrolling index for vertical presentation rows
         }
 
         function hideArtworkPage(event) {
@@ -528,7 +528,12 @@
             detailView.style.opacity = '0';
             setTimeout(() => {
                 detailView.style.display = 'none';
-                mediaTarget.innerHTML = ''; 
+                
+                // Flushes content safely while keeping the hardcoded navigation zones completely intact
+                const zones = Array.from(mediaTarget.querySelectorAll('.nav-zone'));
+                mediaTarget.innerHTML = '';
+                zones.forEach(zone => mediaTarget.appendChild(zone));
+                
                 archiveView.style.display = 'block';
             }, 300);
         }
