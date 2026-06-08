@@ -40,7 +40,7 @@
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
 
-        /* Clean white layout sub-page background */
+             /* White layout sub-page background - now acts as a clickable trigger */
         #detail-view {
             display: none; 
             background-color: #fff;
@@ -48,66 +48,81 @@
             font-family: sans-serif;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Forces content directly to the top edge */
             min-height: 100vh;
             box-sizing: border-box;
-            padding: 40px 20px;
+            padding: 0; /* Stripped container padding to remove top white space */
             opacity: 0;
             transition: opacity 0.3s ease;
+            cursor: pointer; /* Pointer cue showing you can click anywhere to exit */
+        }
+
+        /* The structural wrapper containing the artwork frame and text column */
+        .detail-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* Snaps text box to the right hand side of the image */
+            max-width: 100vw;
+            margin-top: 0;
+            cursor: default; /* Stops the grid click-back action inside the presentation zone */
         }
 
         .artwork-container {
-            max-width: 90vw;
-            max-height: 70vh;
-            margin-bottom: 20px;
+            max-width: 100vw;
+            max-height: 75vh;
+            margin-bottom: 0;
+            display: flex;
+            justify-content: center;
         }
 
         .artwork-container img, 
         .artwork-container video {
-            max-width: 100%;
-            max-height: 70vh;
+            max-width: 100vw;
+            max-height: 75vh;
             object-fit: contain;
             display: block;
         }
-        /* Aligns text block precisely with the right boundary edge of the image wrapper */
+
+        /* Aligns metadata block lines precisely with the right border edge of the image */
         .artwork-details {
-            width: 100%;
             text-align: right;
             box-sizing: border-box;
-            margin-top: 10px;
+            padding: 15px 20px 40px 20px; /* Generates clean safe page edges */
+            margin-top: 0;
         }
 
-        /* All text compressed dynamically by 30% and set to automatic Title Case text */
+        /* Uniform sizing, light font styling, compressed spacing, Title Case formatting */
         .artwork-details h1 {
-            font-weight: 300;
+            font-weight: 300; /* Removes standard header bolding entirely */
             font-size: 13px;
             letter-spacing: 1px;
-            text-transform: capitalize; /* Forces Title Case */
+            text-transform: capitalize; 
             color: #000;
             margin: 0;
-            line-height: 1.25; /* 30% reduction from standard web line heights */
+            line-height: 1.25; 
         }
 
         .artwork-details p {
             color: #000;
-            font-weight: 300;
+            font-weight: 300; /* Matching weight */
             font-size: 13px;
             letter-spacing: 1px;
-            text-transform: capitalize; /* Forces Title Case */
+            text-transform: capitalize; 
             margin: 0;
-            line-height: 1.25; /* 30% reduction from standard web line heights */
+            line-height: 1.25; 
         }
 
-        /* Matches text styling exactly and sits precisely one line space below */
+        /* Clean "Back to Images" navigation prompt sitting exactly two lines below */
         .back-link {
             color: #000;
             text-decoration: none;
             font-size: 13px;
+            font-weight: 300; /* Stripped bolding to make it uniform with the meta lines */
             letter-spacing: 1px;
-            text-transform: capitalize; /* Forces Title Case */
+            text-transform: capitalize; 
             cursor: pointer;
             display: inline-block;
-            margin-top: 12px; 
+            margin-top: 25px; /* Double line break space layout */
             line-height: 1.25;
         }
 
