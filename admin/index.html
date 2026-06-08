@@ -6,7 +6,18 @@
     <title>TinaCMS Admin</title>
   </head>
   <body>
-    <!-- The Tina editing engine loads cleanly through this script injection link -->
+    <!-- Secure container where your visual editing panels will render -->
+    <div id="tina-admin"></div>
+
+    <!-- The Tina editing engine script layer -->
     <script src="https://tinacms.org"></script>
+
+    <!-- Connects the file directly to your secure account profile -->
+    <script>
+      TinaAdmin.init({
+        clientId: "1524d320-7ee4-4a3e-bca7-351916403e51",
+        branch: "main"
+      });
+    </script>
   </body>
 </html>
