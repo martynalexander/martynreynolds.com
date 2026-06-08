@@ -40,10 +40,11 @@
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
 
+        /* Clean white layout sub-page background */
         #detail-view {
-            display: none;
-            background-color: #000;
-            color: #fff;
+            display: none; 
+            background-color: #fff;
+            color: #000;
             font-family: sans-serif;
             flex-direction: column;
             align-items: center;
@@ -54,11 +55,13 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
+
         .artwork-container {
             max-width: 90vw;
             max-height: 70vh;
-            margin-bottom: 35px;
+            margin-bottom: 20px;
         }
+
         .artwork-container img, 
         .artwork-container video {
             max-width: 100%;
@@ -66,39 +69,51 @@
             object-fit: contain;
             display: block;
         }
+
+        /* Aligns the entire text block to the bottom right of the image container width */
         .artwork-details {
-            text-align: center;
-            max-width: 600px;
+            width: 100%;
+            max-width: 90vw;
+            text-align: right;
+            box-sizing: border-box;
+            margin-top: 0;
         }
+
+        /* All text lines made completely uniform in size and line-spacing */
         .artwork-details h1 {
-            font-weight: 300;
-            font-size: 16px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin: 0 0 12px 0;
-        }
-        .artwork-details p {
-            color: #888;
             font-weight: 300;
             font-size: 13px;
             letter-spacing: 1px;
-            line-height: 1.8;
-            margin: 0 0 35px 0;
-        }
-        .back-link {
-            color: #aaa;
-            text-decoration: none;
-            font-size: 11px;
-            letter-spacing: 2px;
             text-transform: uppercase;
-            border-bottom: 1px solid #333;
-            padding-bottom: 4px;
-            cursor: pointer;
-            transition: color 0.2s ease, border-color 0.2s ease;
+            color: #000;
+            margin: 0;
+            line-height: 1.8;
         }
+
+        .artwork-details p {
+            color: #000;
+            font-weight: 300;
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin: 0;
+            line-height: 1.8;
+        }
+
+        /* Back link matches text size perfectly and sits exactly one line space below */
+        .back-link {
+            color: #000;
+            text-decoration: none;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 15px; 
+            line-height: 1.8;
+        }
+
         .back-link:hover {
-            color: #fff;
-            border-color: #fff;
+            color: #666;
         }
     </style>
 </head>
