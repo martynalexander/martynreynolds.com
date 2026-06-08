@@ -489,7 +489,7 @@
             
             if (element.tagName.toLowerCase() === 'video') {
                 const source = element.querySelector('source');
-                mediaTarget.innerHTML = `<video autoplay loop muted playsinline controls><source src="${source.src}" type="video/mp4"></video>`;
+                mediaTarget.innerHTML = `<video autoplay loop muted playsinline><source src="${source.src}" type="video/mp4"></video>`;
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
             } else {
                 const img = element.querySelector('img');
