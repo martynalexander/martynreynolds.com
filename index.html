@@ -11,6 +11,12 @@
             background-color: #000;
             overflow-x: hidden;
         }
+
+        /* Container managing the structural swap between views */
+        #archive-view {
+            display: block;
+        }
+
         .collage-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -18,10 +24,12 @@
             grid-auto-flow: dense;
             gap: 0; 
         }
-        .collage-grid a {
+        .collage-grid a,
+        .collage-grid video {
             width: 100%;
             height: 100%;
             display: block;
+            cursor: pointer;
             text-decoration: none;
         }
         /* Forces BOTH images and videos to scale and zoom identically */
@@ -35,211 +43,220 @@
         .wide { grid-column: span 2; }
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
+
+        /* Minimal Secondary Artwork Details Page Layout Style */
+        #detail-view {
+            display: none; /* Hidden until items are clicked */
+            background-color: #000;
+            color: #fff;
+            font-family: sans-serif;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            padding: 40px 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .artwork-container {
+            max-width: 90vw;
+            max-height: 70vh;
+            margin-bottom: 35px;
+        }
+
+        .artwork-container img, 
+        .artwork-container video {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            display: block;
+        }
+
+        .artwork-details {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        /* Elegant Title Typography Block */
+        .artwork-details h1 {
+            font-weight: 300;
+            font-size: 16px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 0 0 12px 0;
+        }
+
+        /* Elegant Secondary Meta Metadata Column */
+        .artwork-details p {
+            color: #888;
+            font-weight: 300;
+            font-size: 13px;
+            letter-spacing: 1px;
+            line-height: 1.8;
+            margin: 0 0 35px 0;
+        }
+
+        /* Minimal Navigation Back Button Link */
+        .back-link {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+            padding-bottom: 4px;
+            cursor: pointer;
+            transition: color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #fff;
+            border-color: #fff;
+        }
     </style>
 </head>
 <body>
 
-    <div class="collage-grid">
-    
-        <!-- Big Size -->
-        <a class="big" href="MartynReynoldsArch_Sumer_installationview_2025_29.jpg">
-            <img src="MartynReynoldsArch_Sumer_installationview_2025_29.jpg" alt="Photo">
-        </a>
+    <!-- MAIN SEAMLESS COLLAGE IMAGE GRID -->
+    <div id="archive-view">
+        <div class="collage-grid">
         
-        <!-- Normal Size -->
-        <a href="MartynReynolds_Facade_Study_2024_13.jpg">
-            <img src="MartynReynolds_Facade_Study_2024_13.jpg" alt="Photo">
-        </a>
-              
-        <!-- Big Size -->
-        <a class="big" href="MartynReynolds_Arch_Sumer_installation_view_2025_43.jpg">
-            <img src="MartynReynolds_Arch_Sumer_installation_view_2025_43.jpg" alt="Photo">
-        </a>
-                    
-        <!-- Normal Size -->
-        <a href="MartynReynolds_Cut Circle_2025_velvet_6.jpg">
-            <img src="MartynReynolds_Cut Circle_2025_velvet_6.jpg" alt="Photo">
-        </a>
-
-        <!-- Normal Size -->
-        <a href="MartynReynolds_Cut Circle_2025_velvet_9.jpg">
-            <img src="MartynReynolds_Cut Circle_2025_velvet_9.jpg" alt="Photo">
-        </a>
-                 
-        <!-- Big Size -->
-        <a class="big" href="MartynReynolds_Arch_Sumer_installation_view_2025_44_edit.jpg">
-            <img src="MartynReynolds_Arch_Sumer_installation_view_2025_44_edit.jpg" alt="Photo">
-        </a>
-                        
-        <!-- Normal Size -->
-        <a href="MartynReynoldsArch2025_14edit.jpg">
-            <img src="MartynReynoldsArch2025_14edit.jpg" alt="Photo">
-        </a>
-        
-        <!-- Tall Size -->
-        <a class="tall" href="MartynReynolds_Arch_2025_01.jpg">
-            <img src="MartynReynolds_Arch_2025_01.jpg" alt="Photo">
-        </a>
-
-        <!-- Normal Size -->
-        <a href="MartynReynolds_Arch_2025_09.jpg">
-            <img src="MartynReynolds_Arch_2025_09.jpg" alt="Photo">
-        </a>
-    
-        <!-- Tall Size -->
-        <a class="tall" href="MartynReynolds_Cut_Circle_2025_1.jpg">
-            <img src="MartynReynolds_Cut_Circle_2025_1.jpg" alt="Photo">
-        </a>
-              
-        <!-- Normal Size -->
-        <a href="MartynReynolds_Cut_Circle_2025_3.jpg">
-            <img src="MartynReynolds_Cut_Circle_2025_3.jpg" alt="Photo">
-        </a>
+            <!-- Big Size -->
+            <a class="big" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynoldsArch_Sumer_installationview_2025_29.jpg" alt="Sumer Installation View | 2025 | Sumer Gallery, Auckland">
+            </a>
+            
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Facade_Study_2024_13.jpg" alt="Facade Study | 2024 | Prototype Model Study">
+            </a>
                   
-        <!-- Big Size -->
-        <a class="big" href="MartynReynolds_Arch_Sumer_installation_view_2025_33.jpg">
-            <img src="MartynReynolds_Arch_Sumer_installation_view_2025_33.jpg" alt="Photo">
-        </a>
-        
-        <!-- Tall Size -->
-        <a class="tall" href="MartynReynolds_Fasten_Hanami_Sketch_2024_3.jpg">
-            <img src="MartynReynolds_Fasten_Hanami_Sketch_2024_3.jpg" alt="Photo">
-        </a>
+            <!-- Big Size -->
+            <a class="big" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Arch_Sumer_installation_view_2025_43.jpg" alt="Arch Sumer Installation View | 2025 | Frame Record 43">
+            </a>
+                        
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Cut Circle_2025_velvet_6.jpg" alt="Cut Circle | 2025 | Velvet, Variant 6">
+            </a>
 
-        <!-- Tall Size -->
-        <a class="tall" href="MartynReynolds_Fasten_Hanami_2025_10.jpg">
-            <img src="MartynReynolds_Fasten_Hanami_2025_10.jpg" alt="Photo">
-        </a>
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Cut Circle_2025_velvet_9.jpg" alt="Cut Circle | 2025 | Velvet, Variant 9">
+            </a>
+                 
+            <!-- Big Size -->
+            <a class="big" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Arch_Sumer_installation_view_2025_44_edit.jpg" alt="Arch Sumer Installation View | 2025 | Production Edit 44">
+            </a>
+                        
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynoldsArch2025_14edit.jpg" alt="Arch Study | 2025 | Selected Studio Edit 14">
+            </a>
+            
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Arch_2025_01.jpg" alt="Arch | 2025 | Documentation Frame 01">
+            </a>
 
-        <!-- Big Size -->
-        <a class="big" href="MartynReynolds_Fasten_Hanami_2025_07.jpg">
-            <img src="MartynReynolds_Fasten_Hanami_2025_07.jpg" alt="Photo">
-        </a>
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Arch_2025_09.jpg" alt="Arch | 2025 | Documentation Frame 09">
+            </a>
         
-        <!-- Tall Size -->
-        <a class="tall" href="MartynReynolds_Fasten_Hanami_2025_05.jpg">
-            <img src="MartynReynolds_Fasten_Hanami_2025_05.jpg" alt="Photo">
-        </a>
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Cut_Circle_2025_1.jpg" alt="Cut Circle 1 | 2025 | Archive Entry">
+            </a>
               
-        <!-- Tall Size -->
-        <a class="tall" href="MartynReynolds_Fasten_Hanami_2025_02.jpg">
-            <img src="MartynReynolds_Fasten_Hanami_2025_02.jpg" alt="Photo">
-        </a>
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Cut_Circle_2025_3.jpg" alt="Cut Circle 3 | 2025 | Archive Entry">
+            </a>
+                      
+            <!-- Big Size -->
+            <a class="big" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Arch_Sumer_installation_view_2025_33.jpg" alt="Arch Sumer Installation View | 2025 | Frame Record 33">
+            </a>
+            
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Fasten_Hanami_Sketch_2024_3.jpg" alt="Fasten Hanami Sketch 3 | 2024 | Graphite on Paper">
+            </a>
 
-        <!-- Normal Size -->
-        <a href="facade_study_2025_sumer.jpg">
-            <img src="facade_study_2025_sumer.jpg" alt="Photo">
-        </a>
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Fasten_Hanami_2025_10.jpg" alt="Fasten Hanami 10 | 2025 | Installation View Element">
+            </a>
 
-        <!-- Normal Size -->
-        <a href="140A1262.jpg">
-            <img src="140A1262.jpg" alt="Photo">
-        </a>
-        
-        <!-- Normal Size -->
-        <a href="140A1270.jpg">
-            <img src="140A1270.jpg" alt="Photo">
-        </a>
-        
-        <!-- Normal Size -->
-        <a href="140A1273.jpg">
-            <img src="140A1273.jpg" alt="Photo">
-        </a>
-           
-        <!-- Normal Size -->
-        <a href="140A1254_edit.jpg">
-            <img src="140A1254_edit.jpg" alt="Photo">
-        </a>
+            <!-- Big Size -->
+            <a class="big" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Fasten_Hanami_2025_07.jpg" alt="Fasten Hanami 07 | 2025 | Installation View Element">
+            </a>
+            
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Fasten_Hanami_2025_05.jpg" alt="Fasten Hanami 05 | 2025 | Installation View Element">
+            </a>
+                  
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="MartynReynolds_Fasten_Hanami_2025_02.jpg" alt="Fasten Hanami 02 | 2025 | Installation View Element">
+            </a>
 
-        <!-- Tall Size -->
-        <a class="tall" href="IMG_7332.JPG">
-            <img src="IMG_7332.JPG" alt="Photo">
-        </a>
-        
-        <!-- Normal Size -->
-        <a href="IMG_9073.JPG">
-            <img src="IMG_9073.JPG" alt="Photo">
-        </a>
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="facade_study_2025_sumer.jpg" alt="Facade Study | 2025 | Sumer Gallery, Auckland">
+            </a>
 
-        <!-- Big Size -->
-        <a class="big" href="000034_023.jpeg">
-            <img src="000034_023.jpeg" alt="Photo">
-        </a>
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="140A1262.jpg" alt="Archive Log 140A1262 | 2025 | Exhibition View Detail">
+            </a>
+            
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="140A1270.jpg" alt="Archive Log 140A1270 | 2025 | Exhibition View Detail">
+            </a>
+            
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="140A1273.jpg" alt="Archive Log 140A1273 | 2025 | Exhibition View Detail">
+            </a>
+               
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="140A1254_edit.jpg" alt="Archive Log 140A1254 | 2025 | Digital Master Edit">
+            </a>
 
-        <!-- Tall Size -->
-        <a class="tall" href="IMG_2665.JPG">
-            <img src="IMG_2665.JPG" alt="Photo">
-        </a>
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="IMG_7332.JPG" alt="Studio Documentation | 2025 | Log Capture 7332">
+            </a>
+            
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')">
+                <img src="IMG_9073.JPG" alt="Studio Documentation | 2025 | Log Capture 9073">
+            </a>
 
-        <!-- Tall Size -->
-        <a class="tall" href="IMG_2664.JPG">
-            <img src="IMG_2664.JPG" alt="Photo">
-        </a>
-        
-        <!-- Tall Size -->
-        <a class="tall" href="IMG_2667.JPG">
-            <img src="IMG_2667.JPG" alt="Photo">
-        </a>
+            <!-- Big Size -->
+            <a class="big" onclick="showArtworkPage(this, 'image')">
+                <img src="000034_023.jpeg" alt="Archive Scan | 2024 | Medium Format Exposure 023">
+            </a>
 
-        <!-- Tall Size -->
-        <a class="tall" href="IMG_2668.JPG">
-            <img src="IMG_2668.JPG" alt="Photo">
-        </a>
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="IMG_2665.JPG" alt="Installation Fragment View | 2025 | Capture 2665">
+            </a>
 
-        <!-- Tall Size -->
-        <a class="tall" href="IMG_2666.JPG">
-            <img src="IMG_2666.JPG" alt="Photo">
-        </a>
-
-        <!-- Big Size -->
-        <a class="big" href="IMG_2680.JPG">
-            <img src="IMG_2680.JPG" alt="Photo">
-        </a>
-        
-        <!-- Tall Size -->
-        <a class="tall" href="IMG_2663.jpeg">
-            <img src="IMG_2663.jpeg" alt="Photo">
-        </a>
-
-        <!-- Big Size -->
-        <a class="big" href="SANY0144.JPG">
-            <img src="SANY0144.JPG" alt="Photo">
-        </a>
-
-      <!-- First Frameless Video Loop (Large Size Grid Layout) -->
-<video class="big" autoplay loop muted playsinline>
-    <source src="SANY0137.MP4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
-
-        <!-- Normal Size -->
-        <a href="SANY0146.JPG">
-            <img src="SANY0146.JPG" alt="Photo">
-        </a>
-
-        <!-- Normal Size -->
-        <a href="SANY0147.JPG">
-            <img src="SANY0147.JPG" alt="Photo">
-        </a>
-
-        <!-- Normal Size -->
-        <a href="SANY0148.JPG">
-            <img src="SANY0148.JPG" alt="Photo">
-        </a>
-
-        <!-- Normal Size -->
-        <a href="SANY0149.JPG">
-            <img src="SANY0149.JPG" alt="Photo">
-        </a>
-        
-        <!-- Second Frameless Video Loop (Normal Size Grid Layout) -->
-        <video autoplay loop muted playsinline>
-            <source src="SANY0150.MP4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        
-    </div>
-
-</body>
-</html>
-
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
+                <img src="IMG_2664.JPG" alt="Installation Fragment View | 2025 | Capture 2664">
+            </a>
+            
+            <!-- Tall Size -->
+            <a class="tall" onclick="showArtworkPage(this, 'image')">
