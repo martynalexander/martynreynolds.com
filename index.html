@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Martyn Reynolds' Images</title>
+    <title>Martyn Reynolds Images</title>
     <style>
         body {
             margin: 0;
@@ -11,9 +11,12 @@
             background-color: #000;
             overflow-x: hidden;
         }
+
+        /* Container managing the structural swap between views */
         #archive-view {
             display: block;
         }
+
         .collage-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -29,6 +32,7 @@
             cursor: pointer;
             text-decoration: none;
         }
+        /* Forces BOTH images and videos to scale and zoom identically */
         .collage-grid img,
         .collage-grid video {
             width: 100%;
@@ -40,9 +44,9 @@
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
 
-             /* White layout sub-page background - now acts as a clickable trigger */
+        /* Minimal Secondary Artwork Details Page Layout Style */
         #detail-view {
-            display: none; 
+            display: none; /* Hidden until items are clicked */
             background-color: #fff;
             color: #000;
             font-family: sans-serif;
@@ -91,7 +95,7 @@
             margin-top: 0;
         }
 
-  /* Uniform sizing, light font styling, compressed spacing, Title Case formatting */
+        /* Uniform sizing, light font styling, compressed spacing, Title Case formatting */
         .artwork-details h1 {
             font-weight: 300; 
             font-size: 13px;
@@ -132,209 +136,283 @@
     </style>
 </head>
 <body>
+
+    <!-- MAIN SEAMLESS COLLAGE IMAGE GRID -->
     <div id="archive-view">
+        <!-- cms-list-start: archive_grid -->
         <div class="collage-grid">
- <!-- Big Size -->
+        
+            <!-- cms-item-start -->
+            <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynoldsArch_Sumer_installationview_2025_29.jpg" alt="Sumer Installation View | 2025 | Sumer Gallery, Auckland">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Facade_Study_2024_13.jpg" alt="Facade Study | 2024 | Prototype Model Study">
             </a>
+            <!-- cms-item-end -->
                   
+            <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Arch_Sumer_installation_view_2025_43.jpg" alt="Arch Sumer Installation View | 2025 | Frame Record 43">
             </a>
+            <!-- cms-item-end -->
                         
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Cut Circle_2025_velvet_6.jpg" alt="Cut Circle | 2025 | Velvet, Variant 6">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Cut Circle_2025_velvet_9.jpg" alt="Cut Circle | 2025 | Velvet, Variant 9">
             </a>
+            <!-- cms-item-end -->
                  
+            <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Arch_Sumer_installation_view_2025_44_edit.jpg" alt="Arch Sumer Installation View | 2025 | Production Edit 44">
             </a>
+            <!-- cms-item-end -->
                         
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynoldsArch2025_14edit.jpg" alt="Arch Study | 2025 | Selected Studio Edit 14">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Arch_2025_01.jpg" alt="Arch | 2025 | Documentation Frame 01">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Arch_2025_09.jpg" alt="Arch | 2025 | Documentation Frame 09">
             </a>
+            <!-- cms-item-end -->
         
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Cut_Circle_2025_1.jpg" alt="Cut Circle 1 | 2025 | Archive Entry">
             </a>
+            <!-- cms-item-end -->
               
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Cut_Circle_2025_3.jpg" alt="Cut Circle 3 | 2025 | Archive Entry">
             </a>
+            <!-- cms-item-end -->
                       
+            <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Arch_Sumer_installation_view_2025_33.jpg" alt="Arch Sumer Installation View | 2025 | Frame Record 33">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Fasten_Hanami_Sketch_2024_3.jpg" alt="Fasten Hanami Sketch 3 | 2024 | Graphite on Paper">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Fasten_Hanami_2025_10.jpg" alt="Fasten Hanami 10 | 2025 | Installation View Element">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Fasten_Hanami_2025_07.jpg" alt="Fasten Hanami 07 | 2025 | Installation View Element">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Fasten_Hanami_2025_05.jpg" alt="Fasten Hanami 05 | 2025 | Installation View Element">
             </a>
+            <!-- cms-item-end -->
                   
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="MartynReynolds_Fasten_Hanami_2025_02.jpg" alt="Fasten Hanami 02 | 2025 | Installation View Element">
             </a>
-
-            <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
-                <img src="facade_study_2025_sumer.jpg" alt="Facade Study | 2025 | Sumer Gallery, Auckland">
-            </a>
-
+                    <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="140A1262.jpg" alt="Archive Log 140A1262 | 2025 | Exhibition View Detail">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="140A1270.jpg" alt="Archive Log 140A1270 | 2025 | Exhibition View Detail">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="140A1273.jpg" alt="Archive Log 140A1273 | 2025 | Exhibition View Detail">
             </a>
+            <!-- cms-item-end -->
                
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="140A1254_edit.jpg" alt="Archive Log 140A1254 | 2025 | Digital Master Edit">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_7332.JPG" alt="Studio Documentation | 2025 | Log Capture 7332">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_9073.JPG" alt="Studio Documentation | 2025 | Log Capture 9073">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
                 <img src="000034_023.jpeg" alt="Archive Scan | 2024 | Medium Format Exposure 023">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_2665.JPG" alt="Installation Fragment View | 2025 | Capture 2665">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_2664.JPG" alt="Installation Fragment View | 2025 | Capture 2664">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_2667.JPG" alt="Installation Fragment View | 2025 | Capture 2667">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_2668.JPG" alt="Installation Fragment View | 2025 | Capture 2668">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_2666.JPG" alt="Installation Fragment View | 2025 | Capture 2666">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_2680.JPG" alt="Exhibition Space View | 2025 | Landscape Grid Entry 2680">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')">
                 <img src="IMG_2663.jpeg" alt="Exhibition Space View | 2025 | Grid Entry 2663">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
                 <img src="SANY0144.JPG" alt="Studio Documentation | 2025 | Capture 0144">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- First Frameless Video Loop (Large Size Grid Layout) -->
             <video class="big" onclick="showArtworkPage(this, 'video')" data-title="Studio Video Record | 2025 | Digital Widescreen Loop Capture" autoplay loop muted playsinline>
                 <source src="SANY0137.MP4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="SANY0146.JPG" alt="Studio Production Run | 2025 | Capture 0146">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="SANY0147.JPG" alt="Studio Production Run | 2025 | Capture 0147">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="SANY0148.JPG" alt="Studio Production Run | 2025 | Capture 0148">
             </a>
+            <!-- cms-item-end -->
 
+            <!-- cms-item-start -->
             <!-- Normal Size -->
             <a onclick="showArtworkPage(this, 'image')">
                 <img src="SANY0149.JPG" alt="Studio Production Run | 2025 | Capture 0149">
             </a>
+            <!-- cms-item-end -->
             
+            <!-- cms-item-start -->
             <!-- Second Frameless Video Loop (Normal Size Grid Layout) -->
             <video onclick="showArtworkPage(this, 'video')" data-title="Gallery Exhibition Record | 2025 | HD Documentation Loop" autoplay loop muted playsinline>
                 <source src="SANY0150.MP4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-
-            </div>
+            <!-- cms-item-end -->
+            
+        </div>
+        <!-- cms-list-end -->
     </div>
 
- <!-- CLEAN SECONDARY METADATA PAGE CONTAINER -->
+    <!-- CLEAN SECONDARY METADATA PAGE CONTAINER -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
         <div class="detail-wrapper" onclick="event.stopPropagation()">
             <div class="artwork-container" id="media-target">
@@ -348,7 +426,6 @@
         </div>
     </div>
 
-
     <!-- Seamless Subpage Transition Script Logic -->
     <script>
         const archiveView = document.getElementById('archive-view');
@@ -360,6 +437,7 @@
         function showArtworkPage(element, mediaType) {
             let rawText = "";
             
+            // 1. Capture content and metadata properties safely based on type
             if (mediaType === 'image') {
                 const img = element.querySelector('img');
                 mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view">`;
@@ -370,32 +448,38 @@
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
             }
 
+            // 2. Parse structural layout split blocks using the vertical bar "|"
             const textSegments = rawText.split('|');
-            titleTarget.textContent = textSegments[0].trim();
+            titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
             
             if (textSegments.length > 1) {
+                // Stack fields vertically into standard subtitle metadata text blocks
                 const descriptions = textSegments.slice(1).map(item => item.trim());
                 infoTarget.innerHTML = descriptions.join('<br>');
             } else {
                 infoTarget.textContent = "";
             }
 
+            // 3. Complete immediate structural transition view switch
             archiveView.style.display = 'none';
-            window.scrollTo(0, 0); 
+            window.scrollTo(0, 0); // Forces view top index normalization
             detailView.style.display = 'flex';
             setTimeout(() => {
                 detailView.style.opacity = '1';
             }, 50);
         }
 
-        function hideArtworkPage() {
+        function hideArtworkPage(event) {
+            if (event) event.preventDefault();
+            
             detailView.style.opacity = '0';
             setTimeout(() => {
                 detailView.style.display = 'none';
-                mediaTarget.innerHTML = ''; 
+                mediaTarget.innerHTML = ''; // Flushes source to freeze video loops instantly
                 archiveView.style.display = 'block';
             }, 300);
         }
     </script>
+
 </body>
 </html>
