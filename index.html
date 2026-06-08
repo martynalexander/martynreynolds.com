@@ -116,27 +116,39 @@
             cursor: url('data:image/svg+xml,%3Csvg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M15 18l-6-6 6-6"/%3E%3C/svg%3E') 16 16, auto;
         }
 
-        /* Floats your exact previous text layout in the bottom right corner of the screen */
+           /* Floats your text container cleanly in the bottom right corner of the window screen */
         .artwork-details {
             text-align: right;
             box-sizing: border-box;
             padding: 0;
             margin-top: 0;
-            position: fixed; /* Holds the block in place while the image scrolls */
-            bottom: 40px; /* Kept sitting exactly two lines above the bottom edge */
-            right: 40px; /* Kept sitting flush with your right-hand border margin */
-            width: calc(100vw - 80px); /* Extends across the screen width matching your previous styling */
-            z-index: 100; /* Keeps the text floating on top of the moving image layer */
-            pointer-events: none; /* Allows click-throughs to hit the left/right tap zones underneath */
+            position: fixed; 
+            bottom: 40px; 
+            right: 40px; 
+            width: calc(100vw - 80px); 
+            z-index: 100; 
+            pointer-events: none; 
         }
 
+        /* Enforces your exact 11px light weight and elegant italics on your artwork titles */
+        .artwork-details h1 {
+            font-weight: 300; 
+            font-size: 11px;
+            font-style: italic; 
+            letter-spacing: 1px;
+            color: #000;
+            margin: 0;
+            line-height: 1.38; 
+        }
+
+        /* Enforces your exact 11px light weight on your metadata detail lines */
         .artwork-details p {
             color: #000;
             font-weight: 300; 
             font-size: 11px;
             letter-spacing: 1px; 
             margin: 0;
-            line-height: 1.38; /* Increased by 10% for improved breathing room */
+            line-height: 1.38; 
         }
 
         /* Clean "back to images" navigation prompt sitting exactly two lines below */
