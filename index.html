@@ -433,9 +433,12 @@
     <!-- CLEAN SECONDARY METADATA PAGE CONTAINER -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
         <div class="detail-wrapper" onclick="event.stopPropagation()">
-            <!-- Clicking this container now triggers the next item in the archive list -->
-            <div class="artwork-container" id="media-target" onclick="navigateToNextArtwork(event)">
+            <div class="artwork-container" id="media-target">
                 <!-- Selected Video / Image scales dynamically inside here -->
+                 
+                <!-- Invisible tap pads layered directly on top of the image frame -->
+                <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
+                <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
             </div>
             <div class="artwork-details">
                 <h1 id="title-target">Artwork Title</h1>
