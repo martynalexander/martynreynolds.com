@@ -69,25 +69,23 @@
             object-fit: contain;
             display: block;
         }
-
-        /* Aligns the entire text block to the bottom right of the image container width */
+        /* Aligns text block precisely with the right boundary edge of the image wrapper */
         .artwork-details {
             width: 100%;
-            max-width: 90vw;
             text-align: right;
             box-sizing: border-box;
-            margin-top: 0;
+            margin-top: 10px;
         }
 
-        /* All text lines made completely uniform in size and line-spacing */
+        /* All text compressed dynamically by 30% and set to automatic Title Case text */
         .artwork-details h1 {
             font-weight: 300;
             font-size: 13px;
             letter-spacing: 1px;
-            text-transform: uppercase;
+            text-transform: capitalize; /* Forces Title Case */
             color: #000;
             margin: 0;
-            line-height: 1.8;
+            line-height: 1.25; /* 30% reduction from standard web line heights */
         }
 
         .artwork-details p {
@@ -95,21 +93,22 @@
             font-weight: 300;
             font-size: 13px;
             letter-spacing: 1px;
+            text-transform: capitalize; /* Forces Title Case */
             margin: 0;
-            line-height: 1.8;
+            line-height: 1.25; /* 30% reduction from standard web line heights */
         }
 
-        /* Back link matches text size perfectly and sits exactly one line space below */
+        /* Matches text styling exactly and sits precisely one line space below */
         .back-link {
             color: #000;
             text-decoration: none;
             font-size: 13px;
             letter-spacing: 1px;
-            text-transform: uppercase;
+            text-transform: capitalize; /* Forces Title Case */
             cursor: pointer;
             display: inline-block;
-            margin-top: 15px; 
-            line-height: 1.8;
+            margin-top: 12px; 
+            line-height: 1.25;
         }
 
         .back-link:hover {
