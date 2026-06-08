@@ -469,7 +469,9 @@
             currentArtworkIndex = allArtworkElements.indexOf(element);
             if (currentArtworkIndex === -1) currentArtworkIndex = 0;
 
-            loadArtworkData(element);
+            // Global Fallback Rule: Fixes images missing explicit layout parameters
+            const detectedType = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
+            loadArtworkData(element, detectedType);
 
             archiveView.style.display = 'none';
             window.scrollTo(0, 0);
