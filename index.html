@@ -72,21 +72,40 @@
             cursor: default; /* Stops the grid click-back action inside the presentation zone */
         }
 
-        .artwork-container {
-            width: 100vw; /* Forces the image box to span the entire screen width */
+             .artwork-container {
+            width: 100vw; 
             max-width: 100vw;
             margin-bottom: 0;
             display: flex;
             justify-content: center;
+            position: relative; /* Context anchor for the invisible hit boxes */
         }
 
-           .artwork-container img, 
+        .artwork-container img, 
         .artwork-container video {
             width: 100vw; 
             height: auto; 
             object-fit: contain;
             display: block;
-            cursor: pointer; /* Displays a pointer hand indicating it is clickable */
+        }
+
+        /* Invisible Left/Right Split-Screen Touch Overlays */
+        .nav-zone {
+            position: absolute;
+            top: 0;
+            width: 50%; /* Divides the viewing window perfectly down the center */
+            height: 100%;
+            z-index: 10; /* Sits cleanly over the image layer */
+        }
+
+        .nav-zone-left {
+            left: 0;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5"><path d="M15 19l-7-7 7-7"/></svg>'), w-resize;
+        }
+
+        .nav-zone-right {
+            right: 0;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>'), e-resize;
         }
 
         /* Aligns metadata block lines precisely with the right border edge of the image */
