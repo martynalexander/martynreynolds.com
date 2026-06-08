@@ -119,15 +119,19 @@
             margin-top: 0;
         }
 
-        /* Uniform sizing, light font styling, compressed spacing, italicised titles */
-        .artwork-details h1 {
-            font-weight: 300; 
-            font-size: 11px;
-            font-style: italic; /* Forces your artwork title line into italics */
-            letter-spacing: 1px;
-            color: #000;
-            margin: 0;
-            line-height: 1.38; 
+        /* Floats the metadata block permanently in the bottom right corner of your display screen */
+        .artwork-details {
+            text-align: right;
+            box-sizing: border-box;
+            padding: 0;
+            margin-top: 0;
+            position: fixed; /* Fixes the box to the screen window grid */
+            bottom: 40px; /* Pins it exactly two lines above the very bottom edge */
+            right: 40px; /* Aligns it with the clean safe margin line on the right hand side */
+            width: auto;
+            max-width: 320px; /* Keeps your text columns elegantly narrow over the moving images */
+            z-index: 100; /* Layers the text safely on top of the scrolling media layer */
+            pointer-events: none; /* Allows click-throughs to hit the invisible image tap zones beneath */
         }
 
         .artwork-details p {
@@ -146,10 +150,12 @@
             font-size: 11px;
             font-weight: 300; 
             letter-spacing: 1px;
+            text-transform: lowercase;
             cursor: pointer;
             display: inline-block;
             margin-top: 25px; 
-            line-height: 1.38; /* Increased by 10% for improved breathing room */
+            line-height: 1.38;
+            pointer-events: auto; /* Restores clicking capability strictly to the text links themselves */
         }
 
         .back-link:hover {
