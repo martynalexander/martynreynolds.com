@@ -32,7 +32,7 @@
             cursor: pointer;
             text-decoration: none;
         }
-        /* Forces BOTH images and videos to scale and zoom identically */
+         /* Forces BOTH images and videos to scale and zoom identically */
         .collage-grid img,
         .collage-grid video {
             width: 100%;
@@ -43,6 +43,12 @@
         .wide { grid-column: span 2; }
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
+
+        /* Forces CloudCannon to show an overlay border in edit mode */
+        .collage-grid img[data-cms-bind],
+        .collage-grid video[data-title] {
+            cursor: pointer !important;
+        }
 
         /* Minimal Secondary Artwork Details Page Layout Style */
         #detail-view {
