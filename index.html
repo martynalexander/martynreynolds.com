@@ -95,18 +95,18 @@
             top: 0;
             width: 50%; /* Divides the screen perfectly down the center */
             height: 100%;
-            z-index: 99999 !important; /* Raised layer weight to safely bypass the fixed text block override */
+            z-index: 99999 !important; /* Master priority bypasses floating text conflicts */
         }
 
         .nav-zone-left {
             left: 0;
-            /* Simple thin straight black left arrow (<-) using the verified text string format */
+            /* Ultra-thin elegant straight black left arrow (<-) using the verified text format */
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto;
         }
 
         .nav-zone-right {
             right: 0;
-            /* Simple thin straight black right arrow (->) using the verified text string format */
+            /* Ultra-thin elegant straight black right arrow (->) using the verified text format */
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto;
         }
 
@@ -470,15 +470,11 @@
             <div class="artwork-container" id="media-target">
                 <!-- Selected Video / Image scales dynamically inside here -->
                  
-                <!-- Left Touch Zone with its Floating Hair-line Left Arrow -->
-                <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)">
-                    <svg class="screen-arrow arrow-left-offset" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                </div>
+                <!-- Left Touch Zone -->
+                <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
                 
-                <!-- Right Touch Zone with its Floating Hair-line Right Arrow -->
-                <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)">
-                    <svg class="screen-arrow arrow-right-offset" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </div>
+                <!-- Right Touch Zone -->
+                <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
             </div>
             <div class="artwork-details">
                 <h1 id="title-target">Artwork Title</h1>
