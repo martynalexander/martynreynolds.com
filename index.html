@@ -460,7 +460,7 @@
     </div>
 
     <!-- Seamless Subpage Transition Script Logic -->
-    <script>
+     <script>
         const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
@@ -528,7 +528,7 @@
             if (rightZone) mediaTarget.appendChild(rightZone);
 
             const textSegments = rawText.split('|');
-            titleTarget.textContent = textSegments ? textSegments.trim() : "Untitled";
+            titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
             
             if (textSegments.length > 1) {
                 const descriptions = textSegments.slice(1).map(item => item.trim());
@@ -563,12 +563,11 @@
                 if (leftZone) mediaTarget.appendChild(leftZone);
                 if (rightZone) mediaTarget.appendChild(rightZone);
                 
-                // RESTORES THE GRID VIEW CONTAINER FIRST
                 archiveView.style.display = 'block';
 
-                // INSTANTLY JUMPS YOUR WINDOW SCROLL AXIS DIRECTLY BACK TO THE LAST VIEWED ITEM
+                // Fixed: Changed 'instant' to 'auto' to securely restore grid link clicks across Safari
                 if (allArtworkElements[currentArtworkIndex]) {
-                    allArtworkElements[currentArtworkIndex].scrollIntoView({ block: 'center', behavior: 'instant' });
+                    allArtworkElements[currentArtworkIndex].scrollIntoView({ block: 'center', behavior: 'auto' });
                 }
             }, 300);
         }
