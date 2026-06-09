@@ -45,75 +45,72 @@
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
 
-        /* Minimal Secondary Artwork Details Page Layout Style */
+        /* PRESENTATION SUB-PAGE MASTER LAYOUT CONTAINER */
         #detail-view {
-            display: none; /* Hidden until items are clicked */
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background-color: #fff;
-            color: #000;
-            font-family: sans-serif;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; /* Forces content directly to the top edge */
-            min-height: 100vh;
+            z-index: 100000;
             box-sizing: border-box;
-            padding: 0; /* Stripped container padding to remove top white space */
+            font-family: sans-serif;
             opacity: 0;
             transition: opacity 0.3s ease;
-            cursor: pointer; /* Pointer cue showing you can click anywhere to exit */
         }
 
-        /* The structural wrapper containing the artwork frame and text column */
-        .detail-wrapper {
+        /* FLEX STACK FORCING EXTRA LARGE IMAGES EDGE-TO-EDGE OVER TEXT COLUMNS */
+        .gallery-split-wrapper {
             display: flex;
             flex-direction: column;
-            align-items: flex-end; /* Snaps text box to the right hand side of the image */
-            max-width: 100vw;
-            margin-top: 0;
-            cursor: default; /* Stops the grid click-back action inside the presentation zone */
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow-y: auto; /* Activates natural scrolling down the page to read metadata */
         }
 
+        /* MASTER CONTAINER EXPANDING IMAGES FULL WIDTH NATIVELY */
         .artwork-container {
+            width: 100vw;
             max-width: 100vw;
-            max-height: 75vh;
-            margin-bottom: 0;
+            position: relative;
             display: flex;
             justify-content: center;
+            background-color: #fff;
         }
 
         .artwork-container img, 
         .artwork-container video {
-            max-width: 100vw;
-            max-height: 75vh;
+            width: 100vw; /* Forces strict edge-to-edge scale */
+            height: auto;
             object-fit: contain;
             display: block;
+            transition: transform 0.25s ease;
         }
 
-        /* Floats your exact previous text layout in the bottom right corner of the screen */
+        /* TEXT ENTRY FIELD SITTING COMFORTABLY BELOW FULL WIDTH IMAGES */
         .artwork-details {
-            text-align: right;
+            width: 100vw;
             box-sizing: border-box;
-            padding: 0;
-            margin-top: 0;
-            position: fixed; /* Holds the block in place while the image scrolls */
-            bottom: 40px; /* Kept sitting exactly two lines above the bottom edge */
-            right: 40px; /* Kept sitting flush with your right-hand border margin */
-            width: calc(100vw - 80px); /* Extends across the screen width matching your previous styling */
-            z-index: 100; /* Keeps the text floating on top of the moving image layer */
-            pointer-events: none; /* Allows click-throughs to hit the left/right tap zones underneath */
+            padding: 25px 40px 60px 40px; /* Generates beautiful spatial alignment padding */
+            text-align: right;
+            background-color: #fff;
+            position: relative;
+            z-index: 999999 !important; /* Layers text and button safely on top of all click overlays */
         }
 
-        /* Enforces your exact 11px light weight and elegant italics on your artwork titles */
         .artwork-details h1 {
             font-weight: 300; 
             font-size: 11px;
-            font-style: italic; 
+            font-style: italic; /* Beautiful italic style for titles */
             letter-spacing: 1px;
             color: #000;
-            margin: 0;
+            margin: 0 0 4px 0;
             line-height: 1.38; 
         }
 
-        /* Enforces your exact 11px light weight on your metadata detail lines */
         .artwork-details p {
             color: #000;
             font-weight: 300; 
@@ -123,42 +120,41 @@
             line-height: 1.38; 
         }
 
-        /* Clean "back to images" navigation prompt sitting exactly two lines below */
         .back-link {
             color: #000;
             text-decoration: none;
             font-size: 11px;
             font-weight: 300; 
             letter-spacing: 1px;
-            cursor: pointer;
+            text-transform: lowercase; /* Pristine lowercase formatting */
+            cursor: pointer !important;
             display: inline-block;
             margin-top: 25px; 
-            line-height: 1.38; /* Increased by 10% for improved breathing room */
+            line-height: 1.38; 
         }
 
-        .back-link:hover {
-            color: #666;
-        }
+        .back-link:hover { color: #666; }
 
-        /* Invisible Left/Right Split-Screen Touch Overlays */
+        /* INVISIBLE TAP BUTTON PAD CHANNELS OVER THE IMAGE REGIONS */
         .nav-zone {
             position: absolute;
             top: 0;
-            width: 50%; /* Divides the screen perfectly down the center */
+            width: 50%;
             height: 100%;
-            z-index: 99999 !important; /* Master priority bypasses floating text conflicts */
+            z-index: 1000;
         }
-
-        .nav-zone-left {
-            left: 0;
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto;
+        
+        /* Safari-safe custom arrow cursors */
+        .nav-zone-left { 
+            left: 0; 
+            cursor: url('data:image/svg+xml,%3Csvg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"%3E%3Cline x1="19" y1="12" x2="5" y2="12"/%3E%3Cpolyline points="12 19 5 12 12 5"/%3E%3C/svg%3E') 16 16, auto;
         }
-
-        .nav-zone-right {
-            right: 0;
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto;
+        
+        .nav-zone-right { 
+            right: 0; 
+            cursor: url('data:image/svg+xml,%3Csvg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"%3E%3Cline x1="5" y1="12" x2="19" y2="12"/%3E%3Cpolyline points="12 5 19 12 12 19"/%3E%3C/svg%3E') 16 16, auto;
         }
-
+        
         /* Stark, hair-thin minimalist screen-anchored arrow graphics */
         .screen-arrow {
             width: 32px;
@@ -513,21 +509,21 @@
         <!-- cms-list-end -->
     </div>
 
-    <!-- SEPARATED PORTFOLIO STAGE CONTAINER -->
+    <!-- CLEAN METADATA PRESENTATION CORE STAGE -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
         <div class="gallery-split-wrapper" onclick="event.stopPropagation()">
             
-            <!-- COUPLING COLUMN A (MEDIA SCALES IN HERE) -->
+            <!-- VIEWPORT MANAGING EDGE-TO-EDGE PRESENTATION FRAMES -->
             <div class="artwork-container" id="media-target">
-                <!-- Selected Media node drops in right here dynamically -->
+                <!-- Selected Media scales dynamically inside here -->
                 <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
                 <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
             </div>
             
-            <!-- COUPLING COLUMN B (TEXT IS SECURELY PINNED INSIDE HERE) -->
+            <!-- SECURE TEXT CONTAINER PLACED COMFORTABLY OUTSIDE OVERLAP LANES -->
             <div class="artwork-details">
                 <h1 id="title-target">Artwork Title</h1>
-                <p id="info-target">Metadata text column entries apply cleanly here.</p>
+                <p id="info-target">Metadata details load cleanly here.</p>
                 <a onclick="hideArtworkPage(event)" class="back-link">back to images</a>
             </div>
             
@@ -536,7 +532,7 @@
 
     <!-- Seamless Subpage Transition Script Logic -->
     <script>
-                const archiveView = document.getElementById('archive-view');
+              const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
         const titleTarget = document.getElementById('title-target');
@@ -589,7 +585,7 @@
                                 if (e.detail === 2) {
                                     e.stopPropagation();
                                     zoomed = !zoomed;
-                                    zoomNode.style.transform = zoomed ? 'scale(2.5)' : 'scale(1)';
+                                    zoomNode.style.transform = zoomed ? 'scale(2)' : 'scale(1)';
                                     zoomNode.style.cursor = zoomed ? 'zoom-out' : 'zoom-in';
                                 }
                             });
@@ -621,8 +617,7 @@
             const detectedType = targetElement.tagName.toLowerCase() === 'video' ? 'video' : 'image';
             loadArtworkData(targetElement, detectedType);
             
-            const container = document.querySelector('.artwork-container');
-            if (container) { container.scrollTop = 0; container.scrollLeft = 0; }
+            window.scrollTo(0, 0);
         }
 
         function hideArtworkPage(event) {
