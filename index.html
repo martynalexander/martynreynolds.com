@@ -72,13 +72,14 @@
             cursor: default; /* Stops the grid click-back action inside the presentation zone */
         }
 
-             .artwork-container {
+        .artwork-container {
             width: 100vw; 
             max-width: 100vw;
             margin-bottom: 0;
             display: flex;
             justify-content: center;
-            position: relative; /* Context anchor for the invisible hit boxes */
+            position: relative;
+            overflow: hidden; /* Pins the image viewport bounds so zooming doesn't break the layout */
         }
 
         .artwork-container img, 
@@ -516,25 +517,45 @@
             }, 50);
         }
 
-        function loadArtworkData(element) {
+  function loadArtworkData(element, mediaType) {
             let rawText = "";
-            
-            // Retains the interactive tap overlay zones while swapping out underlying image/video nodes
             const existingZones = mediaTarget.querySelectorAll('.nav-zone');
             
-            if (element.tagName.toLowerCase() === 'video') {
+            const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
+            
+            if (typeToCheck === 'video') {
                 const source = element.querySelector('source');
                 mediaTarget.innerHTML = `<video autoplay loop muted playsinline><source src="${source.src}" type="video/mp4"></video>`;
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view">`;
+                    // Generates the image node with built-in layout zoom variables
+                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" id="zoomable-target" style="transition: transform 0.3s ease; cursor: zoom-in;">`;
                     rawText = img.alt || "Untitled";
+                    
+                    // Activates independent double-click zoom listeners instantly
+                    setTimeout(() => {
+                        const targetImg = document.getElementById('zoomable-target');
+                        if (targetImg) {
+                            let isZoomed = false;
+                            targetImg.addEventListener('dblclick', function(e) {
+                                e.stopPropagation(); // Stops navigation scripts from jumping slides
+                                if (!isZoomed) {
+                                    targetImg.style.transform = 'scale(2.2)'; // Smooth 2.2x pixel magnification
+                                    targetImg.style.cursor = 'zoom-out';
+                                    isZoomed = true;
+                                } else {
+                                    targetImg.style.transform = 'scale(1)'; // Drops cleanly back to screen fit
+                                    targetImg.style.cursor = 'zoom-in';
+                                    isZoomed = false;
+                                }
+                            });
+                        }
+                    }, 50);
                 }
             }
 
-            // Re-injects the invisible touch pads back over the fresh media element seamlessly
             existingZones.forEach(zone => mediaTarget.appendChild(zone));
 
             const textSegments = rawText.split('|');
