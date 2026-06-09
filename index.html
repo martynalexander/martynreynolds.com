@@ -483,7 +483,7 @@
 
             archiveView.style.display = 'none';
             window.scrollTo(0, 0);
-            detailView.style.display = 'flex';
+            detailView.style.display = 'block'; // Switched to block to allow full page background click tracking
             setTimeout(() => {
                 detailView.style.opacity = '1';
             }, 50);
@@ -493,7 +493,6 @@
             let rawText = "";
             const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
             
-            // Crucial: Hold a record of your navigation touch pad zones before updating media content
             const leftZone = document.querySelector('.nav-zone-left');
             const rightZone = document.querySelector('.nav-zone-right');
             
@@ -504,7 +503,8 @@
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
+                    // Stop Propagation on image click prevents image magnification from triggering a page exit
+                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" onclick="event.stopPropagation()" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
                     rawText = img.alt || "Untitled";
 
                     setTimeout(() => {
@@ -524,7 +524,6 @@
                 }
             }
 
-            // Re-inject the invisible touch lanes back onto the top layer cleanly
             if (leftZone) mediaTarget.appendChild(leftZone);
             if (rightZone) mediaTarget.appendChild(rightZone);
 
@@ -540,7 +539,7 @@
         }
 
         function navigateToAdjacentArtwork(event, direction) {
-            if (event) event.stopPropagation();
+            if (event) event.stopPropagation(); // Stops click from leaking to the white background stage
             refreshArtworkList();
 
             currentArtworkIndex = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
@@ -558,7 +557,6 @@
             setTimeout(() => {
                 detailView.style.display = 'none';
                 
-                // Clear media elements while keeping your navigation structures anchored safely
                 const leftZone = document.querySelector('.nav-zone-left');
                 const rightZone = document.querySelector('.nav-zone-right');
                 mediaTarget.innerHTML = '';
