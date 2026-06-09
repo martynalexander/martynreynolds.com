@@ -93,22 +93,44 @@
         .nav-zone {
             position: absolute;
             top: 0;
-            width: 50%; /* Divides the screen perfectly down the center */
+            width: 50%; /* Divides the screen window perfectly down the center */
             height: 100%;
             z-index: 10;
+            display: flex;
+            align-items: center; /* Centers the floating icons vertically on the screen */
         }
 
         .nav-zone-left {
             left: 0;
-            /* Simple thin straight black left arrow using secure hex code (%23000000) */
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto;
+            justify-content: flex-start;
         }
 
         .nav-zone-right {
             right: 0;
-            /* Simple thin straight black right arrow using secure hex code (%23000000) */
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto;
+            justify-content: flex-end;
         }
+
+        /* Stark, hair-thin minimalist screen-anchored arrow graphics */
+        .screen-arrow {
+            width: 32px;
+            height: 32px;
+            stroke: #000;
+            stroke-width: 1.25; /* Your exact delicate hair-line thickness parameter */
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none; /* Allows clicks to pass through straight to the touch pads */
+            opacity: 0.3; /* Quiet, elegant semi-transparent baseline opacity */
+            transition: opacity 0.2s ease;
+        }
+
+        /* Subtle feedback cue when mouse hovers over a navigation half */
+        .nav-zone:hover .screen-arrow {
+            opacity: 1; /* Crisp full-contrast black highlight when active */
+        }
+
+        .arrow-left-offset { margin-left: 40px; }  /* Aligns with your 40px left margin line */
+        .arrow-right-offset { margin-right: 40px; } /*
 
            /* Floats your text container cleanly in the bottom right corner of the window screen */
         .artwork-details {
