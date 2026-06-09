@@ -45,7 +45,7 @@
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
 
-        /* PRESENTATION SUB-PAGE MASTER LAYOUT CONTAINER */
+       /* PRESENTATION MAIN PORTFOLIO LAYOUT WINDOW */
         #detail-view {
             display: none;
             position: fixed;
@@ -61,50 +61,46 @@
             transition: opacity 0.3s ease;
         }
 
-        /* FLEX STACK FORCING EXTRA LARGE IMAGES EDGE-TO-EDGE OVER TEXT COLUMNS */
+        /* EXTENDS YOUR IMAGES TRUE EDGE-TO-EDGE OVER THE WINDOW FRAME */
         .gallery-split-wrapper {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             position: relative;
-            overflow-y: auto; /* Activates natural scrolling down the page to read metadata */
+            overflow-y: auto; /* Restores standard page scrolling lines */
         }
 
-        /* MASTER CONTAINER EXPANDING IMAGES FULL WIDTH NATIVELY */
         .artwork-container {
             width: 100vw;
             max-width: 100vw;
             position: relative;
             display: flex;
             justify-content: center;
-            background-color: #fff;
         }
 
         .artwork-container img, 
         .artwork-container video {
-            width: 100vw; /* Forces strict edge-to-edge scale */
+            width: 100vw; /* Perfect horizontal edge-to-edge presentation */
             height: auto;
             object-fit: contain;
             display: block;
-            transition: transform 0.25s ease;
         }
 
-        /* TEXT ENTRY FIELD SITTING COMFORTABLY BELOW FULL WIDTH IMAGES */
+        /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE (NO WHITE BOX LAYER) */
         .artwork-details {
-            width: 100vw;
-            box-sizing: border-box;
-            padding: 25px 40px 60px 40px; /* Generates beautiful spatial alignment padding */
             text-align: right;
-            background-color: #fff;
-            position: relative;
-            z-index: 999999 !important; /* Layers text and button safely on top of all click overlays */
+            box-sizing: border-box;
+            padding: 0;
+            position: fixed; /* Keeps text completely locked in place during zoom actions */
+            bottom: 40px; 
+            right: 40px; 
+            width: auto;
+            z-index: 200000 !important; /* Forces link text to hover above expanded image panels */
         }
 
         .artwork-details h1 {
             font-weight: 300; 
             font-size: 11px;
-            font-style: italic; /* Beautiful italic style for titles */
+            font-style: italic; /* Your delicate italic title line style */
             letter-spacing: 1px;
             color: #000;
             margin: 0 0 4px 0;
@@ -126,7 +122,7 @@
             font-size: 11px;
             font-weight: 300; 
             letter-spacing: 1px;
-            text-transform: lowercase; /* Pristine lowercase formatting */
+            text-transform: lowercase; /* Your quiet lowercase link parameter */
             cursor: pointer !important;
             display: inline-block;
             margin-top: 25px; 
@@ -135,24 +131,24 @@
 
         .back-link:hover { color: #666; }
 
-        /* INVISIBLE TAP BUTTON PAD CHANNELS OVER THE IMAGE REGIONS */
+        /* INVISIBLE CLICKOverlays LINK PATHS WITH ABSOLUTE PERSISTENT Z-INDEX TRACKING */
         .nav-zone {
-            position: absolute;
+            position: fixed; /* Switched to fixed to keep tracking vectors locked over screen halves */
             top: 0;
             width: 50%;
             height: 100%;
-            z-index: 1000;
+            z-index: 150000 !important;
         }
         
-        /* Safari-safe custom arrow cursors */
+        /* Thin Black Gallery Cursors optimized cleanly for standard browser configurations */
         .nav-zone-left { 
             left: 0; 
-            cursor: url('data:image/svg+xml,%3Csvg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"%3E%3Cline x1="19" y1="12" x2="5" y2="12"/%3E%3Cpolyline points="12 19 5 12 12 5"/%3E%3C/svg%3E') 16 16, auto;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto !important;
         }
         
         .nav-zone-right { 
             right: 0; 
-            cursor: url('data:image/svg+xml,%3Csvg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"%3E%3Cline x1="5" y1="12" x2="19" y2="12"/%3E%3Cpolyline points="12 5 19 12 12 19"/%3E%3C/svg%3E') 16 16, auto;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto !important;
         }
         
         /* Stark, hair-thin minimalist screen-anchored arrow graphics */
@@ -509,18 +505,20 @@
         <!-- cms-list-end -->
     </div>
 
-    <!-- CLEAN METADATA PRESENTATION CORE STAGE -->
+    <!-- SEAMLESS PRESENTATION LAYER MATRIX -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
         <div class="gallery-split-wrapper" onclick="event.stopPropagation()">
             
-            <!-- VIEWPORT MANAGING EDGE-TO-EDGE PRESENTATION FRAMES -->
+            <!-- CORE PRESENTATION WINDOW HOUSING PORTFOLIO VIEWS -->
             <div class="artwork-container" id="media-target">
-                <!-- Selected Media scales dynamically inside here -->
-                <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
-                <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
+                <!-- Selected media loops scale natively edge-to-edge inside here -->
             </div>
             
-            <!-- SECURE TEXT CONTAINER PLACED COMFORTABLY OUTSIDE OVERLAP LANES -->
+            <!-- INVISIBLE TOUCH CHANNELS LOCKED SAFELY OVER THE LEFT/RIGHT SCREEN HALVES -->
+            <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
+            <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
+            
+            <!-- SAFELY ISOLATED FLOATING CORNER COLUMN DETAIL COUPLING -->
             <div class="artwork-details">
                 <h1 id="title-target">Artwork Title</h1>
                 <p id="info-target">Metadata details load cleanly here.</p>
@@ -532,7 +530,7 @@
 
     <!-- Seamless Subpage Transition Script Logic -->
     <script>
-              const archiveView = document.getElementById('archive-view');
+         const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
         const titleTarget = document.getElementById('title-target');
@@ -562,9 +560,7 @@
         }
 
         function loadArtworkData(element, mediaType) {
-            const existingZones = mediaTarget.querySelectorAll('.nav-zone');
             let rawText = "";
-            
             const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
             
             if (typeToCheck === 'video') {
@@ -574,7 +570,8 @@
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" style="cursor: zoom-in; transition: transform 0.25s ease;">`;
+                    // Targets image magnification cleanly without scaling text layers
+                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
                     rawText = img.alt || "Untitled";
 
                     setTimeout(() => {
@@ -593,8 +590,6 @@
                     }, 50);
                 }
             }
-
-            existingZones.forEach(zone => mediaTarget.appendChild(zone));
 
             const textSegments = rawText.split('|');
             titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
@@ -625,9 +620,7 @@
             detailView.style.opacity = '0';
             setTimeout(() => {
                 detailView.style.display = 'none';
-                const zones = Array.from(mediaTarget.querySelectorAll('.nav-zone'));
                 mediaTarget.innerHTML = '';
-                zones.forEach(zone => mediaTarget.appendChild(zone));
                 archiveView.style.display = 'block';
             }, 300);
         }
