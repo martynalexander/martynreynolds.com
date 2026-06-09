@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Martyn Reynolds' Images</title>
    <style>
-        body {
+          body {
             margin: 0;
             padding: 0;
-            background-color: #fff; 
+            background-color: #fff;
             overflow-x: hidden;
         }
 
         /* Container managing the structural swap between views */
         #archive-view {
             display: block;
-            background-color: #fff; 
+            background-color: #fff;
         }
 
         .collage-grid {
@@ -24,6 +24,7 @@
             grid-auto-rows: 150px;
             grid-auto-flow: dense;
             gap: 0; 
+            background-color: #000;
         }
         .collage-grid a,
         .collage-grid video {
@@ -33,7 +34,6 @@
             cursor: pointer;
             text-decoration: none;
         }
-        
         .collage-grid img,
         .collage-grid video {
             width: 100%;
@@ -59,15 +59,15 @@
             font-family: sans-serif;
             opacity: 0;
             transition: opacity 0.3s ease;
-            overflow-y: scroll; 
-            -webkit-overflow-scrolling: touch; 
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
         }
 
         .gallery-split-wrapper {
             width: 100vw;
             min-height: 100vh;
             position: relative;
-            display: block; 
+            display: block;
         }
 
         .artwork-container {
@@ -80,13 +80,13 @@
 
         .artwork-container img, 
         .artwork-container video {
-            width: 100vw; 
+            width: 100vw;
             height: auto;
             object-fit: contain;
             display: block;
         }
 
-        /* FLOATS TEXT CONVENIENTLY IN THE CORNER (NO CONFLICTING DUPLICATES) */
+        /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
         .artwork-details {
             text-align: right;
             box-sizing: border-box;
@@ -95,14 +95,14 @@
             bottom: 40px; 
             right: 40px; 
             width: calc(100vw - 80px); 
-            z-index: 200000 !important; /* Raised layout rank safely above scrolling images */
-            pointer-events: none; 
+            z-index: 200000 !important;
+            pointer-events: none;
         }
 
         .artwork-details h1 {
             font-weight: 300; 
             font-size: 11px;
-            font-style: italic; 
+            font-style: italic;
             letter-spacing: 1px;
             color: #000;
             margin: 0 0 4px 0;
@@ -129,32 +129,28 @@
             display: inline-block;
             margin-top: 25px; 
             line-height: 1.38;
-            pointer-events: auto; /* Restores clicking capability strictly to the text links themselves */
+            pointer-events: auto;
         }
 
-        .back-link:hover {
-            color: #666;
-        }
+        .back-link:hover { color: #666; }
 
-        /* INVISIBLE TAP BUTTON PAD CHANNELS OVER THE IMAGE REGIONS ONLY */
+        /* INVISIBLE CLICK RE-ROUTING TOUCH CHANNELS LOCKING SENSORS */
         .nav-zone {
             position: absolute;
             top: 0;
-            bottom: 0; /* Snaps the touch zones strictly to the bottom edge of the image frame */
+            bottom: 0;
             width: 50%;
-            height: auto; /* Unlocks the full height lock so it doesn't leak into your white space */
+            height: auto;
             z-index: 150000 !important;
         }
         
         .nav-zone-left { 
             left: 0; 
-            /* Corrected hair-thin straight black left arrow (<-) optimized safely for Safari */
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto !important;
         }
         
         .nav-zone-right { 
             right: 0; 
-            /* Corrected hair-thin straight black right arrow (->) optimized safely for Safari */
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto !important;
         }
     </style>
@@ -436,23 +432,19 @@
         <!-- cms-list-end -->
     </div>
 
-    <!-- SEAMLESS PRESENTATION LAYER MATRIX -->
+   <!-- CLEAN SEPARATED METADATA PRESENTATION STAGE CONTAINER -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
         <div class="gallery-split-wrapper" onclick="hideArtworkPage(event)">
             
-            <!-- CORE PRESENTATION WINDOW HOUSING PORTFOLIO VIEWS -->
             <div class="artwork-container" id="media-target">
-                <!-- Selected media loops scale natively edge-to-edge inside here -->
+                <!-- Selected Media node drops in right here dynamically -->
+                <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
+                <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
             </div>
             
-            <!-- INVISIBLE TOUCH CHANNELS LOCKED SAFELY OVER THE LEFT/RIGHT SCREEN HALVES -->
-            <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
-            <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
-            
-            <!-- SAFELY ISOLATED FLOATING CORNER COLUMN DETAIL COUPLING -->
-            <div class="artwork-details">
+            <div class="artwork-details" onclick="event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
-                <p id="info-target">Metadata details load cleanly here.</p>
+                <p id="info-target">Metadata text column entries apply cleanly here.</p>
                 <a onclick="hideArtworkPage(event)" class="back-link">back to images</a>
             </div>
             
@@ -565,7 +557,6 @@
                 
                 archiveView.style.display = 'block';
 
-                // Fixed: Changed 'instant' to 'auto' to securely restore grid link clicks across Safari
                 if (allArtworkElements[currentArtworkIndex]) {
                     allArtworkElements[currentArtworkIndex].scrollIntoView({ block: 'center', behavior: 'auto' });
                 }
