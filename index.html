@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Martyn Reynolds' Images</title>
-    <style>
+   <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #fff; /* Changed master fallback to white */
+            background-color: #fff; 
             overflow-x: hidden;
         }
 
         /* Container managing the structural swap between views */
         #archive-view {
             display: block;
-            background-color: #fff; /* Ensures the background stays white during grid calculations */
+            background-color: #fff; 
         }
 
         .collage-grid {
@@ -33,7 +33,7 @@
             cursor: pointer;
             text-decoration: none;
         }
-         /* Forces BOTH images and videos to scale and zoom identically */
+        
         .collage-grid img,
         .collage-grid video {
             width: 100%;
@@ -45,7 +45,7 @@
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
 
-       /* PRESENTATION MAIN PORTFOLIO LAYOUT WINDOW */
+        /* PRESENTATION MAIN PORTFOLIO LAYOUT WINDOW */
         #detail-view {
             display: none;
             position: fixed;
@@ -59,16 +59,15 @@
             font-family: sans-serif;
             opacity: 0;
             transition: opacity 0.3s ease;
-            overflow-y: scroll; /* Forces standard vertical scrolling globally across the sub-page */
-            -webkit-overflow-scrolling: touch; /* Ensures ultra-smooth momentum scrolling on iPad and iPhone */
+            overflow-y: scroll; 
+            -webkit-overflow-scrolling: touch; 
         }
 
-        /* REMOVED 100VH TO LET TALL ARTWORKS NATURALLY EXPAND DOWN THE PAGE BOUNDARIES */
         .gallery-split-wrapper {
             width: 100vw;
             min-height: 100vh;
             position: relative;
-            display: block; /* Switches container type to allow items to stack down naturally */
+            display: block; 
         }
 
         .artwork-container {
@@ -81,28 +80,29 @@
 
         .artwork-container img, 
         .artwork-container video {
-            width: 100vw; /* Perfect horizontal edge-to-edge presentation */
+            width: 100vw; 
             height: auto;
             object-fit: contain;
             display: block;
         }
 
-        /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE (NO WHITE BOX LAYER) */
+        /* FLOATS TEXT CONVENIENTLY IN THE CORNER (NO CONFLICTING DUPLICATES) */
         .artwork-details {
             text-align: right;
             box-sizing: border-box;
             padding: 0;
-            position: fixed; /* Keeps text completely locked in place during zoom actions */
+            position: fixed; 
             bottom: 40px; 
             right: 40px; 
-            width: auto;
-            z-index: 200000 !important; /* Forces link text to hover above expanded image panels */
+            width: calc(100vw - 80px); 
+            z-index: 200000 !important; /* Raised layout rank safely above scrolling images */
+            pointer-events: none; 
         }
 
         .artwork-details h1 {
             font-weight: 300; 
             font-size: 11px;
-            font-style: italic; /* Your delicate italic title line style */
+            font-style: italic; 
             letter-spacing: 1px;
             color: #000;
             margin: 0 0 4px 0;
@@ -124,101 +124,8 @@
             font-size: 11px;
             font-weight: 300; 
             letter-spacing: 1px;
-            text-transform: lowercase; /* Your quiet lowercase link parameter */
-            cursor: pointer !important;
-            display: inline-block;
-            margin-top: 25px; 
-            line-height: 1.38; 
-        }
-
-        .back-link:hover { color: #666; }
-
-        /* INVISIBLE CLICKOverlays LINK PATHS WITH ABSOLUTE PERSISTENT Z-INDEX TRACKING */
-        .nav-zone {
-            position: fixed; /* Switched to fixed to keep tracking vectors locked over screen halves */
-            top: 0;
-            width: 50%;
-            height: 100%;
-            z-index: 150000 !important;
-        }
-        
-        /* Thin Black Gallery Cursors optimized cleanly for standard browser configurations */
-        .nav-zone-left { 
-            left: 0; 
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto !important;
-        }
-        
-        .nav-zone-right { 
-            right: 0; 
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto !important;
-        }
-        
-        /* Stark, hair-thin minimalist screen-anchored arrow graphics */
-        .screen-arrow {
-            width: 32px;
-            height: 32px;
-            stroke: #000;
-            stroke-width: 1.25; /* Your exact delicate hair-line thickness parameter */
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            pointer-events: none; /* Allows clicks to pass through straight to the touch pads */
-            opacity: 0.3; /* Quiet, elegant semi-transparent baseline opacity */
-            transition: opacity 0.2s ease;
-        }
-
-        /* Subtle feedback cue when mouse hovers over a navigation half */
-        .nav-zone:hover .screen-arrow {
-            opacity: 1; /* Crisp full-contrast black highlight when active */
-        }
-
-        .arrow-left-offset { margin-left: 40px; }  /* Aligns with your 40px left margin line */
-        .arrow-right-offset { margin-right: 40px; } /*
-
-           /* Floats your text container cleanly in the bottom right corner of the window screen */
-        .artwork-details {
-            text-align: right;
-            box-sizing: border-box;
-            padding: 0;
-            margin-top: 0;
-            position: fixed; 
-            bottom: 40px; 
-            right: 40px; 
-            width: calc(100vw - 80px); 
-            z-index: 100; 
-            pointer-events: none; 
-        }
-
-        /* Enforces your exact 11px light weight and elegant italics on your artwork titles */
-        .artwork-details h1 {
-            font-weight: 300; 
-            font-size: 11px;
-            font-style: italic; 
-            letter-spacing: 1px;
-            color: #000;
-            margin: 0;
-            line-height: 1.38; 
-        }
-
-        /* Enforces your exact 11px light weight on your metadata detail lines */
-        .artwork-details p {
-            color: #000;
-            font-weight: 300; 
-            font-size: 11px;
-            letter-spacing: 1px; 
-            margin: 0;
-            line-height: 1.38; 
-        }
-
-        /* Clean "back to images" navigation prompt sitting exactly two lines below */
-        .back-link {
-            color: #000;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 300; 
-            letter-spacing: 1px;
             text-transform: lowercase;
-            cursor: pointer;
+            cursor: pointer !important;
             display: inline-block;
             margin-top: 25px; 
             line-height: 1.38;
@@ -227,6 +134,27 @@
 
         .back-link:hover {
             color: #666;
+        }
+
+        /* INVISIBLE CLICK RE-ROUTING FIELDS COUPLING Master Layer PRIORITY ROUTING */
+        .nav-zone {
+            position: fixed; 
+            top: 0;
+            width: 50%;
+            height: 100%;
+            z-index: 150000 !important; /* Layers touch zones cleanly over image frames */
+        }
+        
+        .nav-zone-left { 
+            left: 0; 
+            /* Corrected hair-thin straight black left arrow (<-) optimized safely for Safari */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto !important;
+        }
+        
+        .nav-zone-right { 
+            right: 0; 
+            /* Corrected hair-thin straight black right arrow (->) optimized safely for Safari */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto !important;
         }
     </style>
 </head>
