@@ -59,14 +59,16 @@
             font-family: sans-serif;
             opacity: 0;
             transition: opacity 0.3s ease;
+            overflow-y: scroll; /* Forces standard vertical scrolling globally across the sub-page */
+            -webkit-overflow-scrolling: touch; /* Ensures ultra-smooth momentum scrolling on iPad and iPhone */
         }
 
-        /* EXTENDS YOUR IMAGES TRUE EDGE-TO-EDGE OVER THE WINDOW FRAME */
+        /* REMOVED 100VH TO LET TALL ARTWORKS NATURALLY EXPAND DOWN THE PAGE BOUNDARIES */
         .gallery-split-wrapper {
             width: 100vw;
-            height: 100vh;
+            min-height: 100vh;
             position: relative;
-            overflow-y: auto; /* Restores standard page scrolling lines */
+            display: block; /* Switches container type to allow items to stack down naturally */
         }
 
         .artwork-container {
