@@ -484,7 +484,7 @@
 
             archiveView.style.display = 'none';
             window.scrollTo(0, 0);
-            detailView.style.display = 'block'; // Unlocks global page canvas for background dismiss clicks
+            detailView.style.display = 'block'; 
             setTimeout(() => {
                 detailView.style.opacity = '1';
             }, 50);
@@ -494,19 +494,16 @@
             let rawText = "";
             const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
             
-            // Retains a solid backup memory record of your side-lane touch zones
             const leftZone = document.querySelector('.nav-zone-left');
             const rightZone = document.querySelector('.nav-zone-right');
             
             if (typeToCheck === 'video') {
                 const source = element.querySelector('source');
-                // stopPropagation locks video playback taps safely away from closing the webpage layout
                 mediaTarget.innerHTML = `<video autoplay loop muted playsinline onclick="event.stopPropagation()"><source src="${source.src}" type="video/mp4"></video>`;
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    // stopPropagation locks image interaction safely away from closing the webpage layout
                     mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" onclick="event.stopPropagation()" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
                     rawText = img.alt || "Untitled";
 
@@ -527,12 +524,11 @@
                 }
             }
 
-            // Securely appends your touch pad elements back into the live layout structure
             if (leftZone) mediaTarget.appendChild(leftZone);
             if (rightZone) mediaTarget.appendChild(rightZone);
 
             const textSegments = rawText.split('|');
-            titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
+            titleTarget.textContent = textSegments ? textSegments.trim() : "Untitled";
             
             if (textSegments.length > 1) {
                 const descriptions = textSegments.slice(1).map(item => item.trim());
@@ -543,7 +539,7 @@
         }
 
         function navigateToAdjacentArtwork(event, direction) {
-            if (event) event.stopPropagation(); // Stops pagination taps from leaking to the white background stage
+            if (event) event.stopPropagation(); 
             refreshArtworkList();
 
             currentArtworkIndex = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
@@ -561,14 +557,19 @@
             setTimeout(() => {
                 detailView.style.display = 'none';
                 
-                // Securely tidies content nodes while keeping layout anchors active
                 const leftZone = document.querySelector('.nav-zone-left');
                 const rightZone = document.querySelector('.nav-zone-right');
                 mediaTarget.innerHTML = '';
                 if (leftZone) mediaTarget.appendChild(leftZone);
                 if (rightZone) mediaTarget.appendChild(rightZone);
                 
+                // RESTORES THE GRID VIEW CONTAINER FIRST
                 archiveView.style.display = 'block';
+
+                // INSTANTLY JUMPS YOUR WINDOW SCROLL AXIS DIRECTLY BACK TO THE LAST VIEWED ITEM
+                if (allArtworkElements[currentArtworkIndex]) {
+                    allArtworkElements[currentArtworkIndex].scrollIntoView({ block: 'center', behavior: 'instant' });
+                }
             }, 300);
         }
     </script>
