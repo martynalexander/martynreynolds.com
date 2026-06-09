@@ -470,9 +470,15 @@
             <div class="artwork-container" id="media-target">
                 <!-- Selected Video / Image scales dynamically inside here -->
                  
-                <!-- Invisible tap pads layered directly on top of the image frame -->
-                <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
-                <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
+                <!-- Left Touch Zone with its Floating Hair-line Left Arrow -->
+                <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)">
+                    <svg class="screen-arrow arrow-left-offset" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </div>
+                
+                <!-- Right Touch Zone with its Floating Hair-line Right Arrow -->
+                <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)">
+                    <svg class="screen-arrow arrow-right-offset" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </div>
             </div>
             <div class="artwork-details">
                 <h1 id="title-target">Artwork Title</h1>
