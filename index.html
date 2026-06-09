@@ -136,13 +136,14 @@
             color: #666;
         }
 
-        /* INVISIBLE CLICK RE-ROUTING FIELDS COUPLING Master Layer PRIORITY ROUTING */
+        /* INVISIBLE TAP BUTTON PAD CHANNELS OVER THE IMAGE REGIONS ONLY */
         .nav-zone {
-            position: fixed; 
+            position: absolute;
             top: 0;
+            bottom: 0; /* Snaps the touch zones strictly to the bottom edge of the image frame */
             width: 50%;
-            height: 100%;
-            z-index: 150000 !important; /* Layers touch zones cleanly over image frames */
+            height: auto; /* Unlocks the full height lock so it doesn't leak into your white space */
+            z-index: 150000 !important;
         }
         
         .nav-zone-left { 
@@ -460,7 +461,7 @@
 
     <!-- Seamless Subpage Transition Script Logic -->
     <script>
-       const archiveView = document.getElementById('archive-view');
+        const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
         const titleTarget = document.getElementById('title-target');
@@ -483,7 +484,7 @@
 
             archiveView.style.display = 'none';
             window.scrollTo(0, 0);
-            detailView.style.display = 'block'; // Switched to block to allow full page background click tracking
+            detailView.style.display = 'block'; // Unlocks global page canvas for background dismiss clicks
             setTimeout(() => {
                 detailView.style.opacity = '1';
             }, 50);
@@ -493,17 +494,19 @@
             let rawText = "";
             const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
             
+            // Retains a solid backup memory record of your side-lane touch zones
             const leftZone = document.querySelector('.nav-zone-left');
             const rightZone = document.querySelector('.nav-zone-right');
             
             if (typeToCheck === 'video') {
                 const source = element.querySelector('source');
-                mediaTarget.innerHTML = `<video autoplay loop muted playsinline><source src="${source.src}" type="video/mp4"></video>`;
+                // stopPropagation locks video playback taps safely away from closing the webpage layout
+                mediaTarget.innerHTML = `<video autoplay loop muted playsinline onclick="event.stopPropagation()"><source src="${source.src}" type="video/mp4"></video>`;
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    // Stop Propagation on image click prevents image magnification from triggering a page exit
+                    // stopPropagation locks image interaction safely away from closing the webpage layout
                     mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" onclick="event.stopPropagation()" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
                     rawText = img.alt || "Untitled";
 
@@ -524,6 +527,7 @@
                 }
             }
 
+            // Securely appends your touch pad elements back into the live layout structure
             if (leftZone) mediaTarget.appendChild(leftZone);
             if (rightZone) mediaTarget.appendChild(rightZone);
 
@@ -539,7 +543,7 @@
         }
 
         function navigateToAdjacentArtwork(event, direction) {
-            if (event) event.stopPropagation(); // Stops click from leaking to the white background stage
+            if (event) event.stopPropagation(); // Stops pagination taps from leaking to the white background stage
             refreshArtworkList();
 
             currentArtworkIndex = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
@@ -557,6 +561,7 @@
             setTimeout(() => {
                 detailView.style.display = 'none';
                 
+                // Securely tidies content nodes while keeping layout anchors active
                 const leftZone = document.querySelector('.nav-zone-left');
                 const rightZone = document.querySelector('.nav-zone-right');
                 mediaTarget.innerHTML = '';
@@ -566,6 +571,6 @@
                 archiveView.style.display = 'block';
             }, 300);
         }
-            </script>
+    </script>
 </body>
 </html>
