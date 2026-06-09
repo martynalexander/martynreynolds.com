@@ -93,21 +93,21 @@
         .nav-zone {
             position: absolute;
             top: 0;
-            width: 50%; /* Divides the screen window perfectly down the center */
+            width: 50%; /* Divides the screen perfectly down the center */
             height: 100%;
-            z-index: 10;
-            display: flex;
-            align-items: center; /* Centers the floating icons vertically on the screen */
+            z-index: 99999 !important; /* Raised layer weight to safely bypass the fixed text block override */
         }
 
         .nav-zone-left {
             left: 0;
-            justify-content: flex-start;
+            /* Simple thin straight black left arrow (<-) using the verified text string format */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto;
         }
 
         .nav-zone-right {
             right: 0;
-            justify-content: flex-end;
+            /* Simple thin straight black right arrow (->) using the verified text string format */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto;
         }
 
         /* Stark, hair-thin minimalist screen-anchored arrow graphics */
