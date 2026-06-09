@@ -73,42 +73,90 @@
         }
 
         .artwork-container {
-            width: 100vw; 
             max-width: 100vw;
+            max-height: 75vh;
             margin-bottom: 0;
             display: flex;
             justify-content: center;
-            position: relative;
-            overflow: hidden; /* Pins the image viewport bounds so zooming doesn't break the layout */
         }
 
         .artwork-container img, 
         .artwork-container video {
-            width: 100vw; 
-            height: auto; 
+            max-width: 100vw;
+            max-height: 75vh;
             object-fit: contain;
             display: block;
         }
-        
+
+        /* Floats your exact previous text layout in the bottom right corner of the screen */
+        .artwork-details {
+            text-align: right;
+            box-sizing: border-box;
+            padding: 0;
+            margin-top: 0;
+            position: fixed; /* Holds the block in place while the image scrolls */
+            bottom: 40px; /* Kept sitting exactly two lines above the bottom edge */
+            right: 40px; /* Kept sitting flush with your right-hand border margin */
+            width: calc(100vw - 80px); /* Extends across the screen width matching your previous styling */
+            z-index: 100; /* Keeps the text floating on top of the moving image layer */
+            pointer-events: none; /* Allows click-throughs to hit the left/right tap zones underneath */
+        }
+
+        /* Enforces your exact 11px light weight and elegant italics on your artwork titles */
+        .artwork-details h1 {
+            font-weight: 300; 
+            font-size: 11px;
+            font-style: italic; 
+            letter-spacing: 1px;
+            color: #000;
+            margin: 0;
+            line-height: 1.38; 
+        }
+
+        /* Enforces your exact 11px light weight on your metadata detail lines */
+        .artwork-details p {
+            color: #000;
+            font-weight: 300; 
+            font-size: 11px;
+            letter-spacing: 1px; 
+            margin: 0;
+            line-height: 1.38; 
+        }
+
+        /* Clean "back to images" navigation prompt sitting exactly two lines below */
+        .back-link {
+            color: #000;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 300; 
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 25px; 
+            line-height: 1.38; /* Increased by 10% for improved breathing room */
+        }
+
+        .back-link:hover {
+            color: #666;
+        }
+
         /* Invisible Left/Right Split-Screen Touch Overlays */
         .nav-zone {
             position: absolute;
             top: 0;
             width: 50%; /* Divides the screen perfectly down the center */
             height: 100%;
-            z-index: 99999 !important; /* Forces layout priority over the fixed text block */
+            z-index: 99999 !important; /* Master priority bypasses floating text conflicts */
         }
 
         .nav-zone-left {
             left: 0;
-            /* Fully encoded hair-thin straight black left arrow (<-) - guaranteed to bypass Safari locks */
-            cursor: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://w3.org') 16 16, auto;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto;
         }
 
         .nav-zone-right {
             right: 0;
-            /* Fully encoded hair-thin straight black right arrow (->) - guaranteed to bypass Safari locks */
-            cursor: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://w3.org') 16 16, auto;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto;
         }
 
         /* Stark, hair-thin minimalist screen-anchored arrow graphics */
@@ -465,29 +513,30 @@
         <!-- cms-list-end -->
     </div>
 
-    <!-- CLEAN SECONDARY METADATA PAGE CONTAINER -->
+    <!-- SEPARATED PORTFOLIO STAGE CONTAINER -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
-        <div class="detail-wrapper" onclick="event.stopPropagation()">
+        <div class="gallery-split-wrapper" onclick="event.stopPropagation()">
+            
+            <!-- COUPLING COLUMN A (MEDIA SCALES IN HERE) -->
             <div class="artwork-container" id="media-target">
-                <!-- Selected Video / Image scales dynamically inside here -->
-                 
-                <!-- Left Touch Zone -->
+                <!-- Selected Media node drops in right here dynamically -->
                 <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
-                
-                <!-- Right Touch Zone -->
                 <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
             </div>
+            
+            <!-- COUPLING COLUMN B (TEXT IS SECURELY PINNED INSIDE HERE) -->
             <div class="artwork-details">
                 <h1 id="title-target">Artwork Title</h1>
-                <p id="info-target">Metadata detail parameters apply here cleanly.</p>
+                <p id="info-target">Metadata text column entries apply cleanly here.</p>
                 <a onclick="hideArtworkPage(event)" class="back-link">back to images</a>
             </div>
+            
         </div>
     </div>
 
     <!-- Seamless Subpage Transition Script Logic -->
     <script>
-                 const archiveView = document.getElementById('archive-view');
+                const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
         const titleTarget = document.getElementById('title-target');
@@ -505,7 +554,6 @@
             currentArtworkIndex = allArtworkElements.indexOf(element);
             if (currentArtworkIndex === -1) currentArtworkIndex = 0;
 
-            // Global Fallback Rule: Fixes images missing explicit layout parameters
             const detectedType = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
             loadArtworkData(element, detectedType);
 
@@ -517,9 +565,9 @@
             }, 50);
         }
 
-  function loadArtworkData(element, mediaType) {
-            let rawText = "";
+        function loadArtworkData(element, mediaType) {
             const existingZones = mediaTarget.querySelectorAll('.nav-zone');
+            let rawText = "";
             
             const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
             
@@ -530,25 +578,19 @@
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    // Generates the image node with built-in layout zoom variables
-                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" id="zoomable-target" style="transition: transform 0.3s ease; cursor: zoom-in;">`;
+                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" style="cursor: zoom-in; transition: transform 0.25s ease;">`;
                     rawText = img.alt || "Untitled";
-                    
-                    // Activates independent double-click zoom listeners instantly
+
                     setTimeout(() => {
-                        const targetImg = document.getElementById('zoomable-target');
-                        if (targetImg) {
-                            let isZoomed = false;
-                            targetImg.addEventListener('dblclick', function(e) {
-                                e.stopPropagation(); // Stops navigation scripts from jumping slides
-                                if (!isZoomed) {
-                                    targetImg.style.transform = 'scale(2.2)'; // Smooth 2.2x pixel magnification
-                                    targetImg.style.cursor = 'zoom-out';
-                                    isZoomed = true;
-                                } else {
-                                    targetImg.style.transform = 'scale(1)'; // Drops cleanly back to screen fit
-                                    targetImg.style.cursor = 'zoom-in';
-                                    isZoomed = false;
+                        const zoomNode = mediaTarget.querySelector('.zoom-node');
+                        if (zoomNode) {
+                            let zoomed = false;
+                            zoomNode.addEventListener('click', function(e) {
+                                if (e.detail === 2) {
+                                    e.stopPropagation();
+                                    zoomed = !zoomed;
+                                    zoomNode.style.transform = zoomed ? 'scale(2.5)' : 'scale(1)';
+                                    zoomNode.style.cursor = zoomed ? 'zoom-out' : 'zoom-in';
                                 }
                             });
                         }
@@ -570,29 +612,27 @@
         }
 
         function navigateToAdjacentArtwork(event, direction) {
-            if (event) event.stopPropagation(); // Prevents layout pop-back dismissals
+            if (event) event.stopPropagation();
             refreshArtworkList();
 
-            // Computes adjacent pagination indexes securely; handles looping backwards cleanly past zero
             currentArtworkIndex = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
             const targetElement = allArtworkElements[currentArtworkIndex];
 
-            loadArtworkData(targetElement);
-            window.scrollTo(0, 0); // Centers scrolling index for vertical presentation rows
+            const detectedType = targetElement.tagName.toLowerCase() === 'video' ? 'video' : 'image';
+            loadArtworkData(targetElement, detectedType);
+            
+            const container = document.querySelector('.artwork-container');
+            if (container) { container.scrollTop = 0; container.scrollLeft = 0; }
         }
 
         function hideArtworkPage(event) {
             if (event) event.preventDefault();
-            
             detailView.style.opacity = '0';
             setTimeout(() => {
                 detailView.style.display = 'none';
-                
-                // Flushes content safely while keeping the hardcoded navigation zones completely intact
                 const zones = Array.from(mediaTarget.querySelectorAll('.nav-zone'));
                 mediaTarget.innerHTML = '';
                 zones.forEach(zone => mediaTarget.appendChild(zone));
-                
                 archiveView.style.display = 'block';
             }, 300);
         }
