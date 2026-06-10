@@ -146,7 +146,15 @@
             pointer-events: auto;
         }
 
-        .back-link:hover { color: #666; }
+        /* Standard halftone fade when the text block is black */
+        .back-link:hover { 
+            color: #666; 
+        }
+
+        /* Pristine white halftone fade when the text block flips to white over dark images */
+        .artwork-details.light-text .back-link:hover { 
+            color: rgba(255, 255, 255, 0.5) !important; 
+        }
 
         /* INVISIBLE CLICK RE-ROUTING TOUCH CHANNELS LOCKING SENSORS */
         .nav-zone {
