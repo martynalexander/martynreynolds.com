@@ -91,8 +91,9 @@
             text-align: right;
             box-sizing: border-box;
             padding: 0;
+            margin-top: 0;
             position: fixed; 
-            bottom: 40px; 
+            bottom: 12px; /* Shifted down exactly two lines from 40px */
             right: 40px; 
             width: calc(100vw - 80px); 
             z-index: 200000 !important;
@@ -105,7 +106,7 @@
             font-style: italic;
             letter-spacing: 1px;
             color: #000;
-            margin: 0 0 4px 0;
+            margin: 0; /* Stripped the bottom margin to match the other lines perfectly */
             line-height: 1.38; 
         }
 
