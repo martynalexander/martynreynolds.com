@@ -454,8 +454,8 @@
     </div>
 
     <!-- Seamless Subpage Transition Script Logic -->
-     <script>
-       const archiveView = document.getElementById('archive-view');
+      <script>
+        const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
         const titleTarget = document.getElementById('title-target');
@@ -463,17 +463,6 @@
 
         let currentArtworkIndex = 0;
         let allArtworkElements = [];
-
-        // Generates an unbreakable hair-thin tracker element that follows your cursor natively
-        const cursorTracker = document.createElement('div');
-        cursorTracker.id = 'cursor-tracker';
-        cursorTracker.style.position = 'fixed';
-        cursorTracker.style.pointerEvents = 'none';
-        cursorTracker.style.zIndex = '9999999';
-        cursorTracker.style.display = 'none';
-        cursorTracker.style.width = '32px';
-        cursorTracker.style.height = '32px';
-        document.body.appendChild(cursorTracker);
 
         function refreshArtworkList() {
             allArtworkElements = Array.from(document.querySelectorAll('.collage-grid > a, .collage-grid > video'));
@@ -490,31 +479,15 @@
             archiveView.style.display = 'none';
             window.scrollTo(0, 0);
             detailView.style.display = 'block'; 
-            cursorTracker.style.display = 'block'; // Turns on the arrow tracker layers
-            
             setTimeout(() => {
                 detailView.style.opacity = '1';
             }, 50);
         }
 
-        // Listens to your desktop mouse movements and glides the black vector lines precisely at the pointer coordinate
-        window.addEventListener('mousemove', function(e) {
-            if (detailView.style.display !== 'block') return;
-            
-            cursorTracker.style.left = (e.clientX - 16) + 'px';
-            cursorTracker.style.top = (e.clientY - 16) + 'px';
-            
-            // Checks if the mouse is on the left half or right half of your browser window layout
-            if (e.clientX < window.innerWidth / 2) {
-                cursorTracker.innerHTML = `<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`;
-            } else {
-                cursorTracker.innerHTML = `<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
-            }
-        });
-
         function loadArtworkData(element, mediaType) {
             let rawText = "";
             const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
+            
             const leftZone = document.querySelector('.nav-zone-left');
             const rightZone = document.querySelector('.nav-zone-right');
             
@@ -525,7 +498,7 @@
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" onclick="event.stopPropagation()" style="transition: transform 0.25s ease; transform-origin: center center;">`;
+                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" onclick="event.stopPropagation()" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
                     rawText = img.alt || "Untitled";
 
                     setTimeout(() => {
@@ -568,16 +541,22 @@
 
             const detectedType = targetElement.tagName.toLowerCase() === 'video' ? 'video' : 'image';
             loadArtworkData(targetElement, detectedType);
+            
             window.scrollTo(0, 0);
         }
 
         function hideArtworkPage(event) {
             if (event) event.preventDefault();
             detailView.style.opacity = '0';
-            cursorTracker.style.display = 'none'; // Swiftly turns off the tracker arrow overlay
             setTimeout(() => {
                 detailView.style.display = 'none';
+                
+                const leftZone = document.querySelector('.nav-zone-left');
+                const rightZone = document.querySelector('.nav-zone-right');
                 mediaTarget.innerHTML = '';
+                if (leftZone) mediaTarget.appendChild(leftZone);
+                if (rightZone) mediaTarget.appendChild(rightZone);
+                
                 archiveView.style.display = 'block';
 
                 if (allArtworkElements[currentArtworkIndex]) {
