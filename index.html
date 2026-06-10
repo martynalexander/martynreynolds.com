@@ -86,7 +86,7 @@
             display: block;
         }
 
-   /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
+          /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
         .artwork-details {
             text-align: right;
             box-sizing: border-box;
@@ -98,7 +98,13 @@
             width: calc(100vw - 32px); 
             z-index: 200000 !important;
             pointer-events: none;
-            mix-blend-mode: difference; /* Tells the browser to dynamically invert text based on underlying pixels */
+        }
+
+        /* Forces the entire text block to flip to pure white instantly as a single unit */
+        .artwork-details.light-text h1,
+        .artwork-details.light-text p,
+        .artwork-details.light-text .back-link {
+            color: #fff !important;
         }
 
         .artwork-details h1 {
@@ -106,13 +112,13 @@
             font-size: 11px;
             font-style: italic;
             letter-spacing: 1px;
-            color: #fff; /* Switched to white base so difference calculation can run cleanly */
+            color: #000;
             margin: 0; 
             line-height: 1.38; 
         }
 
         .artwork-details p {
-            color: #fff; /* Switched to white base so difference calculation can run cleanly */
+            color: #000;
             font-weight: 300; 
             font-size: 11px;
             letter-spacing: 1px; 
@@ -121,7 +127,7 @@
         }
 
         .back-link {
-            color: #fff; /* Switched to white base so difference calculation can run cleanly */
+            color: #000;
             text-decoration: none;
             font-size: 11px;
             font-weight: 300; 
@@ -134,7 +140,7 @@
             pointer-events: auto;
         }
 
-        .back-link:hover { color: #aaa; }
+        .back-link:hover { color: #666; }
 
         /* INVISIBLE CLICK RE-ROUTING TOUCH CHANNELS LOCKING SENSORS */
         .nav-zone {
