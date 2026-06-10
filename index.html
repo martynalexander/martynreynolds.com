@@ -490,16 +490,28 @@
             
             const leftZone = document.querySelector('.nav-zone-left');
             const rightZone = document.querySelector('.nav-zone-right');
+            const detailsContainer = document.querySelector('.artwork-details');
             
             if (typeToCheck === 'video') {
                 const source = element.querySelector('source');
-                mediaTarget.innerHTML = `<video autoplay loop muted playsinline onclick="event.stopPropagation()"><source src="${source.src}" type="video/mp4"></video>`;
+                mediaTarget.innerHTML = `<video autoplay loop muted playsinline crossOrigin="anonymous" id="active-media-node"><source src="${source.src}" type="video/mp4"></video>`;
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
+                
+                // Videos default cleanly to dark contrast layout backgrounds
+                detailsContainer.classList.add('light-text');
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" onclick="event.stopPropagation()" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
+                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" id="active-media-node" crossOrigin="anonymous" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
                     rawText = img.alt || "Untitled";
+
+                    // Triggers the automated pixel brightness calculation once the image node mounts
+                    const targetNode = document.getElementById('active-media-node');
+                    if (targetNode) {
+                        targetNode.onload = function() {
+                            analyzeBackgroundBrightness(targetNode, detailsContainer);
+                        };
+                    }
 
                     setTimeout(() => {
                         const zoomNode = mediaTarget.querySelector('.zoom-node');
@@ -529,6 +541,42 @@
                 infoTarget.innerHTML = descriptions.join('<br>');
             } else {
                 infoTarget.textContent = "";
+            }
+        }
+
+        // SOLID PIXEL SENSING CONTRAST ENGINE (COMPLETELY ELIMINATES GREY TONES)
+        function analyzeBackgroundBrightness(imageElement, textContainer) {
+            try {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 10;
+                canvas.height = 10;
+                
+                // Samples the bottom right corner region data where your text block hovers
+                context.drawImage(imageElement, imageElement.naturalWidth - 100, imageElement.naturalHeight - 100, 100, 100, 0, 0, 10, 10);
+                
+                const imgData = context.getImageData(0, 0, 10, 10).data;
+                let totalBrightness = 0;
+                
+                for (let i = 0; i < imgData.length; i += 4) {
+                    const r = imgData[i];
+                    const g = imgData[i+1];
+                    const b = imgData[i+2];
+                    // Uses standard grayscale calculation weights to determine visual density
+                    totalBrightness += (r * 0.299 + g * 0.587 + b * 0.114);
+                }
+                
+                const averageBrightness = totalBrightness / (imgData.length / 4);
+                
+                // Threshold rule: If average brightness falls below 45%, flip the whole block to pure white
+                if (averageBrightness < 115) {
+                    textContainer.classList.add('light-text');
+                } else {
+                    textContainer.classList.remove('light-text');
+                }
+            } catch (error) {
+                // Secure fallback safety rule prevents layout freezes
+                textContainer.classList.remove('light-text');
             }
         }
 
