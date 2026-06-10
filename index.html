@@ -142,19 +142,16 @@
             width: 50%;
             height: auto;
             z-index: 150000 !important;
-            cursor: none !important; /* Hides the standard mouse completely so the straight black arrow shines */
         }
         
         .nav-zone-left { 
             left: 0; 
-            /* Fully verified hair-thin straight black left arrow (<-) optimized for Safari */
-            cursor: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://w3.org') 16 16, auto !important;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto !important;
         }
         
         .nav-zone-right { 
             right: 0; 
-            /* Fully verified hair-thin straight black right arrow (->) optimized for Safari */
-            cursor: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://w3.org') 16 16, auto !important;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto !important;
         }
     </style>
 </head>
@@ -435,32 +432,27 @@
         <!-- cms-list-end -->
     </div>
 
-   </div>
-    </div>
-
-    <!-- CLEAN METADATA PRESENTATION CORE STAGE -->
+   <!-- CLEAN SEPARATED METADATA PRESENTATION STAGE CONTAINER -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
         <div class="gallery-split-wrapper" onclick="hideArtworkPage(event)">
             
-            <!-- VIEWPORT MANAGING EDGE-TO-EDGE PRESENTATION FRAMES -->
             <div class="artwork-container" id="media-target">
-                <!-- Selected Media scales dynamically inside here -->
+                <!-- Selected Media node drops in right here dynamically -->
                 <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
                 <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
             </div>
             
-            <!-- SECURE TEXT CONTAINER PLACED COMFORTABLY OUTSIDE OVERLAP LANES -->
             <div class="artwork-details" onclick="event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
-                <p id="info-target">Metadata details load cleanly here.</p>
+                <p id="info-target">Metadata text column entries apply cleanly here.</p>
                 <a onclick="hideArtworkPage(event)" class="back-link">back to images</a>
             </div>
             
         </div>
     </div>
 
-    <!-- SEAMLESS SUBPAGE TRANSITION RUNNER CORE -->
-    <script>
+    <!-- Seamless Subpage Transition Script Logic -->
+     <script>
         const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
