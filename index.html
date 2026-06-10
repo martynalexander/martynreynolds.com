@@ -460,8 +460,8 @@
     </div>
 
     <!-- Seamless Subpage Transition Script Logic -->
-     <script>
-      const archiveView = document.getElementById('archive-view');
+        <script>
+        const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
         const titleTarget = document.getElementById('title-target');
@@ -503,35 +503,19 @@
                 mediaTarget.innerHTML = `<video autoplay loop muted playsinline onclick="event.stopPropagation()"><source src="${source.src}" type="video/mp4"></video>`;
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
                 
-                // Videos are dark background loops and instantly flip the text container to pure white
                 detailsContainer.classList.add('light-text');
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" onclick="event.stopPropagation()" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
+                    // Standard clean presentation image node with absolute zero magnification bindings
+                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" onclick="event.stopPropagation()">`;
                     rawText = img.alt || "Untitled";
 
-                    // BULLETPROOF COLOR MATCHING: Checks if the clicked grid link or image tag has a dark marker
                     if (element.hasAttribute('data-dark') || img.hasAttribute('data-dark')) {
                         detailsContainer.classList.add('light-text');
                     } else {
                         detailsContainer.classList.remove('light-text');
                     }
-
-                    setTimeout(() => {
-                        const zoomNode = mediaTarget.querySelector('.zoom-node');
-                        if (zoomNode) {
-                            let zoomed = false;
-                            zoomNode.addEventListener('click', function(e) {
-                                if (e.detail === 2) {
-                                    e.stopPropagation();
-                                    zoomed = !zoomed;
-                                    zoomNode.style.transform = zoomed ? 'scale(2)' : 'scale(1)';
-                                    zoomNode.style.cursor = zoomed ? 'zoom-out' : 'zoom-in';
-                                }
-                            });
-                        }
-                    }, 50);
                 }
             }
 
@@ -580,6 +564,49 @@
                     allArtworkElements[currentArtworkIndex].scrollIntoView({ block: 'center', behavior: 'auto' });
                 }
             }, 300);
+        }
+
+        // GLOBAL KEYBOARD CONTROLLER ARROW SENSORS
+        window.addEventListener('keydown', function(event) {
+            if (detailView.style.display === 'block') {
+                if (event.key === 'ArrowRight') {
+                    navigateToAdjacentArtwork(event, 1);
+                } else if (event.key === 'ArrowLeft') {
+                    navigateToAdjacentArtwork(event, -1);
+                } else if (event.key === 'Escape') {
+                    hideArtworkPage(event);
+                }
+            }
+        });
+
+        // HIGH-PERFORMANCE MOBILE SWIPE GESTURE ENGINE
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        window.addEventListener('touchstart', function(event) {
+            if (detailView.style.display !== 'block') return;
+            touchStartX = event.changedTouches.screenX;
+        }, { passive: true });
+
+        window.addEventListener('touchend', function(event) {
+            if (detailView.style.display !== 'block') return;
+            touchEndX = event.changedTouches.screenX;
+            handleSwipeGesture(event);
+        }, { passive: true });
+
+        function handleSwipeGesture(event) {
+            const swipeDistance = touchEndX - touchStartX;
+            const thresholdPixelGap = 50; 
+
+            if (Math.abs(swipeDistance) > thresholdPixelGap) {
+                if (swipeDistance < 0) {
+                    navigateToAdjacentArtwork(event, 1);  
+                } else {
+                    navigateToAdjacentArtwork(event, -1); 
+                }
+            }
+            touchStartX = 0;
+            touchEndX = 0;
         }
     </script>
 </body>
