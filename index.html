@@ -51,8 +51,8 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 0; /* Shrinks container width to 0 when closed to completely unlock your home grid */
+            height: 0; /* Shrinks container height to 0 when closed to completely unlock your home grid */
             background-color: #fff;
             z-index: 100000;
             box-sizing: border-box;
@@ -144,13 +144,12 @@
 
         /* INVISIBLE CLICK RE-ROUTING TOUCH CHANNELS LOCKING SENSORS */
         .nav-zone {
-            position: fixed; /* Fixed to the viewport window grid so it never bleeds into your home grid */
+            position: absolute; /* Reverted to absolute layout flow */
             top: 0;
             bottom: 0;
             width: 50%;
-            height: auto;
+            height: 100%; /* Restored standard tracking height boundaries */
             z-index: 150000 !important;
-        }
         }
         
         .nav-zone-left { 
