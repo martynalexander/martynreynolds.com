@@ -434,27 +434,32 @@
         <!-- cms-list-end -->
     </div>
 
-   <!-- CLEAN SEPARATED METADATA PRESENTATION STAGE CONTAINER -->
+   </div>
+    </div>
+
+    <!-- CLEAN METADATA PRESENTATION CORE STAGE -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
         <div class="gallery-split-wrapper" onclick="hideArtworkPage(event)">
             
+            <!-- VIEWPORT MANAGING EDGE-TO-EDGE PRESENTATION FRAMES -->
             <div class="artwork-container" id="media-target">
-                <!-- Selected Media node drops in right here dynamically -->
+                <!-- Selected Media scales dynamically inside here -->
                 <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
                 <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
             </div>
             
+            <!-- SECURE TEXT CONTAINER PLACED COMFORTABLY OUTSIDE OVERLAP LANES -->
             <div class="artwork-details" onclick="event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
-                <p id="info-target">Metadata text column entries apply cleanly here.</p>
+                <p id="info-target">Metadata details load cleanly here.</p>
                 <a onclick="hideArtworkPage(event)" class="back-link">back to images</a>
             </div>
             
         </div>
     </div>
 
-    <!-- Seamless Subpage Transition Script Logic -->
-      <script>
+    <!-- SEAMLESS SUBPAGE TRANSITION RUNNER CORE -->
+    <script>
         const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
@@ -522,7 +527,7 @@
             if (rightZone) mediaTarget.appendChild(rightZone);
 
             const textSegments = rawText.split('|');
-            titleTarget.textContent = textSegments ? textSegments.trim() : "Untitled";
+            titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
             
             if (textSegments.length > 1) {
                 const descriptions = textSegments.slice(1).map(item => item.trim());
