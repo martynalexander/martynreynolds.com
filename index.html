@@ -144,12 +144,13 @@
 
         /* INVISIBLE CLICK RE-ROUTING TOUCH CHANNELS LOCKING SENSORS */
         .nav-zone {
-            position: absolute;
+            position: fixed; /* Fixed to the viewport window grid so it never bleeds into your home grid */
             top: 0;
             bottom: 0;
             width: 50%;
             height: auto;
             z-index: 150000 !important;
+        }
         }
         
         .nav-zone-left { 
