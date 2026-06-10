@@ -92,18 +92,19 @@
             display: block;
         }
 
-          /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
+        /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
         .artwork-details {
             text-align: right;
             box-sizing: border-box;
             padding: 0;
             margin-top: 0;
             position: fixed; 
-            bottom: 18px; 
-            right: 16px;  
-            width: calc(100vw - 32px); 
+            bottom: 18px; /* Perfectly aligned bottom margin line */
+            right: 18px;  /* Changed from 16px to 18px to match the bottom thickness exactly */
+            width: calc(100vw - 36px); /* Adjusted width to lock perfectly with the new 18px right border */
             z-index: 200000 !important;
             pointer-events: none;
+            transition: color 0.2s ease;
         }
 
         /* Forces the entire text block to flip to pure white instantly as a single unit */
