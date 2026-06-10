@@ -86,7 +86,7 @@
             display: block;
         }
 
-        /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
+   /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
         .artwork-details {
             text-align: right;
             box-sizing: border-box;
@@ -94,10 +94,11 @@
             margin-top: 0;
             position: fixed; 
             bottom: 18px; 
-            right: 16px;  /* Shifted slightly more to the right */
-            width: calc(100vw - 32px); /* Adjusted width to lock perfectly with the 16px margin */
+            right: 16px;  
+            width: calc(100vw - 32px); 
             z-index: 200000 !important;
             pointer-events: none;
+            mix-blend-mode: difference; /* Tells the browser to dynamically invert text based on underlying pixels */
         }
 
         .artwork-details h1 {
@@ -105,13 +106,13 @@
             font-size: 11px;
             font-style: italic;
             letter-spacing: 1px;
-            color: #000;
-            margin: 0; /* Stripped the bottom margin to match the other lines perfectly */
+            color: #fff; /* Switched to white base so difference calculation can run cleanly */
+            margin: 0; 
             line-height: 1.38; 
         }
 
         .artwork-details p {
-            color: #000;
+            color: #fff; /* Switched to white base so difference calculation can run cleanly */
             font-weight: 300; 
             font-size: 11px;
             letter-spacing: 1px; 
@@ -120,7 +121,7 @@
         }
 
         .back-link {
-            color: #000;
+            color: #fff; /* Switched to white base so difference calculation can run cleanly */
             text-decoration: none;
             font-size: 11px;
             font-weight: 300; 
@@ -133,7 +134,7 @@
             pointer-events: auto;
         }
 
-        .back-link:hover { color: #666; }
+        .back-link:hover { color: #aaa; }
 
         /* INVISIBLE CLICK RE-ROUTING TOUCH CHANNELS LOCKING SENSORS */
         .nav-zone {
