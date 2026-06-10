@@ -461,7 +461,7 @@
 
     <!-- Seamless Subpage Transition Script Logic -->
      <script>
-        const archiveView = document.getElementById('archive-view');
+      const archiveView = document.getElementById('archive-view');
         const detailView = document.getElementById('detail-view');
         const mediaTarget = document.getElementById('media-target');
         const titleTarget = document.getElementById('title-target');
@@ -500,23 +500,22 @@
             
             if (typeToCheck === 'video') {
                 const source = element.querySelector('source');
-                mediaTarget.innerHTML = `<video autoplay loop muted playsinline crossOrigin="anonymous" id="active-media-node"><source src="${source.src}" type="video/mp4"></video>`;
+                mediaTarget.innerHTML = `<video autoplay loop muted playsinline onclick="event.stopPropagation()"><source src="${source.src}" type="video/mp4"></video>`;
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
                 
-                // Videos default cleanly to dark contrast layout backgrounds
+                // Videos are dark background loops and instantly flip the text container to pure white
                 detailsContainer.classList.add('light-text');
             } else {
                 const img = element.querySelector('img');
                 if (img) {
-                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" id="active-media-node" crossOrigin="anonymous" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
+                    mediaTarget.innerHTML = `<img src="${img.src}" alt="Focus view" class="zoom-node" onclick="event.stopPropagation()" style="cursor: zoom-in; transition: transform 0.25s ease; transform-origin: center center;">`;
                     rawText = img.alt || "Untitled";
 
-                    // Triggers the automated pixel brightness calculation once the image node mounts
-                    const targetNode = document.getElementById('active-media-node');
-                    if (targetNode) {
-                        targetNode.onload = function() {
-                            analyzeBackgroundBrightness(targetNode, detailsContainer);
-                        };
+                    // BULLETPROOF COLOR MATCHING: Checks if the clicked grid link or image tag has a dark marker
+                    if (element.hasAttribute('data-dark') || img.hasAttribute('data-dark')) {
+                        detailsContainer.classList.add('light-text');
+                    } else {
+                        detailsContainer.classList.remove('light-text');
                     }
 
                     setTimeout(() => {
@@ -540,49 +539,13 @@
             if (rightZone) mediaTarget.appendChild(rightZone);
 
             const textSegments = rawText.split('|');
-            titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
+            titleTarget.textContent = textSegments ? textSegments.trim() : "Untitled";
             
             if (textSegments.length > 1) {
                 const descriptions = textSegments.slice(1).map(item => item.trim());
                 infoTarget.innerHTML = descriptions.join('<br>');
             } else {
                 infoTarget.textContent = "";
-            }
-        }
-
-        // SOLID PIXEL SENSING CONTRAST ENGINE (COMPLETELY ELIMINATES GREY TONES)
-        function analyzeBackgroundBrightness(imageElement, textContainer) {
-            try {
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = 10;
-                canvas.height = 10;
-                
-                // Samples the bottom right corner region data where your text block hovers
-                context.drawImage(imageElement, imageElement.naturalWidth - 100, imageElement.naturalHeight - 100, 100, 100, 0, 0, 10, 10);
-                
-                const imgData = context.getImageData(0, 0, 10, 10).data;
-                let totalBrightness = 0;
-                
-                for (let i = 0; i < imgData.length; i += 4) {
-                    const r = imgData[i];
-                    const g = imgData[i+1];
-                    const b = imgData[i+2];
-                    // Uses standard grayscale calculation weights to determine visual density
-                    totalBrightness += (r * 0.299 + g * 0.587 + b * 0.114);
-                }
-                
-                const averageBrightness = totalBrightness / (imgData.length / 4);
-                
-                // Threshold rule: If average brightness falls below 45%, flip the whole block to pure white
-                if (averageBrightness < 115) {
-                    textContainer.classList.add('light-text');
-                } else {
-                    textContainer.classList.remove('light-text');
-                }
-            } catch (error) {
-                // Secure fallback safety rule prevents layout freezes
-                textContainer.classList.remove('light-text');
             }
         }
 
