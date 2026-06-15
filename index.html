@@ -197,7 +197,7 @@
             line-height: 1;
             font-size: 18px;
             letter-spacing: 0;
-            font-weight: 200;
+            font-weight: 300;
             font-family: sans-serif;
             color: #000;
             text-transform: none;
@@ -970,14 +970,6 @@
         function handleDetailMouseMove(event) {
             if (!isDesktop()) return;
             const mediaEl = mediaTarget.querySelector('img, video');
-
-            // While the image is zoomed in, suppress the nav arrows and restore
-            // the real cursor — the pointer is for panning/zooming, not paging.
-            if (isImageZoomed) {
-                detailView.classList.remove('over-media');
-                hideArrows();
-                return;
-            }
 
             // When hovering the back-link, show the hand cursor, not the nav arrow.
             const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
