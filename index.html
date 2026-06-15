@@ -82,7 +82,14 @@
             position: relative;
             display: flex;
             justify-content: center;
-            align-items: center;  /* vertically centres image within viewport */
+            align-items: flex-start; /* mobile: image anchored to top */
+        }
+
+        /* Desktop: vertically centre the image within the viewport */
+        @media (hover: hover) and (pointer: fine) {
+            .artwork-container {
+                align-items: center;
+            }
         }
 
         .artwork-container img, 
@@ -91,6 +98,8 @@
             height: auto;
             object-fit: contain;
             display: block;
+            position: relative;
+            z-index: 1; /* sits above the wrapper click zone */
         }
 
         /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
@@ -163,20 +172,42 @@
             width: 50%;
             height: 100%;
             z-index: 150000 !important;
-        }
-        
-        .nav-zone-left { 
-            left: 0; 
-        }
-        
-        .nav-zone-right { 
-            right: 0; 
+            cursor: none; /* hide system cursor — we show our own arrow indicators */
         }
 
-        /* Desktop-only cursor arrows — applied via JS, not on mobile */
+        .nav-zone-left  { left: 0; }
+        .nav-zone-right { right: 0; }
+
+        /* MINIMAL FLAT ARROW INDICATORS — desktop only */
+        .nav-arrow {
+            display: none; /* hidden on mobile */
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 250000;
+            pointer-events: none; /* clicks pass through to nav-zone beneath */
+            opacity: 0;
+            transition: opacity 0.2s ease, color 0.2s ease;
+            line-height: 1;
+            font-size: 11px;
+            letter-spacing: 2px;
+            font-weight: 300;
+            font-family: sans-serif;
+            color: #000;
+            text-transform: lowercase;
+        }
+
+        .nav-arrow-left  { left: 18px; }
+        .nav-arrow-right { right: 18px; }
+
+        /* Arrows flip white with the text block */
+        .artwork-details.light-text ~ * .nav-arrow,
+        body.light-nav .nav-arrow {
+            color: #fff;
+        }
+
         @media (hover: hover) and (pointer: fine) {
-            .nav-zone-left  { cursor: w-resize !important; }
-            .nav-zone-right { cursor: e-resize !important; }
+            .nav-arrow { display: block; }
         }
     </style>
 </head>
@@ -458,13 +489,15 @@
     </div>
 
    <!-- CLEAN SEPARATED METADATA PRESENTATION STAGE CONTAINER -->
+    <!-- Clicking the wrapper (white space above/below image) returns to grid -->
     <div id="detail-view" onclick="hideArtworkPage(event)">
-        <div class="gallery-split-wrapper" onclick="hideArtworkPage(event)">
+        <div class="gallery-split-wrapper">
             
             <div class="artwork-container" id="media-target">
-                <!-- Selected Media node drops in right here dynamically -->
-                <div class="nav-zone nav-zone-left" onclick="navigateToAdjacentArtwork(event, -1)"></div>
-                <div class="nav-zone nav-zone-right" onclick="navigateToAdjacentArtwork(event, 1)"></div>
+                <!-- Image/video inserted here — has stopPropagation so clicks on it don't close -->
+                <!-- Nav zones stopPropagation then navigate — white space outside them closes -->
+                <div class="nav-zone nav-zone-left" onclick="event.stopPropagation(); navigateToAdjacentArtwork(event, -1)"></div>
+                <div class="nav-zone nav-zone-right" onclick="event.stopPropagation(); navigateToAdjacentArtwork(event, 1)"></div>
             </div>
             
             <div class="artwork-details" onclick="event.stopPropagation()">
@@ -475,6 +508,10 @@
             
         </div>
     </div>
+
+    <!-- MINIMAL FLAT ARROW INDICATORS (desktop only, pointer-events:none) -->
+    <div class="nav-arrow nav-arrow-left" id="arrow-left">←</div>
+    <div class="nav-arrow nav-arrow-right" id="arrow-right">→</div>
 
     <script>
         const archiveView = document.getElementById('archive-view');
@@ -570,7 +607,7 @@
                 detailsContainer.classList.remove('light-text');
                 return;
             }
-            if (luminance < 140) {
+            if (luminance < 168) {  // shifted 20% toward white sensitivity
                 detailsContainer.classList.add('light-text');
             } else {
                 detailsContainer.classList.remove('light-text');
@@ -808,6 +845,47 @@
                 if (brightnessLoopActive) lastBrightnessSample = 0; // force immediate resample
             }, 150);
         });
+
+        // ─────────────────────────────────────────────────────────────────
+        // MINIMAL ARROW INDICATORS — desktop only
+        // Appear when mouse enters the nav zone, hide on exit.
+        // Colour tracks the artwork-details light-text state.
+        // ─────────────────────────────────────────────────────────────────
+        const arrowLeft  = document.getElementById('arrow-left');
+        const arrowRight = document.getElementById('arrow-right');
+
+        function syncArrowColour() {
+            const isLight = document.querySelector('.artwork-details').classList.contains('light-text');
+            const col = isLight ? '#fff' : '#000';
+            if (arrowLeft)  arrowLeft.style.color  = col;
+            if (arrowRight) arrowRight.style.color = col;
+        }
+
+        // Patch applyTextColour to also sync arrow colour
+        const _origApply = applyTextColour;
+        applyTextColour = function(luminance) {
+            _origApply(luminance);
+            syncArrowColour();
+        };
+
+        // Show left arrow when hovering left nav zone
+        const navZoneLeft  = document.querySelector('.nav-zone-left');
+        const navZoneRight = document.querySelector('.nav-zone-right');
+
+        if (navZoneLeft && arrowLeft) {
+            navZoneLeft.addEventListener('mouseenter', () => { arrowLeft.style.opacity = '1'; });
+            navZoneLeft.addEventListener('mouseleave', () => { arrowLeft.style.opacity = '0'; });
+        }
+        if (navZoneRight && arrowRight) {
+            navZoneRight.addEventListener('mouseenter', () => { arrowRight.style.opacity = '1'; });
+            navZoneRight.addEventListener('mouseleave', () => { arrowRight.style.opacity = '0'; });
+        }
+
+        // Hide arrows when detail view closes
+        function hideArrows() {
+            if (arrowLeft)  arrowLeft.style.opacity  = '0';
+            if (arrowRight) arrowRight.style.opacity = '0';
+        }
     </script>
 </body>
 </html>
