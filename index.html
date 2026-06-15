@@ -604,18 +604,10 @@
                     detailView.scrollTop = maxScroll > 0 ? maxScroll / 2 : 0;
                 });
             } else {
+                // Portrait images: flex-start anchors the top edge to the screen top.
+                // Landscape images: center them vertically in the viewport.
+                // The CSS width:100vw / height:auto handles sizing — no inline override needed.
                 mediaTarget.style.alignItems = h > w ? 'flex-start' : 'center';
-                if (h > w) {
-                    mediaEl.style.width = 'auto';
-                    mediaEl.style.height = '100vh';
-                    mediaEl.style.maxWidth = '100vw';
-                    mediaEl.style.maxHeight = '100vh';
-                } else {
-                    mediaEl.style.width = '100vw';
-                    mediaEl.style.height = 'auto';
-                    mediaEl.style.maxWidth = '100vw';
-                    mediaEl.style.maxHeight = '100vh';
-                }
                 detailView.scrollTop = 0;
             }
         }
