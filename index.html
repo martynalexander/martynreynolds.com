@@ -842,7 +842,7 @@
 
         function navigateToAdjacentArtwork(event, direction) {
             if (event) event.stopPropagation();
-            if (isPinching || isImageZoomed) return; // don't navigate mid-pinch or while zoomed in
+            if (isPinching) return;
             if (typeof window.resetImageZoom === 'function') window.resetImageZoom();
             refreshArtworkList();
 
@@ -1219,12 +1219,50 @@
                 endGesture();
             }, { passive: false });
 
-            // iOS Safari fires its own gesture events for pinch — block them so
-            // the page (and the text) never zoom natively.
-            ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (evt) {
-                container.addEventListener(evt, function (e) { e.preventDefault(); },
-                    { passive: false });
+            // macOS Safari fires gesturestart/gesturechange/gestureend for trackpad
+            // pinch instead of wheel+ctrlKey. We use these to zoom toward the cursor
+            // and also call preventDefault to block native page zoom on both macOS
+            // and iOS Safari.
+            let cursorX = window.innerWidth / 2, cursorY = window.innerHeight / 2;
+            let gestureStartScale = 1;
+            let gestureL0x = 0, gestureL0y = 0, gesturePx = 0, gesturePy = 0;
+
+            detailView.addEventListener('mousemove', function (e) {
+                cursorX = e.clientX; cursorY = e.clientY;
             });
+
+            container.addEventListener('gesturestart', function (e) {
+                e.preventDefault();
+                if (!isDesktop()) return;
+                const el = media();
+                if (!el) return;
+                gestureStartScale = scale;
+                beginGesture();
+                const r = el.getBoundingClientRect();
+                gestureL0x = r.left - tx;
+                gestureL0y = r.top  - ty;
+                gesturePx = (cursorX - gestureL0x - tx) / scale;
+                gesturePy = (cursorY - gestureL0y - ty) / scale;
+            }, { passive: false });
+
+            container.addEventListener('gesturechange', function (e) {
+                e.preventDefault();
+                if (!isDesktop()) return;
+                const el = media();
+                if (!el) return;
+                let newScale = Math.max(1, Math.min(gestureStartScale * e.scale, MAX_SCALE));
+                tx = cursorX - gestureL0x - newScale * gesturePx;
+                ty = cursorY - gestureL0y - newScale * gesturePy;
+                scale = newScale;
+                if (scale <= 1.001) { scale = 1; tx = 0; ty = 0; }
+                apply();
+            }, { passive: false });
+
+            container.addEventListener('gestureend', function (e) {
+                e.preventDefault();
+                if (scale <= 1.05) { scale = 1; tx = 0; ty = 0; apply(); }
+                endGesture();
+            }, { passive: false });
 
             // Double-tap to reset zoom.
             let lastTap = 0;
