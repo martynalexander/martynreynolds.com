@@ -195,9 +195,9 @@
             opacity: 0;
             transition: opacity 0.15s ease;
             line-height: 1;
-            font-size: 30px;
+            font-size: 18px;
             letter-spacing: 0;
-            font-weight: 300;
+            font-weight: 200;
             font-family: sans-serif;
             color: #000;
             text-transform: none;
@@ -978,6 +978,14 @@
                 return;
             }
 
+            // When hovering the back-link, show the hand cursor, not the nav arrow.
+            const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
+            if (elAtPoint && elAtPoint.closest('.back-link')) {
+                detailView.classList.remove('over-media');
+                hideArrows();
+                return;
+            }
+
             if (!isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
                 detailView.classList.remove('over-media');
                 hideArrows();
@@ -1170,11 +1178,15 @@
             // while the text block (a fixed sibling) never moves. A plain wheel
             // with no modifier is left alone so tall images still scroll.
             // ─────────────────────────────────────────────────────────────
-            container.addEventListener('wheel', function (e) {
+            // Wheel listener is on detailView (the scroll container) so that
+            // Chrome/Safari see a non-passive listener at the container level and
+            // don't intercept pinch events before our handler runs.
+            detailView.addEventListener('wheel', function (e) {
+                const el = media();
                 if (!e.ctrlKey && !e.metaKey) {
                     // Plain wheel: pan the image while zoomed, otherwise let the
                     // page scroll (so tall images still scroll at 1×).
-                    if (scale > 1) {
+                    if (scale > 1 && el) {
                         e.preventDefault();
                         beginGesture();
                         tx -= e.deltaX;
@@ -1184,8 +1196,8 @@
                     }
                     return;
                 }
-                const el = media();
                 if (!el) return;
+                if (!isPointOverMedia(el, e.clientX, e.clientY)) return;
                 e.preventDefault();
                 beginGesture();
 
@@ -1196,7 +1208,7 @@
                 const py = (e.clientY - L0y - ty) / scale;
 
                 // Smooth, frame-rate-independent zoom factor from the wheel delta.
-                let newScale = scale * Math.exp(-e.deltaY * 0.0025);
+                let newScale = scale * Math.exp(-e.deltaY * 0.005);
                 newScale = Math.max(1, Math.min(newScale, MAX_SCALE));
 
                 tx = e.clientX - L0x - newScale * px;
