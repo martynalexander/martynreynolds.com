@@ -78,9 +78,11 @@
         .artwork-container {
             width: 100vw;
             max-width: 100vw;
+            min-height: 100vh;
             position: relative;
             display: flex;
             justify-content: center;
+            align-items: center;  /* vertically centres image within viewport */
         }
 
         .artwork-container img, 
@@ -165,12 +167,16 @@
         
         .nav-zone-left { 
             left: 0; 
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>') 16 16, auto !important;
         }
         
         .nav-zone-right { 
             right: 0; 
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>') 16 16, auto !important;
+        }
+
+        /* Desktop-only cursor arrows — applied via JS, not on mobile */
+        @media (hover: hover) and (pointer: fine) {
+            .nav-zone-left  { cursor: w-resize !important; }
+            .nav-zone-right { cursor: e-resize !important; }
         }
     </style>
 </head>
@@ -484,146 +490,162 @@
             allArtworkElements = Array.from(document.querySelectorAll('.collage-grid > a, .collage-grid > video'));
         }
 
-        // ---------------------------------------------------------------
-        // AUTO BRIGHTNESS DETECTION
-        // Samples the bottom-right corner of the displayed image (the area
-        // behind the floating text) and switches to light or dark text.
-        //
-        // ORIENTATION RULE:
-        // Portrait mode → text sits below the image in white space, so
-        // always use black text and skip canvas sampling entirely.
-        // Landscape mode (or desktop) → text overlaps the image, so run
-        // the full brightness detection as normal.
-        // ---------------------------------------------------------------
-
-        // Use matchMedia for orientation — more reliable than comparing dimensions
-        // on Safari iOS, which reports stale innerWidth/innerHeight during resize
+        // ─────────────────────────────────────────────────────────────────
+        // ORIENTATION HELPER
+        // Uses matchMedia — reliable on Safari iOS unlike innerWidth/innerHeight
+        // ─────────────────────────────────────────────────────────────────
         function isPortraitMode() {
             return window.matchMedia('(orientation: portrait)').matches;
         }
 
-        function detectBrightnessAndSetText(imgElement) {
-            const detailsContainer = document.querySelector('.artwork-details');
-
-            // Portrait: text is below the image — always black, no sampling needed
-            if (isPortraitMode()) {
-                detailsContainer.classList.remove('light-text');
-                return;
-            }
-
-            // Fallback: default to dark text if canvas sampling fails
-            detailsContainer.classList.remove('light-text');
-
+        // ─────────────────────────────────────────────────────────────────
+        // CANVAS BRIGHTNESS SAMPLING
+        // Shared core — pass any HTMLImageElement or HTMLVideoElement.
+        // Returns average luminance (0–255) of the bottom-right patch,
+        // or null if sampling failed (CORS, not ready, etc.)
+        // ─────────────────────────────────────────────────────────────────
+        function sampleBottomRightLuminance(mediaEl, scrollTop) {
             try {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-
-                // We only need to sample a small patch — bottom-right corner
                 const sampleW = 220;
                 const sampleH = 120;
+                const canvas = document.createElement('canvas');
                 canvas.width = sampleW;
                 canvas.height = sampleH;
+                const ctx = canvas.getContext('2d');
 
-                // Work out where the image is actually rendered on screen
-                const rect = imgElement.getBoundingClientRect();
-                const scaleX = imgElement.naturalWidth / rect.width;
-                const scaleY = imgElement.naturalHeight / rect.height;
+                const rect = mediaEl.getBoundingClientRect();
 
-                // Map the on-screen bottom-right patch to source image coords
-                const srcX = Math.max(0, imgElement.naturalWidth - sampleW * scaleX);
-                const srcY = Math.max(0, imgElement.naturalHeight - sampleH * scaleY);
-                const srcW = imgElement.naturalWidth - srcX;
-                const srcH = imgElement.naturalHeight - srcY;
+                let naturalW, naturalH;
+                if (mediaEl.tagName.toLowerCase() === 'video') {
+                    naturalW = mediaEl.videoWidth;
+                    naturalH = mediaEl.videoHeight;
+                    if (!naturalW || !naturalH) return null;
+                } else {
+                    naturalW = mediaEl.naturalWidth;
+                    naturalH = mediaEl.naturalHeight;
+                }
 
-                ctx.drawImage(imgElement, srcX, srcY, srcW, srcH, 0, 0, sampleW, sampleH);
+                // Scale factor between rendered pixels and source pixels
+                const scaleX = naturalW / rect.width;
+                const scaleY = naturalH / rect.height;
 
+                // On-screen position of the text block (bottom-right, fixed)
+                // We need to find what part of the image sits behind the text.
+                // The text bottom edge is ~18px from screen bottom.
+                // The text block is ~120px tall, so its top is ~138px from screen bottom.
+                const screenH = window.innerHeight;
+                const textAreaTopOnScreen = screenH - 138;  // approx top of text zone
+                const textAreaBottomOnScreen = screenH - 18; // bottom of text zone
+
+                // Convert screen y positions to image y positions
+                // rect.top is where the image top edge sits on screen (may be negative if scrolled)
+                const imgTopOnScreen = rect.top;
+                const srcYtop    = Math.max(0, (textAreaTopOnScreen - imgTopOnScreen) * scaleY);
+                const srcYbottom = Math.min(naturalH, (textAreaBottomOnScreen - imgTopOnScreen) * scaleY);
+
+                // X: rightmost sampleW pixels
+                const srcX = Math.max(0, naturalW - sampleW * scaleX);
+                const srcW = naturalW - srcX;
+                const srcH = srcYbottom - srcYtop;
+
+                if (srcH <= 0 || srcW <= 0) return null; // text is off the image
+
+                ctx.drawImage(mediaEl, srcX, srcYtop, srcW, srcH, 0, 0, sampleW, sampleH);
                 const data = ctx.getImageData(0, 0, sampleW, sampleH).data;
 
-                // Calculate average perceptual luminance across sampled pixels
-                let totalLuminance = 0;
-                const pixelCount = sampleW * sampleH;
+                let total = 0;
+                const pixels = sampleW * sampleH;
                 for (let i = 0; i < data.length; i += 4) {
-                    const r = data[i], g = data[i + 1], b = data[i + 2];
-                    // Standard luminance weights (ITU-R BT.709)
-                    totalLuminance += 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                    total += 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
                 }
-                const avgLuminance = totalLuminance / pixelCount;
-
-                // Threshold: below 140 out of 255 = dark region → use white text
-                if (avgLuminance < 140) {
-                    detailsContainer.classList.add('light-text');
-                } else {
-                    detailsContainer.classList.remove('light-text');
-                }
-            } catch (e) {
-                // CORS or other error — silently fall back to dark text
-                detailsContainer.classList.remove('light-text');
+                return total / pixels;
+            } catch(e) {
+                return null;
             }
         }
 
-        // For videos: sample a frame once the video has loaded enough data
-        function detectVideoBrightnessAndSetText(videoElement) {
+        function applyTextColour(luminance) {
             const detailsContainer = document.querySelector('.artwork-details');
-
-            // Portrait: text is below the image — always black, no sampling needed
-            if (isPortraitMode()) {
+            if (luminance === null) {
                 detailsContainer.classList.remove('light-text');
                 return;
             }
-
-            // Landscape/desktop: default to white while frame loads (most videos are dark)
-            detailsContainer.classList.add('light-text');
-
-            const doSample = () => {
-                try {
-                    const sampleW = 220;
-                    const sampleH = 120;
-                    const canvas = document.createElement('canvas');
-                    canvas.width = sampleW;
-                    canvas.height = sampleH;
-                    const ctx = canvas.getContext('2d');
-
-                    const vw = videoElement.videoWidth;
-                    const vh = videoElement.videoHeight;
-                    if (!vw || !vh) return; // not ready yet
-
-                    const rect = videoElement.getBoundingClientRect();
-                    const scaleX = vw / rect.width;
-                    const scaleY = vh / rect.height;
-
-                    const srcX = Math.max(0, vw - sampleW * scaleX);
-                    const srcY = Math.max(0, vh - sampleH * scaleY);
-                    const srcW = vw - srcX;
-                    const srcH = vh - srcY;
-
-                    ctx.drawImage(videoElement, srcX, srcY, srcW, srcH, 0, 0, sampleW, sampleH);
-                    const data = ctx.getImageData(0, 0, sampleW, sampleH).data;
-
-                    let totalLuminance = 0;
-                    const pixelCount = sampleW * sampleH;
-                    for (let i = 0; i < data.length; i += 4) {
-                        const r = data[i], g = data[i + 1], b = data[i + 2];
-                        totalLuminance += 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                    }
-                    const avgLuminance = totalLuminance / pixelCount;
-
-                    if (avgLuminance < 140) {
-                        detailsContainer.classList.add('light-text');
-                    } else {
-                        detailsContainer.classList.remove('light-text');
-                    }
-                } catch (e) {
-                    detailsContainer.classList.add('light-text'); // safe fallback for video
-                }
-            };
-
-            if (videoElement.readyState >= 2) {
-                doSample();
+            if (luminance < 140) {
+                detailsContainer.classList.add('light-text');
             } else {
-                videoElement.addEventListener('loadeddata', doSample, { once: true });
+                detailsContainer.classList.remove('light-text');
             }
         }
 
+        // ─────────────────────────────────────────────────────────────────
+        // SCROLL-LINKED BRIGHTNESS LOOP
+        // Runs on a throttled rAF loop while the detail view is open.
+        // Samples on every animation frame but only recomputes every ~100ms.
+        // ─────────────────────────────────────────────────────────────────
+        let brightnessLoopActive = false;
+        let lastBrightnessSample = 0;
+
+        function startBrightnessLoop() {
+            brightnessLoopActive = true;
+            lastBrightnessSample = 0;
+
+            function loop(timestamp) {
+                if (!brightnessLoopActive) return;
+
+                // Throttle: only sample every 100ms
+                if (timestamp - lastBrightnessSample > 100) {
+                    lastBrightnessSample = timestamp;
+
+                    // In portrait mode text is below image — always black
+                    if (isPortraitMode()) {
+                        applyTextColour(255);
+                    } else {
+                        const mediaEl = mediaTarget.querySelector('img, video');
+                        if (mediaEl) {
+                            const lum = sampleBottomRightLuminance(mediaEl, detailView.scrollTop);
+                            if (lum !== null) applyTextColour(lum);
+                        }
+                    }
+                }
+                requestAnimationFrame(loop);
+            }
+            requestAnimationFrame(loop);
+        }
+
+        function stopBrightnessLoop() {
+            brightnessLoopActive = false;
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PINCH-TO-ZOOM: mobile — suppress swipe/tap navigation during pinch
+        // ─────────────────────────────────────────────────────────────────
+        let activeTouches = 0;
+        let isPinching = false;
+
+        detailView.addEventListener('touchstart', function(e) {
+            activeTouches = e.touches.length;
+            if (activeTouches >= 2) {
+                isPinching = true;
+            }
+        }, { passive: true });
+
+        detailView.addEventListener('touchend', function(e) {
+            activeTouches = e.touches.length;
+            // Keep isPinching true until all fingers lift, then clear after short delay
+            if (activeTouches === 0) {
+                setTimeout(() => { isPinching = false; }, 300);
+            }
+        }, { passive: true });
+
+        detailView.addEventListener('touchmove', function(e) {
+            if (e.touches.length >= 2) {
+                isPinching = true;
+            }
+        }, { passive: true });
+
+        // ─────────────────────────────────────────────────────────────────
+        // CORE NAVIGATION
+        // ─────────────────────────────────────────────────────────────────
         function showArtworkPage(element, mediaType) {
             refreshArtworkList();
             currentArtworkIndex = allArtworkElements.indexOf(element);
@@ -633,27 +655,27 @@
             loadArtworkData(element, detectedType);
 
             archiveView.style.display = 'none';
-            window.scrollTo(0, 0);
-            
-            detailView.style.display = 'block'; 
-            detailView.classList.add('active-stage'); 
-            
+            detailView.scrollTop = 0;
+
+            detailView.style.display = 'block';
+            detailView.classList.add('active-stage');
+
             setTimeout(() => {
                 detailView.style.opacity = '1';
+                startBrightnessLoop();
             }, 50);
         }
 
         function loadArtworkData(element, mediaType) {
             let rawText = "";
             const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
-            
+
             const leftZone = document.querySelector('.nav-zone-left');
             const rightZone = document.querySelector('.nav-zone-right');
             const detailsContainer = document.querySelector('.artwork-details');
 
-            // Reset text colour while new media loads
             detailsContainer.classList.remove('light-text');
-            
+
             if (typeToCheck === 'video') {
                 const source = element.querySelector('source');
                 const newVideo = document.createElement('video');
@@ -668,11 +690,7 @@
                 newVideo.appendChild(newSource);
                 mediaTarget.innerHTML = '';
                 mediaTarget.appendChild(newVideo);
-
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
-
-                // Run brightness detection on the video element
-                detectVideoBrightnessAndSetText(newVideo);
 
             } else {
                 const img = element.querySelector('img');
@@ -680,16 +698,9 @@
                     const newImg = new Image();
                     newImg.setAttribute('onclick', 'event.stopPropagation()');
                     newImg.alt = 'Focus view';
-
-                    newImg.onload = function() {
-                        // Image is fully decoded — safe to sample pixels now
-                        detectBrightnessAndSetText(newImg);
-                    };
-
                     newImg.src = img.src;
                     mediaTarget.innerHTML = '';
                     mediaTarget.appendChild(newImg);
-
                     rawText = img.alt || "Untitled";
                 }
             }
@@ -699,7 +710,7 @@
 
             const textSegments = rawText.split('|');
             titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
-            
+
             if (textSegments.length > 1) {
                 const descriptions = textSegments.slice(1).map(item => item.trim());
                 infoTarget.innerHTML = descriptions.join('<br>');
@@ -709,7 +720,8 @@
         }
 
         function navigateToAdjacentArtwork(event, direction) {
-            if (event) event.stopPropagation(); 
+            if (event) event.stopPropagation();
+            if (isPinching) return; // block navigation during pinch zoom
             refreshArtworkList();
 
             currentArtworkIndex = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
@@ -717,24 +729,24 @@
 
             const detectedType = targetElement.tagName.toLowerCase() === 'video' ? 'video' : 'image';
             loadArtworkData(targetElement, detectedType);
-            
-            window.scrollTo(0, 0);
+            detailView.scrollTop = 0;
         }
 
         function hideArtworkPage(event) {
             if (event) event.preventDefault();
+            stopBrightnessLoop();
             detailView.style.opacity = '0';
-            detailView.classList.remove('active-stage'); 
-            
+            detailView.classList.remove('active-stage');
+
             setTimeout(() => {
                 detailView.style.display = 'none';
-                
+
                 const leftZone = document.querySelector('.nav-zone-left');
                 const rightZone = document.querySelector('.nav-zone-right');
                 mediaTarget.innerHTML = '';
                 if (leftZone) mediaTarget.appendChild(leftZone);
                 if (rightZone) mediaTarget.appendChild(rightZone);
-                
+
                 archiveView.style.display = 'block';
 
                 if (allArtworkElements[currentArtworkIndex]) {
@@ -743,70 +755,59 @@
             }, 300);
         }
 
-        // GLOBAL KEYBOARD SENSORS
+        // ─────────────────────────────────────────────────────────────────
+        // KEYBOARD
+        // ─────────────────────────────────────────────────────────────────
         window.addEventListener('keydown', function(event) {
             if (detailView.style.display === 'block') {
-                if (event.key === 'ArrowRight') {
-                    navigateToAdjacentArtwork(event, 1);
-                } else if (event.key === 'ArrowLeft') {
-                    navigateToAdjacentArtwork(event, -1);
-                } else if (event.key === 'Escape') {
-                    hideArtworkPage(event);
-                }
+                if (event.key === 'ArrowRight') navigateToAdjacentArtwork(event, 1);
+                else if (event.key === 'ArrowLeft') navigateToAdjacentArtwork(event, -1);
+                else if (event.key === 'Escape') hideArtworkPage(event);
             }
         });
 
-        // SANDBOXED TOUCH ENGINE
+        // ─────────────────────────────────────────────────────────────────
+        // TOUCH SWIPE — blocked when pinching
+        // ─────────────────────────────────────────────────────────────────
         let touchStartX = 0;
         let touchEndX = 0;
 
         detailView.addEventListener('touchstart', function(event) {
-            touchStartX = event.changedTouches[0].screenX;
+            if (event.touches.length === 1) {
+                touchStartX = event.changedTouches[0].screenX;
+            }
         }, { passive: true });
 
         detailView.addEventListener('touchend', function(event) {
-            touchEndX = event.changedTouches[0].screenX;
-            handleSwipeGesture(event);
+            if (isPinching) return;
+            if (event.touches.length === 0 && !isPinching) {
+                touchEndX = event.changedTouches[0].screenX;
+                handleSwipeGesture(event);
+            }
         }, { passive: true });
 
-        // RE-EVALUATE TEXT COLOUR ON SCREEN ROTATION
-        // Safari iOS fires resize before dimensions settle, so we use matchMedia
-        // for the orientation check and add a short delay to let the layout reflow
-        function reEvaluateTextColour() {
-            if (detailView.style.display !== 'block') return;
-            const currentMedia = mediaTarget.querySelector('img, video');
-            if (!currentMedia) return;
-            if (currentMedia.tagName.toLowerCase() === 'video') {
-                detectVideoBrightnessAndSetText(currentMedia);
-            } else {
-                detectBrightnessAndSetText(currentMedia);
-            }
-        }
-
-        // matchMedia orientation listener — fires reliably on Safari after rotation
-        window.matchMedia('(orientation: portrait)').addEventListener('change', function() {
-            setTimeout(reEvaluateTextColour, 100);
-        });
-
-        // Fallback resize listener for desktop browsers and edge cases
-        window.addEventListener('resize', function() {
-            setTimeout(reEvaluateTextColour, 100);
-        });
-
         function handleSwipeGesture(event) {
+            if (isPinching) return;
             const swipeDistance = touchEndX - touchStartX;
-            const thresholdPixelGap = 50; 
+            const thresholdPixelGap = 50;
 
             if (Math.abs(swipeDistance) > thresholdPixelGap) {
-                if (swipeDistance < 0) {
-                    navigateToAdjacentArtwork(event, 1);  
-                } else {
-                    navigateToAdjacentArtwork(event, -1); 
-                }
+                if (swipeDistance < 0) navigateToAdjacentArtwork(event, 1);
+                else navigateToAdjacentArtwork(event, -1);
             }
             touchStartX = 0;
             touchEndX = 0;
         }
+
+        // ─────────────────────────────────────────────────────────────────
+        // ORIENTATION CHANGE — brightness loop handles it automatically,
+        // but we force an immediate re-check on rotation
+        // ─────────────────────────────────────────────────────────────────
+        window.matchMedia('(orientation: portrait)').addEventListener('change', function() {
+            setTimeout(() => {
+                if (brightnessLoopActive) lastBrightnessSample = 0; // force immediate resample
+            }, 150);
+        });
     </script>
 </body>
 </html>
