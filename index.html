@@ -104,7 +104,12 @@
                disabling the browser's own pinch-zoom — our JS handles pinch
                so that ONLY the image scales and the text block stays locked. */
             touch-action: pan-y;
-            will-change: transform;
+            /* NB: no static `will-change: transform`. A permanently-promoted
+               layer is rasterised once at its on-screen (100vw) size and then
+               GPU-upscaled when we scale() it — that is what made zoomed images
+               look low-res. We toggle will-change ONLY during the live gesture
+               (see JS) so the resting, zoomed image re-rasterises from the full
+               source resolution and stays crisp. */
         }
 
         /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
@@ -190,12 +195,12 @@
             opacity: 0;
             transition: opacity 0.15s ease;
             line-height: 1;
-            font-size: 13px;
-            letter-spacing: 2px;
+            font-size: 30px;
+            letter-spacing: 0;
             font-weight: 300;
             font-family: sans-serif;
             color: #000;
-            text-transform: lowercase;
+            text-transform: none;
             will-change: left, top, color;
         }
 
@@ -501,8 +506,8 @@
     </div>
 
     <!-- MINIMAL FLAT ARROW INDICATORS (desktop only, follow the cursor) -->
-    <div class="nav-arrow nav-arrow-left" id="arrow-left">←</div>
-    <div class="nav-arrow nav-arrow-right" id="arrow-right">→</div>
+    <div class="nav-arrow nav-arrow-left" id="arrow-left">&lt;</div>
+    <div class="nav-arrow nav-arrow-right" id="arrow-right">&gt;</div>
 
     <script>
         const archiveView = document.getElementById('archive-view');
@@ -965,6 +970,14 @@
             if (!isDesktop()) return;
             const mediaEl = mediaTarget.querySelector('img, video');
 
+            // While the image is zoomed in, suppress the nav arrows and restore
+            // the real cursor — the pointer is for panning/zooming, not paging.
+            if (isImageZoomed) {
+                detailView.classList.remove('over-media');
+                hideArrows();
+                return;
+            }
+
             if (!isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
                 detailView.classList.remove('over-media');
                 hideArrows();
@@ -1029,6 +1042,7 @@
                     scale = 1; tx = 0; ty = 0;
                     el.style.transform = '';
                     el.style.transformOrigin = '';
+                    el.style.willChange = 'auto';
                     isImageZoomed = false;
                 } else {
                     el.style.transformOrigin = '0 0';
@@ -1038,11 +1052,34 @@
                 }
             }
 
+            // During an active gesture we promote the layer (will-change:transform)
+            // for smooth GPU compositing; at rest we drop the promotion so the
+            // browser re-rasterises the image from its full source resolution and
+            // the zoomed-in view is crisp rather than an up-scaled bitmap.
+            let settleTimer = null;
+            function beginGesture() {
+                const el = media();
+                if (el) el.style.willChange = 'transform';
+                if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
+            }
+            function endGesture() {
+                if (settleTimer) clearTimeout(settleTimer);
+                settleTimer = setTimeout(function () {
+                    const el = media();
+                    if (el && scale > 1) el.style.willChange = 'auto'; // force re-raster
+                }, 120);
+            }
+
             // Reset zoom whenever a new artwork is loaded.
             window.resetImageZoom = function () {
                 scale = 1; tx = 0; ty = 0; mode = null; isImageZoomed = false;
+                if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
                 const el = media();
-                if (el) { el.style.transform = ''; el.style.transformOrigin = ''; }
+                if (el) {
+                    el.style.transform = '';
+                    el.style.transformOrigin = '';
+                    el.style.willChange = 'auto';
+                }
             };
 
             function dist(t) {
@@ -1059,6 +1096,7 @@
                     const el = media();
                     if (!el) return;
                     mode = 'pinch';
+                    beginGesture();
                     startDist = dist(e.touches) || 1;
                     startScale = scale;
                     const m = mid(e.touches);
@@ -1070,6 +1108,7 @@
                     e.preventDefault();
                 } else if (e.touches.length === 1 && scale > 1) {
                     mode = 'pan';
+                    beginGesture();
                     panStartX = e.touches[0].clientX;
                     panStartY = e.touches[0].clientY;
                     startTx = tx; startTy = ty;
@@ -1119,7 +1158,53 @@
                     startTx = tx; startTy = ty;
                 } else if (e.touches.length === 0) {
                     mode = null;
+                    endGesture();
                 }
+            }, { passive: false });
+
+            // ─────────────────────────────────────────────────────────────
+            // DESKTOP ZOOM — trackpad pinch & Ctrl/⌘ + wheel
+            // A trackpad pinch arrives as a `wheel` event with `ctrlKey:true`;
+            // Ctrl/⌘ + mouse-wheel is the explicit fallback. We zoom the image
+            // toward the cursor so the point under the pointer stays fixed,
+            // while the text block (a fixed sibling) never moves. A plain wheel
+            // with no modifier is left alone so tall images still scroll.
+            // ─────────────────────────────────────────────────────────────
+            container.addEventListener('wheel', function (e) {
+                if (!e.ctrlKey && !e.metaKey) {
+                    // Plain wheel: pan the image while zoomed, otherwise let the
+                    // page scroll (so tall images still scroll at 1×).
+                    if (scale > 1) {
+                        e.preventDefault();
+                        beginGesture();
+                        tx -= e.deltaX;
+                        ty -= e.deltaY;
+                        apply();
+                        endGesture();
+                    }
+                    return;
+                }
+                const el = media();
+                if (!el) return;
+                e.preventDefault();
+                beginGesture();
+
+                const r = el.getBoundingClientRect();      // includes current transform
+                const L0x = r.left - tx;                   // untransformed layout origin
+                const L0y = r.top  - ty;
+                const px = (e.clientX - L0x - tx) / scale;  // intrinsic point under cursor
+                const py = (e.clientY - L0y - ty) / scale;
+
+                // Smooth, frame-rate-independent zoom factor from the wheel delta.
+                let newScale = scale * Math.exp(-e.deltaY * 0.0025);
+                newScale = Math.max(1, Math.min(newScale, MAX_SCALE));
+
+                tx = e.clientX - L0x - newScale * px;
+                ty = e.clientY - L0y - newScale * py;
+                scale = newScale;
+                if (scale <= 1.001) { scale = 1; tx = 0; ty = 0; }
+                apply();
+                endGesture();
             }, { passive: false });
 
             // iOS Safari fires its own gesture events for pinch — block them so
