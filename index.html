@@ -164,46 +164,34 @@
             color: rgba(255, 255, 255, 0.5) !important; 
         }
 
-        /* INVISIBLE CLICK RE-ROUTING TOUCH CHANNELS LOCKING SENSORS */
-        .nav-zone {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 50%;
-            height: 100%;
-            z-index: 150000 !important;
-            cursor: none; /* hide system cursor — we show our own arrow indicators */
+        /* Detail-view cursor: hidden over the image (the custom arrow stands in
+           for it), default elsewhere so the white space reads as a clickable
+           "return to grid" zone. */
+        @media (hover: hover) and (pointer: fine) {
+            #detail-view.over-media { cursor: none; }
         }
 
-        .nav-zone-left  { left: 0; }
-        .nav-zone-right { right: 0; }
-
-        /* MINIMAL FLAT ARROW INDICATORS — desktop only */
+        /* MINIMAL FLAT ARROW INDICATOR — desktop only, follows the cursor.
+           Its colour is set in JS by sampling the image tone directly behind
+           the cursor — the same brightness feature that drives the text block. */
         .nav-arrow {
-            display: none; /* hidden on mobile */
+            display: none; /* hidden on mobile / touch */
             position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
             z-index: 250000;
-            pointer-events: none; /* clicks pass through to nav-zone beneath */
+            pointer-events: none; /* never intercept clicks */
             opacity: 0;
-            transition: opacity 0.2s ease, color 0.2s ease;
+            transition: opacity 0.15s ease;
             line-height: 1;
-            font-size: 11px;
+            font-size: 13px;
             letter-spacing: 2px;
             font-weight: 300;
             font-family: sans-serif;
             color: #000;
             text-transform: lowercase;
-        }
-
-        .nav-arrow-left  { left: 18px; }
-        .nav-arrow-right { right: 18px; }
-
-        /* Arrows flip white with the text block */
-        .artwork-details.light-text ~ * .nav-arrow,
-        body.light-nav .nav-arrow {
-            color: #fff;
+            will-change: left, top, color;
         }
 
         @media (hover: hover) and (pointer: fine) {
@@ -489,27 +477,25 @@
     </div>
 
    <!-- CLEAN SEPARATED METADATA PRESENTATION STAGE CONTAINER -->
-    <!-- Clicking the wrapper (white space above/below image) returns to grid -->
-    <div id="detail-view" onclick="hideArtworkPage(event)">
+    <!-- A single click handler decides: a click on the image navigates (left /
+         right half), a click on the surrounding white space returns to grid. -->
+    <div id="detail-view" onclick="handleDetailClick(event)">
         <div class="gallery-split-wrapper">
-            
+
             <div class="artwork-container" id="media-target">
-                <!-- Image/video inserted here — has stopPropagation so clicks on it don't close -->
-                <!-- Nav zones stopPropagation then navigate — white space outside them closes -->
-                <div class="nav-zone nav-zone-left" onclick="event.stopPropagation(); navigateToAdjacentArtwork(event, -1)"></div>
-                <div class="nav-zone nav-zone-right" onclick="event.stopPropagation(); navigateToAdjacentArtwork(event, 1)"></div>
+                <!-- Image / video inserted here at run time -->
             </div>
-            
+
             <div class="artwork-details" onclick="event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
                 <p id="info-target">Metadata text column entries apply cleanly here.</p>
                 <a onclick="hideArtworkPage(event)" class="back-link">back to images</a>
             </div>
-            
+
         </div>
     </div>
 
-    <!-- MINIMAL FLAT ARROW INDICATORS (desktop only, pointer-events:none) -->
+    <!-- MINIMAL FLAT ARROW INDICATORS (desktop only, follow the cursor) -->
     <div class="nav-arrow nav-arrow-left" id="arrow-left">←</div>
     <div class="nav-arrow nav-arrow-right" id="arrow-right">→</div>
 
@@ -533,6 +519,45 @@
         // ─────────────────────────────────────────────────────────────────
         function isPortraitMode() {
             return window.matchMedia('(orientation: portrait)').matches;
+        }
+
+        function isDesktop() {
+            return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        }
+
+        // True when the cursor (cx, cy) sits within the rendered media bounds.
+        function isPointOverMedia(mediaEl, cx, cy) {
+            if (!mediaEl) return false;
+            const r = mediaEl.getBoundingClientRect();
+            return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // INITIAL LAYOUT PER DEVICE + IMAGE ORIENTATION
+        //   • Desktop: vertical images that overflow open scrolled to centre.
+        //   • Mobile portrait images: top edge aligned to the top of the screen.
+        //   • Mobile landscape images: centred vertically on the screen.
+        // Called once the media has loaded (so its natural size is known).
+        // ─────────────────────────────────────────────────────────────────
+        function applyMediaLayout(mediaEl) {
+            const w = mediaEl.naturalWidth  || mediaEl.videoWidth  || 0;
+            const h = mediaEl.naturalHeight || mediaEl.videoHeight || 0;
+            const isPortraitImage = h > w;
+            const container = document.querySelector('.artwork-container');
+
+            if (isDesktop()) {
+                if (container) container.style.alignItems = 'center';
+                // Centre the scroll position on tall images that overflow.
+                requestAnimationFrame(() => {
+                    const maxScroll = detailView.scrollHeight - detailView.clientHeight;
+                    detailView.scrollTop = maxScroll > 0 ? maxScroll / 2 : 0;
+                });
+            } else {
+                if (container) {
+                    container.style.alignItems = isPortraitImage ? 'flex-start' : 'center';
+                }
+                detailView.scrollTop = 0;
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -592,6 +617,56 @@
 
                 let total = 0;
                 const pixels = sampleW * sampleH;
+                for (let i = 0; i < data.length; i += 4) {
+                    total += 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
+                }
+                return total / pixels;
+            } catch(e) {
+                return null;
+            }
+        }
+
+        // Generic: average luminance (0–255) of the image region under a
+        // screen-space rectangle (sx, sy, sw, sh). Returns null if it can't
+        // sample (cursor off the image, not loaded, CORS, etc.).
+        function sampleLuminanceAtScreenRect(mediaEl, sx, sy, sw, sh) {
+            try {
+                const rect = mediaEl.getBoundingClientRect();
+                let naturalW, naturalH;
+                if (mediaEl.tagName.toLowerCase() === 'video') {
+                    naturalW = mediaEl.videoWidth;
+                    naturalH = mediaEl.videoHeight;
+                } else {
+                    naturalW = mediaEl.naturalWidth;
+                    naturalH = mediaEl.naturalHeight;
+                }
+                if (!naturalW || !naturalH || rect.width <= 0 || rect.height <= 0) return null;
+
+                const scaleX = naturalW / rect.width;
+                const scaleY = naturalH / rect.height;
+
+                // Intersect the screen rect with the media rect.
+                const left   = Math.max(sx, rect.left);
+                const right  = Math.min(sx + sw, rect.right);
+                const top    = Math.max(sy, rect.top);
+                const bottom = Math.min(sy + sh, rect.bottom);
+                if (right <= left || bottom <= top) return null;
+
+                const srcX = (left - rect.left) * scaleX;
+                const srcY = (top  - rect.top)  * scaleY;
+                const srcW = (right - left) * scaleX;
+                const srcH = (bottom - top)  * scaleY;
+
+                const outW = 24, outH = 16;
+                const canvas = document.createElement('canvas');
+                canvas.width = outW;
+                canvas.height = outH;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(mediaEl, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+                const data = ctx.getImageData(0, 0, outW, outH).data;
+
+                let total = 0;
+                const pixels = outW * outH;
                 for (let i = 0; i < data.length; i += 4) {
                     total += 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
                 }
@@ -707,10 +782,7 @@
             let rawText = "";
             const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
 
-            const leftZone = document.querySelector('.nav-zone-left');
-            const rightZone = document.querySelector('.nav-zone-right');
             const detailsContainer = document.querySelector('.artwork-details');
-
             detailsContainer.classList.remove('light-text');
 
             if (typeToCheck === 'video') {
@@ -720,30 +792,31 @@
                 newVideo.setAttribute('loop', '');
                 newVideo.setAttribute('muted', '');
                 newVideo.setAttribute('playsinline', '');
-                newVideo.setAttribute('onclick', 'event.stopPropagation()');
                 const newSource = document.createElement('source');
                 newSource.src = source.src;
                 newSource.type = 'video/mp4';
                 newVideo.appendChild(newSource);
                 mediaTarget.innerHTML = '';
                 mediaTarget.appendChild(newVideo);
+                newVideo.addEventListener('loadedmetadata', () => applyMediaLayout(newVideo));
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
 
             } else {
                 const img = element.querySelector('img');
                 if (img) {
                     const newImg = new Image();
-                    newImg.setAttribute('onclick', 'event.stopPropagation()');
                     newImg.alt = 'Focus view';
                     newImg.src = img.src;
                     mediaTarget.innerHTML = '';
                     mediaTarget.appendChild(newImg);
+                    if (newImg.complete && newImg.naturalWidth) {
+                        applyMediaLayout(newImg);
+                    } else {
+                        newImg.addEventListener('load', () => applyMediaLayout(newImg));
+                    }
                     rawText = img.alt || "Untitled";
                 }
             }
-
-            if (leftZone) mediaTarget.appendChild(leftZone);
-            if (rightZone) mediaTarget.appendChild(rightZone);
 
             const textSegments = rawText.split('|');
             titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
@@ -770,20 +843,19 @@
         }
 
         function hideArtworkPage(event) {
-            if (event) event.preventDefault();
+            if (event) {
+                event.preventDefault();
+                if (event.stopPropagation) event.stopPropagation();
+            }
             stopBrightnessLoop();
+            hideArrows();
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
+            detailView.classList.remove('over-media');
 
             setTimeout(() => {
                 detailView.style.display = 'none';
-
-                const leftZone = document.querySelector('.nav-zone-left');
-                const rightZone = document.querySelector('.nav-zone-right');
                 mediaTarget.innerHTML = '';
-                if (leftZone) mediaTarget.appendChild(leftZone);
-                if (rightZone) mediaTarget.appendChild(rightZone);
-
                 archiveView.style.display = 'block';
 
                 if (allArtworkElements[currentArtworkIndex]) {
@@ -847,45 +919,107 @@
         });
 
         // ─────────────────────────────────────────────────────────────────
-        // MINIMAL ARROW INDICATORS — desktop only
-        // Appear when mouse enters the nav zone, hide on exit.
-        // Colour tracks the artwork-details light-text state.
+        // CLICK ROUTING (desktop + mobile)
+        //   • Click on the image  → navigate (left half = previous, right = next)
+        //   • Click on white space → return to the image grid
+        // This reconciles points 3 & 4: the arrows live over the image, and the
+        // surrounding white space is the "return to grid" button.
+        // ─────────────────────────────────────────────────────────────────
+        function handleDetailClick(event) {
+            if (isPinching) return;
+            const mediaEl = mediaTarget.querySelector('img, video');
+            if (mediaEl && isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
+                const rect = mediaEl.getBoundingClientRect();
+                const dir = event.clientX < (rect.left + rect.width / 2) ? -1 : 1;
+                navigateToAdjacentArtwork(event, dir);
+            } else {
+                hideArtworkPage(event);
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // CURSOR-TRACKING ARROW INDICATOR — desktop only
+        // The arrow follows the cursor over the image, points in the direction
+        // navigation will go, and flips black/white against the tone directly
+        // behind it (the same luminance sampling that drives the text block).
         // ─────────────────────────────────────────────────────────────────
         const arrowLeft  = document.getElementById('arrow-left');
         const arrowRight = document.getElementById('arrow-right');
+        let lastArrowSample = 0;
+        let lastArrowColour = '#000';
 
-        function syncArrowColour() {
-            const isLight = document.querySelector('.artwork-details').classList.contains('light-text');
-            const col = isLight ? '#fff' : '#000';
-            if (arrowLeft)  arrowLeft.style.color  = col;
-            if (arrowRight) arrowRight.style.color = col;
-        }
-
-        // Patch applyTextColour to also sync arrow colour
-        const _origApply = applyTextColour;
-        applyTextColour = function(luminance) {
-            _origApply(luminance);
-            syncArrowColour();
-        };
-
-        // Show left arrow when hovering left nav zone
-        const navZoneLeft  = document.querySelector('.nav-zone-left');
-        const navZoneRight = document.querySelector('.nav-zone-right');
-
-        if (navZoneLeft && arrowLeft) {
-            navZoneLeft.addEventListener('mouseenter', () => { arrowLeft.style.opacity = '1'; });
-            navZoneLeft.addEventListener('mouseleave', () => { arrowLeft.style.opacity = '0'; });
-        }
-        if (navZoneRight && arrowRight) {
-            navZoneRight.addEventListener('mouseenter', () => { arrowRight.style.opacity = '1'; });
-            navZoneRight.addEventListener('mouseleave', () => { arrowRight.style.opacity = '0'; });
-        }
-
-        // Hide arrows when detail view closes
         function hideArrows() {
             if (arrowLeft)  arrowLeft.style.opacity  = '0';
             if (arrowRight) arrowRight.style.opacity = '0';
         }
+
+        function handleDetailMouseMove(event) {
+            if (!isDesktop()) return;
+            const mediaEl = mediaTarget.querySelector('img, video');
+
+            if (!isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
+                detailView.classList.remove('over-media');
+                hideArrows();
+                return;
+            }
+
+            detailView.classList.add('over-media');
+            const rect = mediaEl.getBoundingClientRect();
+            const goLeft = event.clientX < (rect.left + rect.width / 2);
+            const active = goLeft ? arrowLeft : arrowRight;
+            const other  = goLeft ? arrowRight : arrowLeft;
+
+            other.style.opacity = '0';
+            active.style.left = event.clientX + 'px';
+            active.style.top  = event.clientY + 'px';
+            active.style.opacity = '1';
+
+            // Throttle the (relatively costly) luminance sample to ~12/sec.
+            if (event.timeStamp - lastArrowSample > 80) {
+                lastArrowSample = event.timeStamp;
+                const lum = sampleLuminanceAtScreenRect(
+                    mediaEl, event.clientX - 20, event.clientY - 12, 40, 24);
+                if (lum !== null) lastArrowColour = lum < 168 ? '#fff' : '#000';
+            }
+            active.style.color = lastArrowColour;
+        }
+
+        detailView.addEventListener('mousemove', handleDetailMouseMove);
+        detailView.addEventListener('mouseleave', () => {
+            detailView.classList.remove('over-media');
+            hideArrows();
+        });
+
+        // ─────────────────────────────────────────────────────────────────
+        // PINCH-TO-ZOOM TEXT LOCK
+        // Pinch zoom magnifies the visual viewport — including fixed elements.
+        // We counter-scale and reposition the text block so it stays locked in
+        // place at a constant size while the image zooms beneath it.
+        // (Visual Viewport API — iOS Safari 13+, Chrome, Edge.)
+        // ─────────────────────────────────────────────────────────────────
+        (function lockTextDuringPinch() {
+            const vv = window.visualViewport;
+            if (!vv) return;
+            const details = document.querySelector('.artwork-details');
+            if (!details) return;
+
+            function update() {
+                const scale = vv.scale || 1;
+                if (Math.abs(scale - 1) < 0.01) {
+                    details.style.transform = '';
+                    return;
+                }
+                // Pin to the bottom-right of the visible (visual) viewport.
+                const dx = (vv.offsetLeft + vv.width)  - window.innerWidth;
+                const dy = (vv.offsetTop  + vv.height) - window.innerHeight;
+                details.style.transformOrigin = 'bottom right';
+                details.style.transform =
+                    'translate(' + dx + 'px, ' + dy + 'px) scale(' + (1 / scale) + ')';
+            }
+
+            vv.addEventListener('resize', update);
+            vv.addEventListener('scroll', update);
+        })();
     </script>
 </body>
 </html>
