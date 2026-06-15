@@ -496,8 +496,10 @@
         // the full brightness detection as normal.
         // ---------------------------------------------------------------
 
+        // Use matchMedia for orientation — more reliable than comparing dimensions
+        // on Safari iOS, which reports stale innerWidth/innerHeight during resize
         function isPortraitMode() {
-            return window.innerHeight > window.innerWidth;
+            return window.matchMedia('(orientation: portrait)').matches;
         }
 
         function detectBrightnessAndSetText(imgElement) {
@@ -768,8 +770,9 @@
         }, { passive: true });
 
         // RE-EVALUATE TEXT COLOUR ON SCREEN ROTATION
-        // When the device rotates, re-run detection on whatever is currently showing
-        window.addEventListener('resize', function() {
+        // Safari iOS fires resize before dimensions settle, so we use matchMedia
+        // for the orientation check and add a short delay to let the layout reflow
+        function reEvaluateTextColour() {
             if (detailView.style.display !== 'block') return;
             const currentMedia = mediaTarget.querySelector('img, video');
             if (!currentMedia) return;
@@ -778,6 +781,16 @@
             } else {
                 detectBrightnessAndSetText(currentMedia);
             }
+        }
+
+        // matchMedia orientation listener — fires reliably on Safari after rotation
+        window.matchMedia('(orientation: portrait)').addEventListener('change', function() {
+            setTimeout(reEvaluateTextColour, 100);
+        });
+
+        // Fallback resize listener for desktop browsers and edge cases
+        window.addEventListener('resize', function() {
+            setTimeout(reEvaluateTextColour, 100);
         });
 
         function handleSwipeGesture(event) {
