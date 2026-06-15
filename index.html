@@ -604,7 +604,17 @@
                     detailView.scrollTop = maxScroll > 0 ? maxScroll / 2 : 0;
                 });
             } else {
-                mediaTarget.style.alignItems = h > w ? 'flex-start' : 'center';
+                if (h > w) {
+                    mediaTarget.style.alignItems = 'flex-start';
+                    mediaEl.style.width = 'auto';
+                    mediaEl.style.height = '100vh';
+                    mediaEl.style.maxWidth = '100vw';
+                } else {
+                    mediaTarget.style.alignItems = 'center';
+                    mediaEl.style.width = '100vw';
+                    mediaEl.style.height = 'auto';
+                    mediaEl.style.maxHeight = '100vh';
+                }
                 detailView.scrollTop = 0;
             }
         }
