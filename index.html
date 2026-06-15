@@ -92,7 +92,7 @@
             }
         }
 
-        .artwork-container img, 
+        .artwork-container img,
         .artwork-container video {
             width: 100vw;
             height: auto;
@@ -100,6 +100,11 @@
             display: block;
             position: relative;
             z-index: 1; /* sits above the wrapper click zone */
+            /* pan-y keeps native vertical scrolling for tall images while
+               disabling the browser's own pinch-zoom — our JS handles pinch
+               so that ONLY the image scales and the text block stays locked. */
+            touch-action: pan-y;
+            will-change: transform;
         }
 
         /* FLOATS TEXT CONVENIENTLY IN THE CORNER MINIMALIST STYLE */
@@ -733,6 +738,7 @@
         // ─────────────────────────────────────────────────────────────────
         let activeTouches = 0;
         let isPinching = false;
+        let isImageZoomed = false; // true while the image is pinched in past 1×
 
         detailView.addEventListener('touchstart', function(e) {
             activeTouches = e.touches.length;
@@ -831,7 +837,8 @@
 
         function navigateToAdjacentArtwork(event, direction) {
             if (event) event.stopPropagation();
-            if (isPinching) return; // block navigation during pinch zoom
+            if (isPinching || isImageZoomed) return; // don't navigate mid-pinch or while zoomed in
+            if (typeof window.resetImageZoom === 'function') window.resetImageZoom();
             refreshArtworkList();
 
             currentArtworkIndex = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
@@ -849,6 +856,7 @@
             }
             stopBrightnessLoop();
             hideArrows();
+            if (typeof window.resetImageZoom === 'function') window.resetImageZoom();
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
             detailView.classList.remove('over-media');
@@ -896,7 +904,7 @@
         }, { passive: true });
 
         function handleSwipeGesture(event) {
-            if (isPinching) return;
+            if (isPinching || isImageZoomed) return; // a swipe while zoomed is a pan, not navigation
             const swipeDistance = touchEndX - touchStartX;
             const thresholdPixelGap = 50;
 
@@ -926,7 +934,7 @@
         // surrounding white space is the "return to grid" button.
         // ─────────────────────────────────────────────────────────────────
         function handleDetailClick(event) {
-            if (isPinching) return;
+            if (isPinching || isImageZoomed) return;
             const mediaEl = mediaTarget.querySelector('img, video');
             if (mediaEl && isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
                 const rect = mediaEl.getBoundingClientRect();
@@ -991,34 +999,147 @@
         });
 
         // ─────────────────────────────────────────────────────────────────
-        // PINCH-TO-ZOOM TEXT LOCK
-        // Pinch zoom magnifies the visual viewport — including fixed elements.
-        // We counter-scale and reposition the text block so it stays locked in
-        // place at a constant size while the image zooms beneath it.
-        // (Visual Viewport API — iOS Safari 13+, Chrome, Edge.)
+        // PINCH-TO-ZOOM — image only, so the text block stays locked
+        //
+        // Native page pinch-zoom is a compositor operation: the browser scales
+        // the already-painted layer (text included) and won't repaint during
+        // the gesture, so JS can never hold a fixed element still against it
+        // (and iOS ignores user-scalable=no outright). Instead we suppress the
+        // browser's own pinch and run our own: only the <img>/<video> gets a
+        // CSS transform, so the text — a separate fixed sibling — never moves.
         // ─────────────────────────────────────────────────────────────────
-        (function lockTextDuringPinch() {
-            const vv = window.visualViewport;
-            if (!vv) return;
-            const details = document.querySelector('.artwork-details');
-            if (!details) return;
+        (function customPinchZoom() {
+            const container = document.getElementById('media-target');
+            if (!container) return;
 
-            function update() {
-                const scale = vv.scale || 1;
-                if (Math.abs(scale - 1) < 0.01) {
-                    details.style.transform = '';
-                    return;
+            const MAX_SCALE = 5;
+            let scale = 1, tx = 0, ty = 0;     // current transform of the media
+            let startDist = 0, startScale = 1; // pinch baseline
+            let startTx = 0, startTy = 0;
+            let panStartX = 0, panStartY = 0;
+            let startRectL = 0, startRectT = 0; // media rect at gesture start
+            let mode = null;                   // 'pinch' | 'pan' | null
+
+            function media() { return container.querySelector('img, video'); }
+
+            function apply() {
+                const el = media();
+                if (!el) return;
+                if (scale <= 1.001) {
+                    scale = 1; tx = 0; ty = 0;
+                    el.style.transform = '';
+                    el.style.transformOrigin = '';
+                    isImageZoomed = false;
+                } else {
+                    el.style.transformOrigin = '0 0';
+                    el.style.transform =
+                        'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+                    isImageZoomed = true;
                 }
-                // Pin to the bottom-right of the visible (visual) viewport.
-                const dx = (vv.offsetLeft + vv.width)  - window.innerWidth;
-                const dy = (vv.offsetTop  + vv.height) - window.innerHeight;
-                details.style.transformOrigin = 'bottom right';
-                details.style.transform =
-                    'translate(' + dx + 'px, ' + dy + 'px) scale(' + (1 / scale) + ')';
             }
 
-            vv.addEventListener('resize', update);
-            vv.addEventListener('scroll', update);
+            // Reset zoom whenever a new artwork is loaded.
+            window.resetImageZoom = function () {
+                scale = 1; tx = 0; ty = 0; mode = null; isImageZoomed = false;
+                const el = media();
+                if (el) { el.style.transform = ''; el.style.transformOrigin = ''; }
+            };
+
+            function dist(t) {
+                return Math.hypot(t[0].clientX - t[1].clientX,
+                                  t[0].clientY - t[1].clientY);
+            }
+            function mid(t) {
+                return { x: (t[0].clientX + t[1].clientX) / 2,
+                         y: (t[0].clientY + t[1].clientY) / 2 };
+            }
+
+            container.addEventListener('touchstart', function (e) {
+                if (e.touches.length === 2) {
+                    const el = media();
+                    if (!el) return;
+                    mode = 'pinch';
+                    startDist = dist(e.touches) || 1;
+                    startScale = scale;
+                    const m = mid(e.touches);
+                    startTx = tx; startTy = ty;
+                    const r = el.getBoundingClientRect();
+                    startRectL = r.left; startRectT = r.top;
+                    // remember the focal point in current screen coords
+                    panStartX = m.x; panStartY = m.y;
+                    e.preventDefault();
+                } else if (e.touches.length === 1 && scale > 1) {
+                    mode = 'pan';
+                    panStartX = e.touches[0].clientX;
+                    panStartY = e.touches[0].clientY;
+                    startTx = tx; startTy = ty;
+                    e.preventDefault();
+                } else {
+                    mode = null;
+                }
+            }, { passive: false });
+
+            container.addEventListener('touchmove', function (e) {
+                if (mode === 'pinch' && e.touches.length === 2) {
+                    e.preventDefault();
+                    const d = dist(e.touches);
+                    const m = mid(e.touches);
+                    let newScale = startScale * (d / startDist);
+                    newScale = Math.max(1, Math.min(newScale, MAX_SCALE));
+                    // Keep the image point under the original focal point fixed and
+                    // let it track the fingers (transform-origin 0 0). The element's
+                    // start rect folds in its layout offset, so this stays correct
+                    // even for vertically-centred images:
+                    //   p0 = (focal - rectStart) / startScale   (intrinsic coord)
+                    //   t  = focalNow - newScale*p0 - rectStart + startT
+                    const p0x = (panStartX - startRectL) / startScale;
+                    const p0y = (panStartY - startRectT) / startScale;
+                    tx = m.x - newScale * p0x - startRectL + startTx;
+                    ty = m.y - newScale * p0y - startRectT + startTy;
+                    scale = newScale;
+                    apply();
+                } else if (mode === 'pan' && e.touches.length === 1 && scale > 1) {
+                    e.preventDefault();
+                    tx = startTx + (e.touches[0].clientX - panStartX);
+                    ty = startTy + (e.touches[0].clientY - panStartY);
+                    apply();
+                }
+            }, { passive: false });
+
+            container.addEventListener('touchend', function (e) {
+                if (e.touches.length >= 2) return;
+                // Settle: snap back to 1× if we drifted just above it.
+                if (scale <= 1.05) { scale = 1; tx = 0; ty = 0; }
+                apply();
+                if (e.touches.length === 1 && scale > 1) {
+                    // second finger lifted but one remains → continue as a pan
+                    mode = 'pan';
+                    panStartX = e.touches[0].clientX;
+                    panStartY = e.touches[0].clientY;
+                    startTx = tx; startTy = ty;
+                } else if (e.touches.length === 0) {
+                    mode = null;
+                }
+            }, { passive: false });
+
+            // iOS Safari fires its own gesture events for pinch — block them so
+            // the page (and the text) never zoom natively.
+            ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (evt) {
+                container.addEventListener(evt, function (e) { e.preventDefault(); },
+                    { passive: false });
+            });
+
+            // Double-tap to reset zoom.
+            let lastTap = 0;
+            container.addEventListener('touchend', function (e) {
+                if (e.touches.length !== 0) return;
+                const t = e.timeStamp;
+                if (t - lastTap < 300 && scale > 1) {
+                    window.resetImageZoom();
+                    e.preventDefault();
+                }
+                lastTap = t;
+            }, { passive: false });
         })();
     </script>
 </body>
