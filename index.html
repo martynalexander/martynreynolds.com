@@ -718,8 +718,9 @@
                 if (timestamp - lastBrightnessSample > 100) {
                     lastBrightnessSample = timestamp;
 
-                    // In portrait mode text is below image — always black
-                    if (isPortraitMode()) {
+                    // Portrait, not zoomed: text sits below the image on white — always black.
+                    // When zoomed (any orientation), sample the actual image region behind the text.
+                    if (isPortraitMode() && !isImageZoomed) {
                         applyTextColour(255);
                     } else {
                         const mediaEl = mediaTarget.querySelector('img, video');
@@ -939,7 +940,7 @@
         // surrounding white space is the "return to grid" button.
         // ─────────────────────────────────────────────────────────────────
         function handleDetailClick(event) {
-            if (isPinching || isImageZoomed) return;
+            if (isPinching) return;
             const mediaEl = mediaTarget.querySelector('img, video');
             if (mediaEl && isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
                 const rect = mediaEl.getBoundingClientRect();
@@ -1038,6 +1039,7 @@
             let startDist = 0, startScale = 1; // pinch baseline
             let startTx = 0, startTy = 0;
             let panStartX = 0, panStartY = 0;
+            let panTapX = 0, panTapY = 0;      // finger position at pan start (tap detection)
             let startRectL = 0, startRectT = 0; // media rect at gesture start
             let mode = null;                   // 'pinch' | 'pan' | null
 
@@ -1054,8 +1056,20 @@
                     isImageZoomed = false;
                 } else {
                     el.style.transformOrigin = '0 0';
-                    el.style.transform =
-                        'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+                    el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+                    // Clamp so the zoomed image always fills the viewport — no white bars.
+                    const r = el.getBoundingClientRect();
+                    const vw = window.innerWidth, vh = window.innerHeight;
+                    let clamped = false;
+                    if (r.width >= vw) {
+                        if (r.left > 0)    { tx -= r.left;       clamped = true; }
+                        if (r.right < vw)  { tx += vw - r.right; clamped = true; }
+                    }
+                    if (r.height >= vh) {
+                        if (r.top > 0)     { ty -= r.top;         clamped = true; }
+                        if (r.bottom < vh) { ty += vh - r.bottom; clamped = true; }
+                    }
+                    if (clamped) el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
                     isImageZoomed = true;
                 }
             }
@@ -1117,8 +1131,8 @@
                 } else if (e.touches.length === 1 && scale > 1) {
                     mode = 'pan';
                     beginGesture();
-                    panStartX = e.touches[0].clientX;
-                    panStartY = e.touches[0].clientY;
+                    panStartX = panTapX = e.touches[0].clientX;
+                    panStartY = panTapY = e.touches[0].clientY;
                     startTx = tx; startTy = ty;
                     e.preventDefault();
                 } else {
@@ -1165,8 +1179,22 @@
                     panStartY = e.touches[0].clientY;
                     startTx = tx; startTy = ty;
                 } else if (e.touches.length === 0) {
+                    const wasPan = (mode === 'pan');
                     mode = null;
                     endGesture();
+                    // Tap while zoomed: if the finger barely moved, treat it as a
+                    // navigation tap (left half = prev, right half = next).
+                    if (wasPan && !isPinching) {
+                        const t = e.changedTouches[0];
+                        if (Math.abs(t.clientX - panTapX) + Math.abs(t.clientY - panTapY) < 10) {
+                            const el = media();
+                            if (el) {
+                                const r = el.getBoundingClientRect();
+                                navigateToAdjacentArtwork(null,
+                                    t.clientX < (r.left + r.width / 2) ? -1 : 1);
+                            }
+                        }
+                    }
                 }
             }, { passive: false });
 
