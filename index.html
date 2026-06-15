@@ -488,9 +488,26 @@
         // AUTO BRIGHTNESS DETECTION
         // Samples the bottom-right corner of the displayed image (the area
         // behind the floating text) and switches to light or dark text.
+        //
+        // ORIENTATION RULE:
+        // Portrait mode → text sits below the image in white space, so
+        // always use black text and skip canvas sampling entirely.
+        // Landscape mode (or desktop) → text overlaps the image, so run
+        // the full brightness detection as normal.
         // ---------------------------------------------------------------
+
+        function isPortraitMode() {
+            return window.innerHeight > window.innerWidth;
+        }
+
         function detectBrightnessAndSetText(imgElement) {
             const detailsContainer = document.querySelector('.artwork-details');
+
+            // Portrait: text is below the image — always black, no sampling needed
+            if (isPortraitMode()) {
+                detailsContainer.classList.remove('light-text');
+                return;
+            }
 
             // Fallback: default to dark text if canvas sampling fails
             detailsContainer.classList.remove('light-text');
@@ -546,7 +563,13 @@
         function detectVideoBrightnessAndSetText(videoElement) {
             const detailsContainer = document.querySelector('.artwork-details');
 
-            // Videos default to white text immediately (most are dark)
+            // Portrait: text is below the image — always black, no sampling needed
+            if (isPortraitMode()) {
+                detailsContainer.classList.remove('light-text');
+                return;
+            }
+
+            // Landscape/desktop: default to white while frame loads (most videos are dark)
             detailsContainer.classList.add('light-text');
 
             const doSample = () => {
@@ -743,6 +766,19 @@
             touchEndX = event.changedTouches[0].screenX;
             handleSwipeGesture(event);
         }, { passive: true });
+
+        // RE-EVALUATE TEXT COLOUR ON SCREEN ROTATION
+        // When the device rotates, re-run detection on whatever is currently showing
+        window.addEventListener('resize', function() {
+            if (detailView.style.display !== 'block') return;
+            const currentMedia = mediaTarget.querySelector('img, video');
+            if (!currentMedia) return;
+            if (currentMedia.tagName.toLowerCase() === 'video') {
+                detectVideoBrightnessAndSetText(currentMedia);
+            } else {
+                detectBrightnessAndSetText(currentMedia);
+            }
+        });
 
         function handleSwipeGesture(event) {
             const swipeDistance = touchEndX - touchStartX;
