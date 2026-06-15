@@ -541,15 +541,16 @@
     </div>
 
     <!-- MINIMAL FLAT ARROW INDICATORS (desktop only, follow the cursor) -->
-    <div class="nav-arrow nav-arrow-left" id="arrow-left">&lt;</div>
-    <div class="nav-arrow nav-arrow-right" id="arrow-right">&gt;</div>
+    <div class="nav-arrow" id="arrow-left">&lt;</div>
+    <div class="nav-arrow" id="arrow-right">&gt;</div>
 
     <script>
-        const archiveView = document.getElementById('archive-view');
-        const detailView = document.getElementById('detail-view');
-        const mediaTarget = document.getElementById('media-target');
-        const titleTarget = document.getElementById('title-target');
-        const infoTarget = document.getElementById('info-target');
+        const archiveView    = document.getElementById('archive-view');
+        const detailView     = document.getElementById('detail-view');
+        const mediaTarget    = document.getElementById('media-target');
+        const titleTarget    = document.getElementById('title-target');
+        const infoTarget     = document.getElementById('info-target');
+        const artworkDetails = document.querySelector('.artwork-details');
 
         let currentArtworkIndex = 0;
         let allArtworkElements = [];
@@ -587,20 +588,16 @@
         function applyMediaLayout(mediaEl) {
             const w = mediaEl.naturalWidth  || mediaEl.videoWidth  || 0;
             const h = mediaEl.naturalHeight || mediaEl.videoHeight || 0;
-            const isPortraitImage = h > w;
-            const container = document.querySelector('.artwork-container');
 
             if (isDesktop()) {
-                if (container) container.style.alignItems = 'center';
+                mediaTarget.style.alignItems = 'center';
                 // Centre the scroll position on tall images that overflow.
                 requestAnimationFrame(() => {
                     const maxScroll = detailView.scrollHeight - detailView.clientHeight;
                     detailView.scrollTop = maxScroll > 0 ? maxScroll / 2 : 0;
                 });
             } else {
-                if (container) {
-                    container.style.alignItems = isPortraitImage ? 'flex-start' : 'center';
-                }
+                mediaTarget.style.alignItems = h > w ? 'flex-start' : 'center';
                 detailView.scrollTop = 0;
             }
         }
@@ -611,7 +608,7 @@
         // Returns average luminance (0–255) of the bottom-right patch,
         // or null if sampling failed (CORS, not ready, etc.)
         // ─────────────────────────────────────────────────────────────────
-        function sampleBottomRightLuminance(mediaEl, scrollTop) {
+        function sampleBottomRightLuminance(mediaEl) {
             try {
                 const sampleW = 220;
                 const sampleH = 120;
@@ -722,16 +719,7 @@
         }
 
         function applyTextColour(luminance) {
-            const detailsContainer = document.querySelector('.artwork-details');
-            if (luminance === null) {
-                detailsContainer.classList.remove('light-text');
-                return;
-            }
-            if (luminance < 168) {  // shifted 20% toward white sensitivity
-                detailsContainer.classList.add('light-text');
-            } else {
-                detailsContainer.classList.remove('light-text');
-            }
+            artworkDetails.classList.toggle('light-text', luminance !== null && luminance < 168);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -760,7 +748,7 @@
                     } else {
                         const mediaEl = mediaTarget.querySelector('img, video');
                         if (mediaEl) {
-                            const lum = sampleBottomRightLuminance(mediaEl, detailView.scrollTop);
+                            const lum = sampleBottomRightLuminance(mediaEl);
                             if (lum !== null) applyTextColour(lum);
                         }
                     }
@@ -777,29 +765,19 @@
         // ─────────────────────────────────────────────────────────────────
         // PINCH-TO-ZOOM: mobile — suppress swipe/tap navigation during pinch
         // ─────────────────────────────────────────────────────────────────
-        let activeTouches = 0;
         let isPinching = false;
         let isImageZoomed = false; // true while the image is pinched in past 1×
 
         detailView.addEventListener('touchstart', function(e) {
-            activeTouches = e.touches.length;
-            if (activeTouches >= 2) {
-                isPinching = true;
-            }
+            if (e.touches.length >= 2) isPinching = true;
         }, { passive: true });
 
         detailView.addEventListener('touchend', function(e) {
-            activeTouches = e.touches.length;
-            // Keep isPinching true until all fingers lift, then clear after short delay
-            if (activeTouches === 0) {
-                setTimeout(() => { isPinching = false; }, 300);
-            }
+            if (e.touches.length === 0) setTimeout(() => { isPinching = false; }, 300);
         }, { passive: true });
 
         detailView.addEventListener('touchmove', function(e) {
-            if (e.touches.length >= 2) {
-                isPinching = true;
-            }
+            if (e.touches.length >= 2) isPinching = true;
         }, { passive: true });
 
         // ─────────────────────────────────────────────────────────────────
@@ -827,12 +805,9 @@
 
         function loadArtworkData(element, mediaType) {
             let rawText = "";
-            const typeToCheck = mediaType || (element.tagName.toLowerCase() === 'video' ? 'video' : 'image');
+            artworkDetails.classList.remove('light-text');
 
-            const detailsContainer = document.querySelector('.artwork-details');
-            detailsContainer.classList.remove('light-text');
-
-            if (typeToCheck === 'video') {
+            if (mediaType === 'video') {
                 const source = element.querySelector('source');
                 const newVideo = document.createElement('video');
                 newVideo.setAttribute('autoplay', '');
@@ -879,7 +854,7 @@
         function navigateToAdjacentArtwork(event, direction) {
             if (event) event.stopPropagation();
             if (isPinching) return;
-            if (typeof window.resetImageZoom === 'function') window.resetImageZoom();
+            window.resetImageZoom();
             refreshArtworkList();
 
             currentArtworkIndex = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
@@ -897,7 +872,7 @@
             }
             stopBrightnessLoop();
             hideArrows();
-            if (typeof window.resetImageZoom === 'function') window.resetImageZoom();
+            window.resetImageZoom();
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
             detailView.classList.remove('over-media');
@@ -938,7 +913,7 @@
 
         detailView.addEventListener('touchend', function(event) {
             if (isPinching) return;
-            if (event.touches.length === 0 && !isPinching) {
+            if (event.touches.length === 0) {
                 touchEndX = event.changedTouches[0].screenX;
                 handleSwipeGesture(event);
             }
@@ -998,8 +973,8 @@
         let lastArrowColour = '#000';
 
         function hideArrows() {
-            if (arrowLeft)  arrowLeft.style.opacity  = '0';
-            if (arrowRight) arrowRight.style.opacity = '0';
+            arrowLeft.style.opacity  = '0';
+            arrowRight.style.opacity = '0';
         }
 
         function handleDetailMouseMove(event) {
