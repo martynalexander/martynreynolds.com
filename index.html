@@ -144,6 +144,10 @@
             line-height: 1.38; 
         }
 
+        .artwork-details .title-roman {
+            font-style: normal;
+        }
+
         .artwork-details p {
             color: #000;
             font-weight: 300; 
@@ -942,7 +946,13 @@
             }
 
             const textSegments = rawText.split('|');
-            titleTarget.textContent = textSegments[0] ? textSegments[0].trim() : "Untitled";
+            const rawTitle = textSegments[0] ? textSegments[0].trim() : "Untitled";
+            const titleMatch = rawTitle.match(/^(.*?)(\s*\([^)]*\))$/);
+            if (titleMatch) {
+                titleTarget.innerHTML = `${titleMatch[1]}<span class="title-roman">${titleMatch[2]}</span>`;
+            } else {
+                titleTarget.textContent = rawTitle;
+            }
 
             if (textSegments.length > 1) {
                 const descriptions = textSegments.slice(1).map(item => item.trim());
