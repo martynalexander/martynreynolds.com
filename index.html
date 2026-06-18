@@ -240,7 +240,7 @@
             <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
-                <img src="MartynReynoldsArch_Sumer_installationview_2025_29.jpg" alt="Arch | exhibition view | 2025 | Sumer Gallery, Auckland | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
+                <img src="MartynReynoldsArch_Sumer_installationview_2025_29.jpg" alt="Arch | exhibition view | Sumer Gallery, Auckland | 2025 | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
             </a>
             <!-- cms-item-end -->
             
@@ -254,7 +254,7 @@
             <!-- cms-item-start -->
             <!-- Big Size -->
             <a class="big" onclick="showArtworkPage(this, 'image')">
-                <img src="MartynReynolds_Arch_Sumer_installation_view_2025_43.jpg" alt="Arch | exhibition view | 2025 | Sumer Gallery, Auckland | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
+                <img src="MartynReynolds_Arch_Sumer_installation_view_2025_43.jpg" alt="Arch | exhibition view | Sumer Gallery, Auckland | 2025 | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
             </a>
             <!-- cms-item-end -->
 
@@ -950,22 +950,11 @@
 
                 if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
                     const url = descriptions.pop();
-                    let lastDescription = descriptions.pop();
-                    const linkedText = 'Sumer Gallery';
-
-                    if (lastDescription.includes(linkedText)) {
-                        lastDescription = lastDescription.replace(
-                            linkedText,
-                            `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${linkedText}</a>`
-                        );
-                    } else {
-                        lastDescription = `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${lastDescription}</a>`;
-                    }
-
-                    descriptions.push(lastDescription);
+                    const content = descriptions.join('<br>');
+                    infoTarget.innerHTML = `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${content}</a>`;
+                } else {
+                    infoTarget.innerHTML = descriptions.join('<br>');
                 }
-
-                infoTarget.innerHTML = descriptions.join('<br>');
             } else {
                 infoTarget.textContent = "";
             }
