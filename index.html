@@ -152,6 +152,13 @@
             line-height: 1.38; 
         }
 
+        .artwork-details .info-link {
+            color: inherit;
+            text-decoration: none;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
         .back-link {
             color: #000;
             text-decoration: none;
@@ -925,6 +932,25 @@
 
             if (textSegments.length > 1) {
                 const descriptions = textSegments.slice(1).map(item => item.trim());
+                const urlPattern = /^https?:\/\//i;
+
+                if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
+                    const url = descriptions.pop();
+                    let lastDescription = descriptions.pop();
+                    const linkedText = 'Sumer Gallery';
+
+                    if (lastDescription.includes(linkedText)) {
+                        lastDescription = lastDescription.replace(
+                            linkedText,
+                            `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${linkedText}</a>`
+                        );
+                    } else {
+                        lastDescription = `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${lastDescription}</a>`;
+                    }
+
+                    descriptions.push(lastDescription);
+                }
+
                 infoTarget.innerHTML = descriptions.join('<br>');
             } else {
                 infoTarget.textContent = "";
