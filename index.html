@@ -62,6 +62,7 @@
             overflow-y: scroll;
             -webkit-overflow-scrolling: touch;
             pointer-events: none;
+            cursor: none;
         }
 
         #detail-view.active-stage {
@@ -195,7 +196,8 @@
            "return to grid" zone. */
         @media (hover: hover) and (pointer: fine) {
             #detail-view.over-media .artwork-container { cursor: none; }
-            .artwork-details { cursor: auto; }
+            .artwork-details { cursor: none; }
+            .artwork-details a { cursor: pointer !important; }
         }
 
         /* MINIMAL FLAT ARROW INDICATOR — desktop only, follows the cursor.
