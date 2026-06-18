@@ -128,6 +128,25 @@
             transition: color 0.2s ease;
         }
 
+        .page-number {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            z-index: 200000 !important;
+            pointer-events: none;
+            font-size: 11px;
+            font-weight: 300;
+            font-style: italic;
+            letter-spacing: 1px;
+            line-height: 1.38;
+            color: #000;
+            transition: color 0.2s ease;
+        }
+
+        .page-number.light-text {
+            color: #fff !important;
+        }
+
         .artwork-details.light-text h1,
         .artwork-details.light-text p,
         .artwork-details.light-text .back-link {
@@ -633,6 +652,7 @@
                 <!-- Image / video inserted here at run time -->
             </div>
 
+            <div class="page-number" id="page-number">1</div>
             <div class="artwork-details" onclick="event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
                 <p id="info-target">Metadata text column entries apply cleanly here.</p>
@@ -824,7 +844,9 @@
         }
 
         function applyTextColour(luminance) {
-            artworkDetails.classList.toggle('light-text', luminance !== null && luminance < 168);
+            const isLight = luminance !== null && luminance < 168;
+            artworkDetails.classList.toggle('light-text', isLight);
+            document.getElementById('page-number').classList.toggle('light-text', isLight);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -911,6 +933,7 @@
         function loadArtworkData(element, mediaType) {
             let rawText = "";
             artworkDetails.classList.remove('light-text');
+            document.getElementById('page-number').classList.remove('light-text');
 
             if (mediaType === 'video') {
                 const source = element.querySelector('source');
@@ -953,6 +976,10 @@
             } else {
                 titleTarget.textContent = rawTitle;
             }
+
+            const pageNumber = currentArtworkIndex + 1;
+            const pageNumberTarget = document.getElementById('page-number');
+            pageNumberTarget.textContent = pageNumber;
 
             if (textSegments.length > 1) {
                 const descriptions = textSegments.slice(1).map(item => item.trim());
