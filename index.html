@@ -1101,22 +1101,16 @@
             if (!isDesktop()) return;
             const mediaEl = mediaTarget.querySelector('img, video');
 
-            // When hovering the detail metadata panel, stop the image cursor.
+            // When hovering a metadata link, show the hand cursor, not the nav arrow.
             const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
-            if (elAtPoint && elAtPoint.closest('.artwork-details')) {
-                detailView.classList.remove('over-media');
-                hideArrows();
-                return;
-            }
-
-            if (!isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
+            if (elAtPoint && elAtPoint.closest('.artwork-details a')) {
                 detailView.classList.remove('over-media');
                 hideArrows();
                 return;
             }
 
             detailView.classList.add('over-media');
-            const rect = mediaEl.getBoundingClientRect();
+            const rect = mediaEl ? mediaEl.getBoundingClientRect() : { left: 0, width: window.innerWidth };
             const goLeft = event.clientX < (rect.left + rect.width / 2);
             const active = goLeft ? arrowLeft : arrowRight;
             const other  = goLeft ? arrowRight : arrowLeft;
