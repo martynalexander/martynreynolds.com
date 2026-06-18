@@ -1097,9 +1097,9 @@
             if (!isDesktop()) return;
             const mediaEl = mediaTarget.querySelector('img, video');
 
-            // When hovering a metadata link, show the hand cursor, not the nav arrow.
+            // When hovering the detail metadata panel, stop the image cursor.
             const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
-            if (elAtPoint && elAtPoint.closest('.artwork-details a')) {
+            if (elAtPoint && elAtPoint.closest('.artwork-details')) {
                 detailView.classList.remove('over-media');
                 hideArrows();
                 return;
