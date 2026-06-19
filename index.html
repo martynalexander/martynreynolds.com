@@ -786,9 +786,8 @@
             const w = mediaEl.naturalWidth  || mediaEl.videoWidth  || 0;
             const h = mediaEl.naturalHeight || mediaEl.videoHeight || 0;
 
-            mediaTarget.style.alignItems = 'center';
-
             if (isDesktop()) {
+                mediaTarget.style.alignItems = 'center';
                 // Centre the scroll position on tall images that overflow.
                 requestAnimationFrame(() => {
                     const maxScroll = detailView.scrollHeight - detailView.clientHeight;
@@ -808,6 +807,9 @@
                 }
                 mediaEl.style.maxWidth = '100vw';
                 mediaEl.style.maxHeight = '100vh';
+                // Portrait images (taller than wide) sit flush against the top
+                // edge; landscape images are centred vertically.
+                mediaTarget.style.alignItems = (h > w) ? 'flex-start' : 'center';
                 detailView.scrollTop = 0;
             }
         }
