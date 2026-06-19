@@ -236,11 +236,7 @@
             line-height: 1.38;
         }
 
-        #detail-view.over-media a {
-            cursor: pointer !important;
-        }
-
-        .back-link:hover { 
+        .back-link:hover {
             color: #666; 
         }
 
@@ -273,14 +269,15 @@
             will-change: left, top, color;
         }
 
-        /* Desktop-only interaction tweaks: hide the native cursor over the
-           image (the custom arrow stands in for it; default elsewhere so the
-           white space reads as a clickable "return to grid" zone), and show
-           the cursor-tracking arrow indicator. */
+        /* Desktop-only: show the cursor-tracking arrow indicator. Cursor
+           visibility itself (none over media, pointer over links) is set
+           directly in JS on every mousemove (see handleDetailMouseMove) —
+           toggling it via a CSS class on an ancestor proved unreliable
+           across browsers (Safari kept showing the native arrow over
+           links; Chrome sometimes showed native arrow + custom arrow at
+           once), so the cursor style is now written straight onto the
+           element under the pointer instead. */
         @media (hover: hover) and (pointer: fine) {
-            #detail-view.over-media .artwork-container { cursor: none; }
-            .artwork-details { cursor: none; }
-            .artwork-details a { cursor: pointer !important; }
             .nav-arrow { display: block; }
         }
     </style>
@@ -1072,6 +1069,7 @@
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
             detailView.classList.remove('over-media');
+            detailView.style.cursor = '';
 
             setTimeout(() => {
                 detailView.style.display = 'none';
@@ -1181,11 +1179,13 @@
             const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
             if (elAtPoint && elAtPoint.closest('.artwork-details a')) {
                 detailView.classList.remove('over-media');
+                detailView.style.setProperty('cursor', 'pointer', 'important');
                 hideArrows();
                 return;
             }
 
             detailView.classList.add('over-media');
+            detailView.style.setProperty('cursor', 'none', 'important');
             const rect = mediaEl ? mediaEl.getBoundingClientRect() : { left: 0, width: window.innerWidth };
             const goLeft = event.clientX < (rect.left + rect.width / 2);
             const active = goLeft ? arrowLeft : arrowRight;
@@ -1209,6 +1209,7 @@
         detailView.addEventListener('mousemove', handleDetailMouseMove);
         detailView.addEventListener('mouseleave', () => {
             detailView.classList.remove('over-media');
+            detailView.style.cursor = '';
             hideArrows();
         });
 
