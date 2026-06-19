@@ -183,13 +183,15 @@
         }
 
         .artwork-details h1 {
-            font-weight: 300; 
+            font-weight: 300;
             font-size: 11px;
             font-style: italic;
             letter-spacing: 1px;
             color: #000;
-            margin: 0; 
-            line-height: 1.38; 
+            margin: 0;
+            margin-left: auto;
+            width: fit-content;
+            line-height: 1.38;
         }
 
         .artwork-details .title-roman {
@@ -198,11 +200,13 @@
 
         .artwork-details p {
             color: #000;
-            font-weight: 300; 
+            font-weight: 300;
             font-size: 11px;
-            letter-spacing: 1px; 
+            letter-spacing: 1px;
             margin: 0;
-            line-height: 1.38; 
+            margin-left: auto;
+            width: fit-content;
+            line-height: 1.38;
         }
 
         .artwork-details a {
@@ -742,7 +746,7 @@
             </div>
 
             <div class="page-number" id="page-number">1</div>
-            <div class="artwork-details" onclick="event.stopPropagation()">
+            <div class="artwork-details" onclick="if (event.target !== this) event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
                 <p id="info-target">Metadata text column entries apply cleanly here.</p>
                 <a onclick="hideArtworkPage(event)" class="back-link">back to images</a>
