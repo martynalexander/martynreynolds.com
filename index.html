@@ -1327,7 +1327,11 @@
                 settleTimer = setTimeout(function () {
                     const el = media();
                     if (el && scale > 1) el.style.willChange = 'auto'; // force re-raster
-                    try { detailView.classList.remove('zooming'); } catch(e) {}
+                    // Keep the full-screen, no-letterbox treatment for as long as
+                    // the image stays zoomed in — only drop it once back at 1×.
+                    if (scale <= 1) {
+                        try { detailView.classList.remove('zooming'); } catch(e) {}
+                    }
                 }, 120);
             }
 
