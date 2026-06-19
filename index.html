@@ -779,14 +779,6 @@
             allArtworkElements = Array.from(document.querySelectorAll('.collage-grid > a, .collage-grid > video'));
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // ORIENTATION HELPER
-        // Uses matchMedia — reliable on Safari iOS unlike innerWidth/innerHeight
-        // ─────────────────────────────────────────────────────────────────
-        function isPortraitMode() {
-            return window.matchMedia('(orientation: portrait)').matches;
-        }
-
         function isDesktop() {
             return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
         }
@@ -843,66 +835,6 @@
         // Returns average luminance (0–255) of the bottom-right patch,
         // or null if sampling failed (CORS, not ready, etc.)
         // ─────────────────────────────────────────────────────────────────
-        function sampleBottomRightLuminance(mediaEl) {
-            try {
-                const sampleW = 220;
-                const sampleH = 120;
-                const canvas = document.createElement('canvas');
-                canvas.width = sampleW;
-                canvas.height = sampleH;
-                const ctx = canvas.getContext('2d');
-
-                const rect = mediaEl.getBoundingClientRect();
-
-                let naturalW, naturalH;
-                if (mediaEl.tagName.toLowerCase() === 'video') {
-                    naturalW = mediaEl.videoWidth;
-                    naturalH = mediaEl.videoHeight;
-                    if (!naturalW || !naturalH) return null;
-                } else {
-                    naturalW = mediaEl.naturalWidth;
-                    naturalH = mediaEl.naturalHeight;
-                }
-
-                // Scale factor between rendered pixels and source pixels
-                const scaleX = naturalW / rect.width;
-                const scaleY = naturalH / rect.height;
-
-                // On-screen position of the text block (bottom-right, fixed)
-                // We need to find what part of the image sits behind the text.
-                // The text bottom edge is ~18px from screen bottom.
-                // The text block is ~120px tall, so its top is ~138px from screen bottom.
-                const screenH = window.innerHeight;
-                const textAreaTopOnScreen = screenH - 138;  // approx top of text zone
-                const textAreaBottomOnScreen = screenH - 18; // bottom of text zone
-
-                // Convert screen y positions to image y positions
-                // rect.top is where the image top edge sits on screen (may be negative if scrolled)
-                const imgTopOnScreen = rect.top;
-                const srcYtop    = Math.max(0, (textAreaTopOnScreen - imgTopOnScreen) * scaleY);
-                const srcYbottom = Math.min(naturalH, (textAreaBottomOnScreen - imgTopOnScreen) * scaleY);
-
-                // X: rightmost sampleW pixels
-                const srcX = Math.max(0, naturalW - sampleW * scaleX);
-                const srcW = naturalW - srcX;
-                const srcH = srcYbottom - srcYtop;
-
-                if (srcH <= 0 || srcW <= 0) return null; // text is off the image
-
-                ctx.drawImage(mediaEl, srcX, srcYtop, srcW, srcH, 0, 0, sampleW, sampleH);
-                const data = ctx.getImageData(0, 0, sampleW, sampleH).data;
-
-                let total = 0;
-                const pixels = sampleW * sampleH;
-                for (let i = 0; i < data.length; i += 4) {
-                    total += 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
-                }
-                return total / pixels;
-            } catch(e) {
-                return null;
-            }
-        }
-
         // Generic: average luminance (0–255) of the image region under a
         // screen-space rectangle (sx, sy, sw, sh). Returns null if it can't
         // sample (cursor off the image, not loaded, CORS, etc.).
@@ -953,10 +885,15 @@
             }
         }
 
-        function applyTextColour(luminance) {
-            const isLight = luminance !== null && luminance < 168;
-            artworkDetails.classList.toggle('light-text', isLight);
-            document.getElementById('page-number').classList.toggle('light-text', isLight);
+        // Each text block gets its own light/dark decision from the image
+        // region actually behind IT — the details block (bottom-right) and
+        // the page number (top-left) sit over different parts of the image
+        // and can need opposite colours.
+        function applyTextColour(detailsLuminance, pageNumberLuminance) {
+            document.getElementById('page-number').classList.toggle('light-text',
+                pageNumberLuminance !== null && pageNumberLuminance < 168);
+            artworkDetails.classList.toggle('light-text',
+                detailsLuminance !== null && detailsLuminance < 168);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -978,16 +915,15 @@
                 if (timestamp - lastBrightnessSample > 100) {
                     lastBrightnessSample = timestamp;
 
-                    // Portrait, not zoomed: text sits below the image on white — always black.
-                    // When zoomed (any orientation), sample the actual image region behind the text.
-                    if (isPortraitMode() && !isImageZoomed) {
-                        applyTextColour(255);
-                    } else {
-                        const mediaEl = mediaTarget.querySelector('img, video');
-                        if (mediaEl) {
-                            const lum = sampleBottomRightLuminance(mediaEl);
-                            if (lum !== null) applyTextColour(lum);
-                        }
+                    const mediaEl = mediaTarget.querySelector('img, video');
+                    if (mediaEl) {
+                        const detailsRect = artworkDetails.getBoundingClientRect();
+                        const pageNumberRect = document.getElementById('page-number').getBoundingClientRect();
+                        const detailsLum = sampleLuminanceAtScreenRect(
+                            mediaEl, detailsRect.left, detailsRect.top, detailsRect.width, detailsRect.height);
+                        const pageNumberLum = sampleLuminanceAtScreenRect(
+                            mediaEl, pageNumberRect.left, pageNumberRect.top, pageNumberRect.width, pageNumberRect.height);
+                        applyTextColour(detailsLum, pageNumberLum);
                     }
                 }
                 requestAnimationFrame(loop);
