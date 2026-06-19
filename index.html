@@ -161,16 +161,18 @@
             }
         }
 
-        /* When the user is actively pinch-zooming, force the media to
-           occupy the full viewport and hide page overflow so there are
-           no visible letterboxes during the gesture. */
+        /* When the user is actively pinch-zooming, hide page overflow and
+           switch the media to cover-fit so there are no visible letterboxes
+           during the gesture. The box is sized in JS from the live
+           visualViewport (not 100vw/100vh here) because iOS Safari's vh/vw
+           units don't track its toolbar showing/hiding — a static 100vh
+           box leaves a gap the size of that mismatch, which reads as a
+           white letterbox bar top/bottom while zoomed. */
         #detail-view.zooming {
             overflow: hidden !important;
         }
         #detail-view.zooming .artwork-container img,
         #detail-view.zooming .artwork-container video {
-            width: 100vw !important;
-            height: 100vh !important;
             object-fit: cover !important;
         }
 
@@ -1278,6 +1280,27 @@
 
             function media() { return container.querySelector('img, video'); }
 
+            // Size the media to the live, measured viewport rather than CSS
+            // 100vw/100vh — on iOS Safari those units don't track the
+            // toolbar showing/hiding, which otherwise leaves a letterbox
+            // gap while zoomed. !important on the inline style beats the
+            // stylesheet's !important sizing rules regardless of specificity.
+            function lockMediaToViewport() {
+                const el = media();
+                if (!el) return;
+                const vv = window.visualViewport;
+                const vw = vv ? vv.width : window.innerWidth;
+                const vh = vv ? vv.height : window.innerHeight;
+                el.style.setProperty('width', vw + 'px', 'important');
+                el.style.setProperty('height', vh + 'px', 'important');
+            }
+            function unlockMediaSize() {
+                const el = media();
+                if (!el) return;
+                el.style.removeProperty('width');
+                el.style.removeProperty('height');
+            }
+
             function apply() {
                 const el = media();
                 if (!el) return;
@@ -1288,6 +1311,7 @@
                     el.style.willChange = 'auto';
                     isImageZoomed = false;
                 } else {
+                    lockMediaToViewport();
                     el.style.transformOrigin = '0 0';
                     el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
                     // Clamp so the zoomed image always fills the viewport — no white bars.
@@ -1320,6 +1344,7 @@
                 // visually lock the viewport and force full-screen sizing
                 // while the user is pinching so there are no letterboxes.
                 try { detailView.classList.add('zooming'); } catch(e) {}
+                lockMediaToViewport();
                 if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
             }
             function endGesture() {
@@ -1331,6 +1356,7 @@
                     // the image stays zoomed in — only drop it once back at 1×.
                     if (scale <= 1) {
                         try { detailView.classList.remove('zooming'); } catch(e) {}
+                        unlockMediaSize();
                     }
                 }, 120);
             }
@@ -1345,8 +1371,18 @@
                     el.style.transformOrigin = '';
                     el.style.willChange = 'auto';
                 }
+                unlockMediaSize();
                 try { detailView.classList.remove('zooming'); } catch(e) {}
             };
+
+            // The visible viewport can change shape mid-zoom on iOS Safari
+            // (the toolbar auto-hides as you scroll/pan) — re-lock so the
+            // box keeps matching the actual screen, not a stale measurement.
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', function () {
+                    if (scale > 1 || mode) lockMediaToViewport();
+                });
+            }
 
             function dist(t) {
                 return Math.hypot(t[0].clientX - t[1].clientX,
