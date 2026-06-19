@@ -150,7 +150,7 @@
 
         @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 140px) !important;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
             }
             .artwork-container img,
             .artwork-container video {
@@ -1009,19 +1009,6 @@
             detailView.style.display = 'block';
             detailView.classList.add('active-stage');
 
-            // Compute a bottom offset that accounts for the visual viewport
-            // (iOS shows browser chrome which reduces visualViewport.height).
-            if (!isDesktop()) {
-                const vv = window.visualViewport;
-                const chromeOverlap = (window.innerHeight - (vv ? vv.height : window.innerHeight));
-                // Base offset (user-visible move down). Add chrome overlap so
-                // the text sits visibly above the bottom UI.
-                const base = 56;
-                artworkDetails.style.bottom = (chromeOverlap + base) + 'px';
-            } else {
-                artworkDetails.style.bottom = '';
-            }
-
             setTimeout(() => {
                 detailView.style.opacity = '1';
                 startBrightnessLoop();
@@ -1121,7 +1108,6 @@
             stopBrightnessLoop();
             hideArrows();
             window.resetImageZoom();
-            artworkDetails.style.bottom = '';
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
             detailView.classList.remove('over-media');
