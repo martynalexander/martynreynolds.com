@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Martyn Reynolds' Images</title>
    <style>
           body {
             margin: 0;
             padding: 0;
-            background-color: #fff;
+            background-color: #000;
             overflow-x: hidden;
         }
+
+        html { background-color: #000; }
 
         /* Container managing the structural swap between views */
         #archive-view {
@@ -27,21 +29,20 @@
             background-color: #fff;
         }
         .collage-grid a,
+        .collage-grid img,
         .collage-grid video {
             width: 100%;
             height: 100%;
             display: block;
+        }
+        .collage-grid a {
             cursor: pointer;
             text-decoration: none;
         }
         .collage-grid img,
         .collage-grid video {
-            width: 100%;
-            height: 100%;
             object-fit: cover;
-            display: block;
         }
-        .wide { grid-column: span 2; }
         .tall { grid-row: span 2; }
         .big  { grid-column: span 2; grid-row: span 2; }
 
@@ -53,7 +54,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: #fff;
+            background-color: #000;
             z-index: 100000;
             box-sizing: border-box;
             font-family: sans-serif;
@@ -147,10 +148,30 @@
             color: #fff !important;
         }
 
-        @media (hover: none) and (pointer: coarse) {
+        @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
-                bottom: 34px;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 140px) !important;
             }
+            .artwork-container img,
+            .artwork-container video {
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                width: auto !important;
+                height: auto !important;
+            }
+        }
+
+        /* When the user is actively pinch-zooming, force the media to
+           occupy the full viewport and hide page overflow so there are
+           no visible letterboxes during the gesture. */
+        #detail-view.zooming {
+            overflow: hidden !important;
+        }
+        #detail-view.zooming .artwork-container img,
+        #detail-view.zooming .artwork-container video {
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: cover !important;
         }
 
         .artwork-details.light-text h1,
@@ -220,15 +241,6 @@
             color: rgba(255, 255, 255, 0.5) !important; 
         }
 
-        /* Detail-view cursor: hidden over the image (the custom arrow stands in
-           for it), default elsewhere so the white space reads as a clickable
-           "return to grid" zone. */
-        @media (hover: hover) and (pointer: fine) {
-            #detail-view.over-media .artwork-container { cursor: none; }
-            .artwork-details { cursor: none; }
-            .artwork-details a { cursor: pointer !important; }
-        }
-
         /* MINIMAL FLAT ARROW INDICATOR — desktop only, follows the cursor.
            Its colour is set in JS by sampling the image tone directly behind
            the cursor — the same brightness feature that drives the text block. */
@@ -254,7 +266,14 @@
             will-change: left, top, color;
         }
 
+        /* Desktop-only interaction tweaks: hide the native cursor over the
+           image (the custom arrow stands in for it; default elsewhere so the
+           white space reads as a clickable "return to grid" zone), and show
+           the cursor-tracking arrow indicator. */
         @media (hover: hover) and (pointer: fine) {
+            #detail-view.over-media .artwork-container { cursor: none; }
+            .artwork-details { cursor: none; }
+            .artwork-details a { cursor: pointer !important; }
             .nav-arrow { display: block; }
         }
     </style>
@@ -267,378 +286,430 @@
         <div class="collage-grid">
         
             <!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="MartynReynoldsArch_Sumer_installationview_2025_29.jpg" data-page="1">
                 <img src="MartynReynoldsArch_Sumer_installationview_2025_29.jpg" alt="Arch | exhibition view | Sumer Gallery, Auckland | 2025 | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Facade_Study_2024_13.jpg" data-page="2">
                 <img src="MartynReynolds_Facade_Study_2024_13.jpg" alt="Facade Study | 2024 | oil stick on canvas; heat foil, uv print on synthetic velvet | 90 x 265 cm">
             </a>
             <!-- cms-item-end -->
-                  
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Arch_Sumer_installation_view_2025_43.jpg" data-page="3">
                 <img src="MartynReynolds_Arch_Sumer_installation_view_2025_43.jpg" alt="Arch | exhibition view | Sumer Gallery, Auckland | 2025 | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Cut Circle_2025_velvet_9.jpg" data-page="4">
                 <img src="MartynReynolds_Cut Circle_2025_velvet_9.jpg" alt="Cut Circle | 2025 | permanent marker, heat foil on synthetic velvet | 115 x 170 cm">
             </a>
             <!-- cms-item-end -->
-                        
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Cut Circle_2025_velvet_6.jpg" data-page="5">
                 <img src="MartynReynolds_Cut Circle_2025_velvet_6.jpg" alt="Cut Circle | 2025 | permanent marker, heat foil on synthetic velvet | 115 x 170 cm">
             </a>
             <!-- cms-item-end -->
-                 
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Arch_Sumer_installation_view_2025_44_edit.jpg" data-page="6">
                 <img src="MartynReynolds_Arch_Sumer_installation_view_2025_44_edit.jpg" alt="Arch | exhibition view | Sumer Gallery, Auckland | 2025 | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
             </a>
             <!-- cms-item-end -->
-                        
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="MartynReynoldsArch2025_14edit.jpg" data-page="7">
                 <img src="MartynReynoldsArch2025_14edit.jpg" alt="Arch | 2025 | heat foil, uv print on synthetic velvet | 155 x 245 cm">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Arch_2025_09.jpg" data-page="8">
                 <img src="MartynReynolds_Arch_2025_09.jpg" alt="Arch (detail) | 2025 | heat foil, uv print on synthetic velvet | 155 x 245 cm">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Cut_Circle_2025_3.jpg" data-page="9">
                 <img src="MartynReynolds_Cut_Circle_2025_3.jpg" alt="Cut Circle | 2025 | cast aluminium | 30 x 30 cm">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Arch_2025_01.jpg" data-page="10">
                 <img src="MartynReynolds_Arch_2025_01.jpg" alt="Arch (detail) | 2025 | heat foil, uv print on synthetic velvet | 155 x 245 cm">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Cut_Circle_2025_1.jpg" data-page="11">
                 <img src="MartynReynolds_Cut_Circle_2025_1.jpg" alt="Cut Circle | 2025 | cast aluminium | 30 x 30 cm">
             </a>
             <!-- cms-item-end -->
-                      
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Arch_Sumer_installation_view_2025_33.jpg" data-page="12">
                 <img src="MartynReynolds_Arch_Sumer_installation_view_2025_33.jpg" alt="Arch | exhibition view | Sumer Gallery, Auckland | 2025 | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Fasten_Hanami_Sketch_2024_3.jpg" data-page="13">
                 <img src="MartynReynolds_Fasten_Hanami_Sketch_2024_3.jpg" alt="Fasten Hanami Sketch | 2024 | photographs on found cardboard box | 49 x 30 cm">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Fasten_Hanami_2025_10.jpg" data-page="14">
                 <img src="MartynReynolds_Fasten_Hanami_2025_10.jpg" alt="Fasten Hanami | 2025 | heat foil, uv print on synthetic velvet | 200 x 150 cm">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
-                <img src="MartynReynolds_Fasten_Hanami_2025_07.jpg" alt="Fasten Hanami | 2025 | heat foil, uv print on synthetic velvet | 200 x 150 cm">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="Martyn Reynolds, Arch, Sumer, installation view, 2025-24_edit.jpg" data-page="15">
+                <img src="Martyn Reynolds, Arch, Sumer, installation view, 2025-24_edit.jpg" alt="Arch | exhibition view | Sumer Gallery, Auckland | 2025 | https://sumer.nz/exhibitions/73-martyn-reynolds-arch/overview/">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Fasten_Hanami_2025_05.jpg" data-page="16">
                 <img src="MartynReynolds_Fasten_Hanami_2025_05.jpg" alt="Fasten Hanami (detail) | 2025 | heat foil, uv print on synthetic velvet | 200 x 150 cm">
             </a>
             <!-- cms-item-end -->
-                  
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="MartynReynolds_Fasten_Hanami_2025_02.jpg" data-page="17">
                 <img src="MartynReynolds_Fasten_Hanami_2025_02.jpg" alt="Fasten Hanami (detail) | 2025 | heat foil, uv print on synthetic velvet | 200 x 150 cm">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="140A1369.jpg" data-page="18">
                 <img src="140A1369.jpg" alt="Liquid Paper | exhibition view (including work by Kah Bee Chow) | Bonne Esperánce, Copenhagen | 2024 | https://bonneesperance.org/exhibitions/liquid-paper/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="140A1262.jpg" data-page="19">
                 <img src="140A1262.jpg" alt="Texture Study | 2024 | UV print, heat foil on synthetic velvet | 80 x 80 cm | https://bonneesperance.org/exhibitions/liquid-paper/">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="140A1270.jpg" data-page="20">
                 <img src="140A1270.jpg" alt="Texture Study | 2024 | UV print, heat foil on synthetic velvet | 80 x 80 cm | https://bonneesperance.org/exhibitions/liquid-paper/">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
-                <img src="140A1273.jpg" alt="Texture Study (detail) | 2024 | UV print, heat foil on synthetic velvet | 80 x 80 cm | https://bonneesperance.org/exhibitions/liquid-paper/">
-            </a>
-            <!-- cms-item-end -->
-               
-            <!-- cms-item-start -->
-            <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="140A1254_edit.jpg" data-page="21">
                 <img src="140A1254_edit.jpg" alt="Water Study | 2021 | oil stick, oil pastel and pencil on paper | 13.5 x 15.5 cm | https://bonneesperance.org/exhibitions/liquid-paper/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="140A1394.jpg" data-page="22">
                 <img src="140A1394.jpg" alt="Liquid Paper | exhibition view (including work by Kah Bee Chow) | Bonne Esperánce, Copenhagen | 2024 | https://bonneesperance.org/exhibitions/liquid-paper/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')" data-file="140A1273.jpg" data-page="23">
+                <img src="140A1273.jpg" alt="Texture Study (detail) | 2024 | UV print, heat foil on synthetic velvet | 80 x 80 cm | https://bonneesperance.org/exhibitions/liquid-paper/">
+            </a>
+            <!-- cms-item-end -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="140A1410.jpg" data-page="24">
                 <img src="140A1410.jpg" alt="Liquid Paper | exhibition view (including work by Kah Bee Chow) | Bonne Esperánce, Copenhagen | 2024 | https://bonneesperance.org/exhibitions/liquid-paper/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="140A1432.jpg" data-page="25">
                 <img src="140A1432.jpg" alt="Liquid Paper | exhibition view | Bonne Esperánce, Copenhagen | 2024 | https://bonneesperance.org/exhibitions/liquid-paper/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="black_hook_peony.jpg" data-page="26">
                 <img src="black_hook_peony.jpg" alt="Black Hook Peony | 2023 | uv print on anodized cast aluminium | 48 x 30 cm | Neue Essener Kunstverein Jahresgabe | http://neuer-essener-kunstverein.de/jahresgaben">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="raw_hook_shoes_on_the_sofa.jpg" data-page="27">
                 <img src="raw_hook_shoes_on_the_sofa.jpg" alt="Raw Hook Shoes on the Sofa | 2025 | uv print on  cast aluminium | 48 x 30 cm | Neue Essener Kunstverein Jahresgabe | http://neuer-essener-kunstverein.de/jahresgaben">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="001_MR_edit_web.jpg" data-page="28">
                 <img src="001_MR_edit_web.jpg" alt="u don’t even know me like that | exhibition view (with work by Zoe Field) | Bistro21, Leipzig | https://www.bistro21.org/exhibitions/u-dont-even-know-me-like-that-zoe-field-martyn-reynolds-lilli-thiessen/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="Martyn Reynolds, Shoes on the Sofa Tapestry, 2022 - 2b.jpg" data-page="29">
                 <img src="Martyn Reynolds, Shoes on the Sofa Tapestry, 2022 - 2b.jpg" alt="Shoes on the Sofa Tapestry | 2022 | velvet, heat foil, uv print | 250 x 150 cm | https://www.bistro21.org/exhibitions/u-dont-even-know-me-like-that-zoe-field-martyn-reynolds-lilli-thiessen/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="Martyn Reynolds, Shoes on the Sofa Tapestry, 2022 - 3b.jpg" data-page="30">
                 <img src="Martyn Reynolds, Shoes on the Sofa Tapestry, 2022 - 3b.jpg" alt="Shoes on the Sofa Tapestry (detail) | 2022 | velvet, heat foil, uv print | 250 x 150 cm | https://www.bistro21.org/exhibitions/u-dont-even-know-me-like-that-zoe-field-martyn-reynolds-lilli-thiessen/">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
-                <img src="black_hammer_peonie_testsheet_square_web.jpg" alt="Black Hammer Peonie Testsheet Square | 2025 | Studio Still Life">
-            </a>
-            <!-- cms-item-end -->
-
-            <!-- cms-item-start -->
-            <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="building_tapestry_collage_01.jpg" data-page="31">
                 <img src="building_tapestry_collage_01.jpg" alt="Building Tapestry Collage 01 | 2025 | Textile Work">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="black_hammer_peonie_testsheet_square_web.jpg" data-page="32">
+                <img src="black_hammer_peonie_testsheet_square_web.jpg" alt="Black Hammer Peonie Testsheet Square | 2025 | Studio Still Life">
+            </a>
+            <!-- cms-item-end -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
+            <!-- Normal Size -->
+            <a onclick="showArtworkPage(this, 'image')" data-file="004.jpg" data-page="33">
                 <img src="004.jpg" alt="004 | 2025 | Archive Image">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="005.jpg" data-page="34">
                 <img src="005.jpg" alt="005 | 2025 | Archive Image">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="013.jpg" data-page="35">
                 <img src="013.jpg" alt="013 | 2025 | Archive Image">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="024.jpg" data-page="36">
                 <img src="024.jpg" alt="024 | 2025 | Archive Image">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="IMG_7332.JPG" data-page="37">
                 <img src="IMG_7332.JPG" alt="Studio Documentation | 2025 | Log Capture 7332">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="IMG_9073.JPG" data-page="38">
                 <img src="IMG_9073.JPG" alt="Studio Documentation | 2025 | Log Capture 9073">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="000034_023.jpeg" data-page="39">
                 <img src="000034_023.jpeg" alt="Archive Scan | 2024 | Medium Format Exposure 023">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="IMG_2665.JPG" data-page="40">
                 <img src="IMG_2665.JPG" alt="Installation Fragment View | 2025 | Capture 2665">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="IMG_2664.JPG" data-page="41">
                 <img src="IMG_2664.JPG" alt="Installation Fragment View | 2025 | Capture 2664">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="IMG_2667.JPG" data-page="42">
                 <img src="IMG_2667.JPG" alt="Installation Fragment View | 2025 | Capture 2667">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="IMG_2668.JPG" data-page="43">
                 <img src="IMG_2668.JPG" alt="Installation Fragment View | 2025 | Capture 2668">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="IMG_2666.JPG" data-page="44">
                 <img src="IMG_2666.JPG" alt="Installation Fragment View | 2025 | Capture 2666">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="IMG_2680.JPG" data-page="45">
                 <img src="IMG_2680.JPG" alt="Exhibition Space View | 2025 | Landscape Grid Entry 2680">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
-            <a class="tall" onclick="showArtworkPage(this, 'image')">
+            <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="IMG_2663.jpeg" data-page="46">
                 <img src="IMG_2663.jpeg" alt="Exhibition Space View | 2025 | Grid Entry 2663">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Big Size -->
-            <a class="big" onclick="showArtworkPage(this, 'image')">
+            <a class="big" onclick="showArtworkPage(this, 'image')" data-file="SANY0144.JPG" data-page="47">
                 <img src="SANY0144.JPG" alt="Studio Documentation | 2025 | Capture 0144">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- First Frameless Video Loop (Large Size Grid Layout) -->
-            <video class="big" onclick="showArtworkPage(this, 'video')" data-title="Studio Video Record | 2025 | Digital Widescreen Loop Capture" autoplay loop muted playsinline>
+            <video class="big" onclick="showArtworkPage(this, 'video')" data-title="Studio Video Record | 2025 | Digital Widescreen Loop Capture" autoplay loop muted playsinline data-file="SANY0137.MP4" data-page="48">
                 <source src="SANY0137.MP4" type="video/mp4">
             </video>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="SANY0146.JPG" data-page="49">
                 <img src="SANY0146.JPG" alt="Studio Production Run | 2025 | Capture 0146">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="SANY0147.JPG" data-page="50">
                 <img src="SANY0147.JPG" alt="Studio Production Run | 2025 | Capture 0147">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="SANY0148.JPG" data-page="51">
                 <img src="SANY0148.JPG" alt="Studio Production Run | 2025 | Capture 0148">
             </a>
             <!-- cms-item-end -->
 
-            <!-- cms-item-start -->
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Normal Size -->
-            <a onclick="showArtworkPage(this, 'image')">
+            <a onclick="showArtworkPage(this, 'image')" data-file="SANY0149.JPG" data-page="52">
                 <img src="SANY0149.JPG" alt="Studio Production Run | 2025 | Capture 0149">
             </a>
             <!-- cms-item-end -->
-            
-            <!-- cms-item-start -->
+
+<!-- cms-item-start -->
+            <!-- primary page identifier: data-page -->
             <!-- Second Frameless Video Loop (Normal Size Grid Layout) -->
-            <video onclick="showArtworkPage(this, 'video')" data-title="Gallery Exhibition Record | 2025 | HD Documentation Loop" autoplay loop muted playsinline>
+            <video onclick="showArtworkPage(this, 'video')" data-title="Gallery Exhibition Record | 2025 | HD Documentation Loop" autoplay loop muted playsinline data-file="SANY0150.MP4" data-page="53">
                 <source src="SANY0150.MP4" type="video/mp4">
             </video>
             <!-- cms-item-end -->
-            
-        </div>
-        <!-- cms-list-end -->
+
+<!-- cms-list-end -->
     </div>
 
    <!-- CLEAN SEPARATED METADATA PRESENTATION STAGE CONTAINER -->
@@ -672,6 +743,10 @@
         const titleTarget    = document.getElementById('title-target');
         const infoTarget     = document.getElementById('info-target');
         const artworkDetails = document.querySelector('.artwork-details');
+
+        // Page order is defined purely by element order in the static HTML
+        // (see the data-page comments on each cms-item); nothing here
+        // reorders the DOM at runtime.
 
         let currentArtworkIndex = 0;
         let allArtworkElements = [];
@@ -710,18 +785,28 @@
             const w = mediaEl.naturalWidth  || mediaEl.videoWidth  || 0;
             const h = mediaEl.naturalHeight || mediaEl.videoHeight || 0;
 
+            mediaTarget.style.alignItems = 'center';
+
             if (isDesktop()) {
-                mediaTarget.style.alignItems = 'center';
                 // Centre the scroll position on tall images that overflow.
                 requestAnimationFrame(() => {
                     const maxScroll = detailView.scrollHeight - detailView.clientHeight;
                     detailView.scrollTop = maxScroll > 0 ? maxScroll / 2 : 0;
                 });
             } else {
-                // Portrait images: flex-start anchors the top edge to the screen top.
-                // Landscape images: center them vertically in the viewport.
-                // The CSS width:100vw / height:auto handles sizing — no inline override needed.
-                mediaTarget.style.alignItems = h > w ? 'flex-start' : 'center';
+                const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+                const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                const imageRatio = w / h;
+                const viewportRatio = vw / vh;
+                if (imageRatio > viewportRatio) {
+                    mediaEl.style.width = '100vw';
+                    mediaEl.style.height = 'auto';
+                } else {
+                    mediaEl.style.width = 'auto';
+                    mediaEl.style.height = '100vh';
+                }
+                mediaEl.style.maxWidth = '100vw';
+                mediaEl.style.maxHeight = '100vh';
                 detailView.scrollTop = 0;
             }
         }
@@ -923,6 +1008,19 @@
             detailView.style.display = 'block';
             detailView.classList.add('active-stage');
 
+            // Compute a bottom offset that accounts for the visual viewport
+            // (iOS shows browser chrome which reduces visualViewport.height).
+            if (!isDesktop()) {
+                const vv = window.visualViewport;
+                const chromeOverlap = (window.innerHeight - (vv ? vv.height : window.innerHeight));
+                // Base offset (user-visible move down). Add chrome overlap so
+                // the text sits visibly above the bottom UI.
+                const base = 56;
+                artworkDetails.style.bottom = (chromeOverlap + base) + 'px';
+            } else {
+                artworkDetails.style.bottom = '';
+            }
+
             setTimeout(() => {
                 detailView.style.opacity = '1';
                 startBrightnessLoop();
@@ -956,6 +1054,10 @@
                     const newImg = new Image();
                     newImg.alt = 'Focus view';
                     newImg.src = img.src;
+                    newImg.style.width = '';
+                    newImg.style.height = '';
+                    newImg.style.maxWidth = '';
+                    newImg.style.maxHeight = '';
                     mediaTarget.innerHTML = '';
                     mediaTarget.appendChild(newImg);
                     if (newImg.complete && newImg.naturalWidth) {
@@ -1018,6 +1120,7 @@
             stopBrightnessLoop();
             hideArrows();
             window.resetImageZoom();
+            artworkDetails.style.bottom = '';
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
             detailView.classList.remove('over-media');
@@ -1200,7 +1303,9 @@
                     el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
                     // Clamp so the zoomed image always fills the viewport — no white bars.
                     const r = el.getBoundingClientRect();
-                    const vw = window.innerWidth, vh = window.innerHeight;
+                    const vv = window.visualViewport;
+                    const vw = vv ? vv.width : window.innerWidth;
+                    const vh = vv ? vv.height : window.innerHeight;
                     let clamped = false;
                     if (r.width >= vw) {
                         if (r.left > 0)    { tx -= r.left;       clamped = true; }
@@ -1223,6 +1328,9 @@
             function beginGesture() {
                 const el = media();
                 if (el) el.style.willChange = 'transform';
+                // visually lock the viewport and force full-screen sizing
+                // while the user is pinching so there are no letterboxes.
+                try { detailView.classList.add('zooming'); } catch(e) {}
                 if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
             }
             function endGesture() {
@@ -1230,6 +1338,7 @@
                 settleTimer = setTimeout(function () {
                     const el = media();
                     if (el && scale > 1) el.style.willChange = 'auto'; // force re-raster
+                    try { detailView.classList.remove('zooming'); } catch(e) {}
                 }, 120);
             }
 
@@ -1243,6 +1352,7 @@
                     el.style.transformOrigin = '';
                     el.style.willChange = 'auto';
                 }
+                try { detailView.classList.remove('zooming'); } catch(e) {}
             };
 
             function dist(t) {
