@@ -40,6 +40,22 @@
         .collage-grid a {
             cursor: pointer;
             text-decoration: none;
+            position: relative;
+        }
+        /* TEMP DEBUG: visible page-number badge on every grid thumbnail, to
+           pinpoint exactly which page renders blank. Remove once diagnosed. */
+        .collage-grid a::before {
+            content: attr(data-page);
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: rgba(255, 0, 0, 0.85);
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 1px 5px;
+            z-index: 10;
+            pointer-events: none;
         }
         .collage-grid img,
         .collage-grid video {
