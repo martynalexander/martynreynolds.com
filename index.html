@@ -1355,6 +1355,22 @@
         let brightnessLoopActive = false;
         let lastBrightnessSample = 0;
 
+        // .artwork-details itself is a wide click-target box (see the
+        // "click white space to return to grid" fix); its own
+        // getBoundingClientRect() is far wider than the actual right-aligned
+        // text, so sampling it averages in image content the text never sits
+        // over. Union just the visible text children's rects instead.
+        function visibleTextRect(container) {
+            const children = Array.from(container.children).filter(el => el.textContent.trim() !== '');
+            if (children.length === 0) return container.getBoundingClientRect();
+            const rects = children.map(el => el.getBoundingClientRect());
+            const left = Math.min(...rects.map(r => r.left));
+            const top = Math.min(...rects.map(r => r.top));
+            const right = Math.max(...rects.map(r => r.right));
+            const bottom = Math.max(...rects.map(r => r.bottom));
+            return { left, top, right, bottom, width: right - left, height: bottom - top };
+        }
+
         function startBrightnessLoop() {
             brightnessLoopActive = true;
             lastBrightnessSample = 0;
@@ -1368,7 +1384,7 @@
 
                     const mediaEl = mediaTarget.querySelector('img, video');
                     if (mediaEl) {
-                        const detailsRect = artworkDetails.getBoundingClientRect();
+                        const detailsRect = visibleTextRect(artworkDetails);
                         const pageNumberRect = document.getElementById('page-number').getBoundingClientRect();
                         const detailsLum = sampleLuminanceAtScreenRect(
                             mediaEl, detailsRect.left, detailsRect.top, detailsRect.width, detailsRect.height);
