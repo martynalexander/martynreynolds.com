@@ -157,6 +157,38 @@
             color: #fff !important;
         }
 
+        /* Close button — same type treatment as .page-number, mirrored to
+           the top-right corner, and independently light/dark like the page
+           number and detail text (see applyTextColour). Unlike the page
+           number it's interactive, so it needs pointer-events/cursor. */
+        .close-button {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 200000 !important;
+            pointer-events: auto;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 300;
+            font-style: normal;
+            letter-spacing: 1px;
+            line-height: 1.38;
+            color: #000;
+            transition: color 0.2s ease;
+        }
+
+        .close-button.light-text {
+            color: #fff !important;
+        }
+
+        .close-button:hover {
+            color: #666;
+        }
+
+        .close-button.light-text:hover {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+
         @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
@@ -187,8 +219,7 @@
         }
 
         .artwork-details.light-text h1,
-        .artwork-details.light-text p,
-        .artwork-details.light-text .back-link {
+        .artwork-details.light-text p {
             color: #fff !important;
         }
 
@@ -232,25 +263,6 @@
 
         .artwork-details.light-text a:hover {
             color: rgba(255, 255, 255, 0.5) !important;
-        }
-
-        .back-link {
-            color: #000;
-            font-size: 11px;
-            font-weight: 300; 
-            letter-spacing: 1px;
-            text-transform: lowercase;
-            display: inline-block;
-            margin-top: 25px; 
-            line-height: 1.38;
-        }
-
-        .back-link:hover {
-            color: #666; 
-        }
-
-        .artwork-details.light-text .back-link:hover { 
-            color: rgba(255, 255, 255, 0.5) !important; 
         }
 
         /* MINIMAL FLAT ARROW INDICATOR — desktop only, follows the cursor.
@@ -1188,10 +1200,10 @@
             </div>
 
             <div class="page-number" id="page-number">1</div>
+            <div class="close-button" id="close-button" onclick="hideArtworkPage(event)">X</div>
             <div class="artwork-details" onclick="if (event.target !== this) event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
                 <p id="info-target">Metadata text column entries apply cleanly here.</p>
-                <a onclick="hideArtworkPage(event)" class="back-link">back to images</a>
             </div>
 
         </div>
@@ -1327,12 +1339,14 @@
         }
 
         // Each text block gets its own light/dark decision from the image
-        // region actually behind IT — the details block (bottom-right) and
-        // the page number (top-left) sit over different parts of the image
-        // and can need opposite colours.
-        function applyTextColour(detailsLuminance, pageNumberLuminance) {
+        // region actually behind IT — the details block (bottom-right), the
+        // page number (top-left), and the close button (top-right) all sit
+        // over different parts of the image and can need opposite colours.
+        function applyTextColour(detailsLuminance, pageNumberLuminance, closeButtonLuminance) {
             document.getElementById('page-number').classList.toggle('light-text',
                 pageNumberLuminance !== null && pageNumberLuminance < 168);
+            document.getElementById('close-button').classList.toggle('light-text',
+                closeButtonLuminance !== null && closeButtonLuminance < 168);
             artworkDetails.classList.toggle('light-text',
                 detailsLuminance !== null && detailsLuminance < 168);
         }
@@ -1376,11 +1390,14 @@
                     if (mediaEl) {
                         const detailsRect = visibleTextRect(artworkDetails);
                         const pageNumberRect = document.getElementById('page-number').getBoundingClientRect();
+                        const closeButtonRect = document.getElementById('close-button').getBoundingClientRect();
                         const detailsLum = sampleLuminanceAtScreenRect(
                             mediaEl, detailsRect.left, detailsRect.top, detailsRect.width, detailsRect.height);
                         const pageNumberLum = sampleLuminanceAtScreenRect(
                             mediaEl, pageNumberRect.left, pageNumberRect.top, pageNumberRect.width, pageNumberRect.height);
-                        applyTextColour(detailsLum, pageNumberLum);
+                        const closeButtonLum = sampleLuminanceAtScreenRect(
+                            mediaEl, closeButtonRect.left, closeButtonRect.top, closeButtonRect.width, closeButtonRect.height);
+                        applyTextColour(detailsLum, pageNumberLum, closeButtonLum);
                     }
                 }
                 requestAnimationFrame(loop);
@@ -1437,6 +1454,7 @@
             let rawText = "";
             artworkDetails.classList.remove('light-text');
             document.getElementById('page-number').classList.remove('light-text');
+            document.getElementById('close-button').classList.remove('light-text');
 
             if (mediaType === 'video') {
                 const source = element.querySelector('source');
@@ -1637,9 +1655,10 @@
             if (!isDesktop()) return;
             const mediaEl = mediaTarget.querySelector('img, video');
 
-            // When hovering a metadata link, show the hand cursor, not the nav arrow.
+            // When hovering a metadata link or the close button, show the
+            // hand cursor, not the nav arrow.
             const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
-            if (elAtPoint && elAtPoint.closest('.artwork-details a')) {
+            if (elAtPoint && elAtPoint.closest('.artwork-details a, .close-button')) {
                 detailView.classList.remove('over-media');
                 detailView.style.setProperty('cursor', 'pointer', 'important');
                 hideArrows();
