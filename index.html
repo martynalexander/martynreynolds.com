@@ -1527,6 +1527,30 @@
             } else {
                 infoTarget.textContent = "";
             }
+
+            preloadAdjacentArtwork();
+        }
+
+        // Quietly fetch the next/previous full-res originals so stepping
+        // through the slideshow feels instant, without downloading the
+        // entire (400MB+) gallery up front for visitors who only look at
+        // the grid. fetchPriority 'low' keeps these from competing with
+        // whatever the user is actually waiting on right now. Videos are
+        // skipped — they're large and load fine on demand when opened.
+        const preloadedArtwork = new Set();
+        function preloadAdjacentArtwork() {
+            if (allArtworkElements.length < 2) return;
+            [1, -1].forEach(direction => {
+                const idx = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
+                const el = allArtworkElements[idx];
+                if (el.tagName.toLowerCase() === 'video') return;
+                const file = el.getAttribute('data-file');
+                if (!file || preloadedArtwork.has(file)) return;
+                preloadedArtwork.add(file);
+                const img = new Image();
+                img.fetchPriority = 'low';
+                img.src = file;
+            });
         }
 
         function navigateToAdjacentArtwork(event, direction) {
