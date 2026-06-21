@@ -105,10 +105,16 @@
             display: block;
             position: relative;
             z-index: 1; /* sits above the wrapper click zone */
-            /* pan-y keeps native vertical scrolling for tall images while
-               disabling the browser's own pinch-zoom — our JS handles pinch
-               so that ONLY the image scales and the text block stays locked. */
-            touch-action: pan-y;
+            /* none: on mobile the image is always capped at max-height:100vh
+               (see the mobile media query below), so it never needs native
+               vertical scrolling at rest — there's nothing for pan-y to do
+               except race our own touch handlers. With pan-y, the browser
+               could commit to a native scroll/zoom gesture on the first
+               finger before a second finger registers as a pinch, or fight
+               our JS pan once zoomed in, making both gestures feel broken.
+               touch-action: none hands every touch on the media fully to
+               our JS, with no native gesture to contend with. */
+            touch-action: none;
             /* NB: no static `will-change: transform`. A permanently-promoted
                layer is rasterised once at its on-screen (100vw) size and then
                GPU-upscaled when we scale() it — that is what made zoomed images
