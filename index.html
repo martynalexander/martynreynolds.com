@@ -1256,10 +1256,16 @@
         // the data URI ever fails to load.
         // ─────────────────────────────────────────────────────────────────
         const HAND_CURSOR = (function () {
-            const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>`
-                + `<path d='M11 2.5a1.5 1.5 0 0 1 3 0v9.2c1-.4 2-.2 2.7.5.5-.5 1.3-.6 2-.2.6-.5 1.5-.4 2 .2.5.6.5 1.4.3 2.1l-1 3.2c-.6 1.9-2.4 3-4.4 3h-2c-1.5 0-2.7-.5-3.7-1.6l-3-3.4a1.3 1.3 0 0 1 1.9-1.8l1.2 1V2.5z'`
-                + ` fill='white' stroke='black' stroke-width='1' stroke-linejoin='round'/></svg>`;
-            return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 11 4, pointer`;
+            const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'>`
+                + `<path fill='white' stroke='black' stroke-width='1' stroke-linejoin='round' d='`
+                + `M14 16 V4.5 C14 3.4 14.9 2.5 16 2.5 C17.1 2.5 18 3.4 18 4.5 V15.5`
+                + ` V8.5 C18 7.4 18.9 6.5 20 6.5 C21.1 6.5 22 7.4 22 8.5 V16`
+                + ` V11 C22 9.9 22.9 9 24 9 C25.1 9 26 9.9 26 11 V17.5`
+                + ` V14.5 C26 13.4 26.9 12.5 28 12.5 C29.1 12.5 30 13.4 30 14.5 V21`
+                + ` C30 25.5 27 29 22 29 H17 C13.5 29 11 27.5 9 25 L4 19`
+                + ` C3 17.7 3.3 16 4.5 15.2 C5.6 14.4 7 14.6 7.8 15.7 L12 20`
+                + ` L14 16 Z'/></svg>`;
+            return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 16 3, pointer`;
         })();
 
         document.querySelectorAll('.collage-grid > a').forEach(a => {
