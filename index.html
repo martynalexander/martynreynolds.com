@@ -175,6 +175,11 @@
             line-height: 1.38;
             color: #000;
             transition: color 0.2s ease;
+            /* The glyph alone renders taller than wide; stretch it square,
+               anchored to the right edge so it stays put at right:18px. */
+            display: inline-block;
+            transform: scaleX(2);
+            transform-origin: 100% 50%;
         }
 
         .close-button.light-text {
