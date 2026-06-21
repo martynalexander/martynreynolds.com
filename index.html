@@ -1248,41 +1248,23 @@
         // ─────────────────────────────────────────────────────────────────
         // CUSTOM HAND CURSOR — a minimal drawn glyph (not a font glyph: a
         // Unicode pointing-hand character renders as a full-colour emoji on
-        // Apple platforms regardless of any fill colour, so it can't be
-        // made black/white). Flips colour the same way the page number,
-        // close button and detail text already do — black over light
-        // backgrounds, white over dark — so it's never invisible against
-        // its own background. Falls back to the native pointer if the
-        // data URI ever fails to load.
+        // Apple platforms regardless of any fill colour, so a flat colour
+        // version wasn't possible that way). White fill with a black
+        // outline reads against light AND dark backgrounds at once — the
+        // classic OS cursor convention — so no luminance sampling or
+        // colour-swapping is needed. Falls back to the native pointer if
+        // the data URI ever fails to load.
         // ─────────────────────────────────────────────────────────────────
-        function handCursorCss(isLight) {
-            const color = isLight ? 'white' : 'black';
+        const HAND_CURSOR = (function () {
             const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>`
-                + `<rect x='9' y='2' width='4' height='13' rx='2' fill='${color}'/>`
-                + `<rect x='6' y='11' width='12' height='10' rx='4' fill='${color}'/></svg>`;
+                + `<path d='M11 2.5a1.5 1.5 0 0 1 3 0v9.2c1-.4 2-.2 2.7.5.5-.5 1.3-.6 2-.2.6-.5 1.5-.4 2 .2.5.6.5 1.4.3 2.1l-1 3.2c-.6 1.9-2.4 3-4.4 3h-2c-1.5 0-2.7-.5-3.7-1.6l-3-3.4a1.3 1.3 0 0 1 1.9-1.8l1.2 1V2.5z'`
+                + ` fill='white' stroke='black' stroke-width='1' stroke-linejoin='round'/></svg>`;
             return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 11 4, pointer`;
-        }
-        const HAND_CURSOR_DARK  = handCursorCss(false); // black hand, for light backgrounds
-        const HAND_CURSOR_LIGHT = handCursorCss(true);  // white hand, for dark backgrounds
+        })();
 
-        // Grid: sample the thumbnail under the pointer so the hand stays
-        // visible against any image, light or dark.
-        let lastGridCursorSample = 0;
-        const collageGrid = document.querySelector('.collage-grid');
-        if (collageGrid) {
-            collageGrid.addEventListener('mousemove', function(e) {
-                const a = e.target.closest('a');
-                if (!a) return;
-                const img = a.querySelector('img');
-                if (!img) return;
-                if (e.timeStamp - lastGridCursorSample > 80) {
-                    lastGridCursorSample = e.timeStamp;
-                    const lum = sampleLuminanceAtScreenRect(img, e.clientX - 12, e.clientY - 12, 24, 24);
-                    const isLight = lum !== null && lum < 168;
-                    a.style.setProperty('cursor', isLight ? HAND_CURSOR_LIGHT : HAND_CURSOR_DARK, 'important');
-                }
-            });
-        }
+        document.querySelectorAll('.collage-grid > a').forEach(a => {
+            a.style.setProperty('cursor', HAND_CURSOR, 'important');
+        });
 
         function isDesktop() {
             return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -1732,18 +1714,11 @@
             const mediaEl = mediaTarget.querySelector('img, video');
 
             // When hovering a metadata link or the close button, show the
-            // hand cursor, not the nav arrow. Re-use whichever light-text
-            // decision already applies to that element, so the cursor
-            // matches the colour the brightness loop already picked for
-            // the text/button sitting in the same spot.
+            // hand cursor, not the nav arrow.
             const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
-            const hoveredInteractive = elAtPoint && elAtPoint.closest('.artwork-details a, .close-button');
-            if (hoveredInteractive) {
+            if (elAtPoint && elAtPoint.closest('.artwork-details a, .close-button')) {
                 detailView.classList.remove('over-media');
-                const isLight = hoveredInteractive.closest('.close-button')
-                    ? document.getElementById('close-button').classList.contains('light-text')
-                    : artworkDetails.classList.contains('light-text');
-                detailView.style.setProperty('cursor', isLight ? HAND_CURSOR_LIGHT : HAND_CURSOR_DARK, 'important');
+                detailView.style.setProperty('cursor', HAND_CURSOR, 'important');
                 hideArrows();
                 return;
             }
