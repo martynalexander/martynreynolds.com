@@ -29,5 +29,18 @@
     <video controls playsinline>
         <source src="https://github.com/martynalexander/martynreynolds.com/releases/download/looksmaxxing_down_the_river_of_life/MartynReynolds_LooksmaxxingDownTheRiverOfLife_Shore_LecturePerformance_web.mp4" type="video/mp4">
     </video>
+    <script>
+        // iOS Safari only: webkitEnterFullscreen hides the address bar and
+        // toolbar entirely (the standard Fullscreen API can't target a
+        // <video> on iOS). Feature-detecting it naturally scopes this to
+        // iOS Safari alone — no separate mobile check needed, and desktop/
+        // other browsers are unaffected, staying inline as before.
+        var video = document.querySelector('video');
+        video.addEventListener('play', function () {
+            if (video.webkitEnterFullscreen) {
+                video.webkitEnterFullscreen();
+            }
+        }, { once: true });
+    </script>
 </body>
 </html>
