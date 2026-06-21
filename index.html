@@ -1245,6 +1245,16 @@
             allArtworkElements = Array.from(document.querySelectorAll('.collage-grid > a, .collage-grid > video'));
         }
 
+        // CSS already declares cursor:pointer on .collage-grid a, and it
+        // computes correctly — but plain stylesheet cursor rules have
+        // proven unreliable to actually paint across browsers elsewhere on
+        // this page (see the detail-view cursor fix). Force it the same
+        // way: a direct inline !important write, the one approach that's
+        // held up reliably.
+        document.querySelectorAll('.collage-grid > a').forEach(a => {
+            a.style.setProperty('cursor', 'pointer', 'important');
+        });
+
         function isDesktop() {
             return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
         }
@@ -1702,9 +1712,20 @@
                 return;
             }
 
+            // Anywhere else that ISN'T actually over the media (white space,
+            // page-number corner, the artwork-details padding around the
+            // text) should show the normal arrow cursor and no nav arrow —
+            // clicking there returns to the grid, it doesn't navigate.
+            if (!mediaEl || !isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
+                detailView.classList.remove('over-media');
+                detailView.style.cursor = '';
+                hideArrows();
+                return;
+            }
+
             detailView.classList.add('over-media');
             detailView.style.setProperty('cursor', 'none', 'important');
-            const rect = mediaEl ? mediaEl.getBoundingClientRect() : { left: 0, width: window.innerWidth };
+            const rect = mediaEl.getBoundingClientRect();
             const goLeft = event.clientX < (rect.left + rect.width / 2);
             const active = goLeft ? arrowLeft : arrowRight;
             const other  = goLeft ? arrowRight : arrowLeft;
