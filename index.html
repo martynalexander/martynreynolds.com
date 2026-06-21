@@ -169,16 +169,24 @@
             pointer-events: auto;
             cursor: pointer;
             font-size: 11px;
-            font-weight: 100; /* match the <> nav-arrow stroke thickness */
+            font-weight: 100;
+            /* Match the <> nav-arrow's font stack — its thin stroke comes
+               from this specific system font at weight 100, not just the
+               weight value, which a generic sans-serif fallback renders
+               heavier. */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
             font-style: normal;
             letter-spacing: 1px;
             line-height: 1.38;
             color: #000;
             transition: color 0.2s ease;
-            /* The glyph alone renders taller than wide; stretch it square,
-               anchored to the right edge so it stays put at right:18px. */
+            /* The glyph alone renders taller than wide; stretch it
+               partway toward square, anchored to the right edge so it
+               stays put at right:18px. */
             display: inline-block;
-            transform: scaleX(1.5);
+            transform: scaleX(1.2);
             transform-origin: 100% 50%;
         }
 
