@@ -163,8 +163,14 @@
            number it's interactive, so it needs pointer-events/cursor. */
         .close-button {
             position: fixed;
-            top: 18px;
-            right: 18px;
+            /* Hit area enlarged ~50% via padding (not a transform on this
+               element — Safari has a known issue where a transformed
+               element can fail to paint a custom/changed cursor at all).
+               top/right pulled in by the added padding so the visible
+               glyph still lines up at the original 18px corner position. */
+            top: 14.2px;
+            right: 14.7px;
+            padding: 3.8px 3.3px;
             z-index: 200000 !important;
             pointer-events: auto;
             cursor: pointer;
@@ -182,9 +188,13 @@
             line-height: 1.38;
             color: #000;
             transition: color 0.2s ease;
+        }
+
+        .close-button-glyph {
             /* The glyph alone renders taller than wide; stretch it
                partway toward square, anchored to the right edge so it
-               stays put at right:18px. */
+               stays visually put. This transform lives on the inner
+               glyph, not the hoverable .close-button itself. */
             display: inline-block;
             transform: scaleX(1.2);
             transform-origin: 100% 50%;
@@ -1293,7 +1303,7 @@
             </div>
 
             <div class="page-number" id="page-number">1</div>
-            <div class="close-button" id="close-button" onclick="hideArtworkPage(event)">X</div>
+            <div class="close-button" id="close-button" onclick="hideArtworkPage(event)"><span class="close-button-glyph">X</span></div>
             <div class="artwork-details" onclick="if (event.target !== this) event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
                 <p id="info-target">Metadata text column entries apply cleanly here.</p>
