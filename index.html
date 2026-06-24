@@ -1759,7 +1759,7 @@
             preloadAdjacentArtwork();
         }
 
-        // Quietly fetch the next/previous full-res originals so stepping
+        // Quietly fetch the surrounding full-res originals so stepping
         // through the slideshow feels instant, without downloading the
         // entire (400MB+) gallery up front for visitors who only look at
         // the grid. fetchPriority 'low' keeps these from competing with
@@ -1768,7 +1768,7 @@
         const preloadedArtwork = new Set();
         function preloadAdjacentArtwork() {
             if (allArtworkElements.length < 2) return;
-            [1, -1].forEach(direction => {
+            [1, 2, 3, -1, -2, -3].forEach(direction => {
                 const idx = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
                 const el = allArtworkElements[idx];
                 if (el.tagName.toLowerCase() === 'video') return;
