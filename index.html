@@ -1931,6 +1931,7 @@
             if (hoveredInteractive) {
                 detailView.classList.remove('over-media');
                 detailView.style.cursor = '';
+                if (mediaEl) mediaEl.style.removeProperty('cursor');
                 hoveredInteractive.style.setProperty('cursor', 'pointer', 'important');
                 hideArrows();
                 return;
@@ -1944,12 +1945,18 @@
             if (!mediaEl || !isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
                 detailView.classList.remove('over-media');
                 detailView.style.cursor = '';
+                if (mediaEl) mediaEl.style.removeProperty('cursor');
                 hideArrows();
                 return;
             }
 
+            // Hide the native cursor in favour of the custom <> indicator.
+            // Written directly onto the media element itself, not just the
+            // detailView ancestor — Chrome has shown both the native arrow
+            // and the custom indicator at once when the override only lived
+            // on a parent.
             detailView.classList.add('over-media');
-            detailView.style.setProperty('cursor', 'none', 'important');
+            mediaEl.style.setProperty('cursor', 'none', 'important');
             const rect = mediaEl.getBoundingClientRect();
             const goLeft = event.clientX < (rect.left + rect.width / 2);
             const active = goLeft ? arrowLeft : arrowRight;
@@ -1974,6 +1981,8 @@
         detailView.addEventListener('mouseleave', () => {
             detailView.classList.remove('over-media');
             detailView.style.cursor = '';
+            const mediaEl = mediaTarget.querySelector('img, video');
+            if (mediaEl) mediaEl.style.removeProperty('cursor');
             clearInteractiveCursors();
             hideArrows();
         });
