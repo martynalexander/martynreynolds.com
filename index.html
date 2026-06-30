@@ -53,10 +53,13 @@
         #detail-view {
             display: none;
             position: fixed;
+            /* inset:0 rather than width/height so iOS Safari's position:fixed
+               fills to the physical screen edges (behind the address bar and
+               tab bar) — 100vh on iOS stops short of those toolbar areas. */
             top: 0;
+            right: 0;
+            bottom: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
             background-color: #fff;
             z-index: 100000;
             box-sizing: border-box;
@@ -2013,8 +2016,10 @@
             function lockMediaToViewport() {
                 const el = media();
                 if (!el) return;
-                const vv = window.visualViewport;
-                const vw = vv ? vv.width : window.innerWidth;
+                // Use the detailView container's own clientWidth so the
+                // measurement matches the inset:0 fixed element (full
+                // physical screen), not the smaller visualViewport.
+                const vw = detailView.clientWidth || window.innerWidth;
                 el.style.setProperty('width', vw + 'px', 'important');
             }
             function unlockMediaSize() {
@@ -2036,11 +2041,13 @@
                     lockMediaToViewport();
                     el.style.transformOrigin = '0 0';
                     el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
-                    // Clamp so the zoomed image always fills the viewport — no white bars.
+                    // Clamp so the zoomed image fills the full screen —
+                    // including the areas behind iOS Safari's toolbars.
+                    // detailView uses inset:0 on position:fixed so its
+                    // clientWidth/Height equals the physical screen size.
                     const r = el.getBoundingClientRect();
-                    const vv = window.visualViewport;
-                    const vw = vv ? vv.width : window.innerWidth;
-                    const vh = vv ? vv.height : window.innerHeight;
+                    const vw = detailView.clientWidth || window.innerWidth;
+                    const vh = detailView.clientHeight || window.innerHeight;
                     let clamped = false;
                     if (r.width >= vw) {
                         if (r.left > 0)    { tx -= r.left;       clamped = true; }
