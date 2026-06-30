@@ -226,19 +226,10 @@
             }
         }
 
-        /* When the user is actively pinch-zooming, hide page overflow and
-           switch the media to cover-fit so there are no visible letterboxes
-           during the gesture. The box is sized in JS from the live
-           visualViewport (not 100vw/100vh here) because iOS Safari's vh/vw
-           units don't track its toolbar showing/hiding — a static 100vh
-           box leaves a gap the size of that mismatch, which reads as a
-           white letterbox bar top/bottom while zoomed. */
+        /* When the user is actively pinch-zooming, hide page overflow so
+           the scroll container doesn't interfere with the gesture. */
         #detail-view.zooming {
             overflow: hidden !important;
-        }
-        #detail-view.zooming .artwork-container img,
-        #detail-view.zooming .artwork-container video {
-            object-fit: cover !important;
         }
 
         .artwork-details.light-text h1,
@@ -2012,25 +2003,25 @@
 
             function media() { return container.querySelector('img, video'); }
 
-            // Size the media to the live, measured viewport rather than CSS
-            // 100vw/100vh — on iOS Safari those units don't track the
-            // toolbar showing/hiding, which otherwise leaves a letterbox
-            // gap while zoomed. !important on the inline style beats the
-            // stylesheet's !important sizing rules regardless of specificity.
+            // Lock width to the live visualViewport measurement so iOS
+            // Safari's toolbar show/hide (which vw units don't track)
+            // doesn't leave a sliver gap at the right edge while zoomed.
+            // Height is intentionally left as `auto` — forcing a fixed
+            // viewport height created an element taller than the image
+            // content, which (a) caused a visible jump at gesture start
+            // when object-fit switched from contain to cover, and (b)
+            // let the user pan into the empty space below the image.
             function lockMediaToViewport() {
                 const el = media();
                 if (!el) return;
                 const vv = window.visualViewport;
                 const vw = vv ? vv.width : window.innerWidth;
-                const vh = vv ? vv.height : window.innerHeight;
                 el.style.setProperty('width', vw + 'px', 'important');
-                el.style.setProperty('height', vh + 'px', 'important');
             }
             function unlockMediaSize() {
                 const el = media();
                 if (!el) return;
                 el.style.removeProperty('width');
-                el.style.removeProperty('height');
             }
 
             function apply() {
