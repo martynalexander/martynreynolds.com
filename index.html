@@ -1992,7 +1992,6 @@
             const container = document.getElementById('media-target');
             if (!container) return;
 
-            const MAX_SCALE = 5;
             let scale = 1, tx = 0, ty = 0;     // current transform of the media
             let startDist = 0, startScale = 1; // pinch baseline
             let startTx = 0, startTy = 0;
@@ -2149,7 +2148,7 @@
                     const d = dist(e.touches);
                     const m = mid(e.touches);
                     let newScale = startScale * (d / startDist);
-                    newScale = Math.max(1, Math.min(newScale, MAX_SCALE));
+                    newScale = Math.max(1, newScale);
                     // Keep the image point under the original focal point fixed and
                     // let it track the fingers (transform-origin 0 0). The element's
                     // start rect folds in its layout offset, so this stays correct
@@ -2240,7 +2239,7 @@
 
                 // Smooth, frame-rate-independent zoom factor from the wheel delta.
                 let newScale = scale * Math.exp(-e.deltaY * 0.005);
-                newScale = Math.max(1, Math.min(newScale, MAX_SCALE));
+                newScale = Math.max(1, newScale);
 
                 tx = e.clientX - L0x - newScale * px;
                 ty = e.clientY - L0y - newScale * py;
@@ -2281,7 +2280,7 @@
                 if (!isDesktop()) return;
                 const el = media();
                 if (!el) return;
-                let newScale = Math.max(1, Math.min(gestureStartScale * e.scale, MAX_SCALE));
+                let newScale = Math.max(1, gestureStartScale * e.scale);
                 tx = cursorX - gestureL0x - newScale * gesturePx;
                 ty = cursorY - gestureL0y - newScale * gesturePy;
                 scale = newScale;
