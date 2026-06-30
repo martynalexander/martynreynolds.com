@@ -2192,16 +2192,16 @@
                     mode = null;
                     endGesture();
                     // Tap while zoomed: if the finger barely moved, treat it as a
-                    // navigation tap (left half = prev, right half = next).
+                    // navigation tap (left half of screen = prev, right = next).
+                    // Use screen centre, not image centre — when zoomed and panned
+                    // the image centre can be off-screen, making image-relative
+                    // left/right misalign with what the user sees as left/right.
                     if (wasPan && !isPinching) {
                         const t = e.changedTouches[0];
                         if (Math.abs(t.clientX - panTapX) + Math.abs(t.clientY - panTapY) < 10) {
-                            const el = media();
-                            if (el) {
-                                const r = el.getBoundingClientRect();
-                                navigateToAdjacentArtwork(null,
-                                    t.clientX < (r.left + r.width / 2) ? -1 : 1);
-                            }
+                            const screenMid = detailView.clientWidth / 2;
+                            navigateToAdjacentArtwork(null,
+                                t.clientX < screenMid ? -1 : 1);
                         }
                     }
                 }
