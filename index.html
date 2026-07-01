@@ -1878,8 +1878,10 @@
             if (isPinching) return;
             const mediaEl = mediaTarget.querySelector('img, video');
             if (mediaEl && isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
-                const rect = mediaEl.getBoundingClientRect();
-                const dir = event.clientX < (rect.left + rect.width / 2) ? -1 : 1;
+                // Use screen centre, not image centre — when panned or zoomed
+                // the image centre can be off-screen, so image-relative left/
+                // right doesn't match what the user perceives as left/right.
+                const dir = event.clientX < (detailView.clientWidth / 2) ? -1 : 1;
                 navigateToAdjacentArtwork(event, dir);
             } else {
                 hideArtworkPage(event);
@@ -2199,6 +2201,11 @@
                     if (wasPan && !isPinching) {
                         const t = e.changedTouches[0];
                         if (Math.abs(t.clientX - panTapX) + Math.abs(t.clientY - panTapY) < 10) {
+                            // Suppress the synthetic click iOS generates from
+                            // this touch — without this, handleDetailClick also
+                            // fires on the same tap using image-relative logic
+                            // and cancels the navigation we're about to trigger.
+                            e.preventDefault();
                             const screenMid = detailView.clientWidth / 2;
                             navigateToAdjacentArtwork(null,
                                 t.clientX < screenMid ? -1 : 1);
