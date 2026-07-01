@@ -69,6 +69,7 @@
             transition: opacity 0.3s ease;
             overflow-y: scroll;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
             pointer-events: none;
             cursor: none;
         }
@@ -1669,11 +1670,13 @@
             archiveView.style.display = 'none';
             detailView.scrollTop = 0;
 
-            // Lock the page scroll so the grid doesn't drift while the detail
-            // view (now position:absolute, not fixed) is shown. Locking <html>
-            // rather than <body> lets the detail view's own overflow-y:scroll
-            // still work for tall images.
-            document.documentElement.style.overflow = 'hidden';
+            // Stretch the element to the full physical screen so iOS can
+            // render it behind the translucent tab bar at the bottom.
+            // overflow:hidden on html/body would clip content at the visual
+            // viewport boundary defeating this, so we use a touchmove block
+            // on the document instead to stop the grid from scrolling.
+            detailView.style.minHeight = window.screen.height + 'px';
+            document.addEventListener('touchmove', _blockBodyScroll, { passive: false });
 
             detailView.style.display = 'block';
             detailView.classList.add('active-stage');
@@ -1796,6 +1799,14 @@
             detailView.scrollTop = 0;
         }
 
+        // Blocks page scroll while the detail view is open without using
+        // overflow:hidden (which would clip the element at the visual viewport
+        // boundary, preventing it from reaching behind iOS Safari's tab bar).
+        // Allows scroll within #detail-view itself so tall images still scroll.
+        function _blockBodyScroll(e) {
+            if (!detailView.contains(e.target)) e.preventDefault();
+        }
+
         function hideArtworkPage(event) {
             if (event) {
                 event.preventDefault();
@@ -1811,10 +1822,9 @@
 
             setTimeout(() => {
                 detailView.style.display = 'none';
+                detailView.style.minHeight = '';
                 mediaTarget.innerHTML = '';
-                // Restore page scroll before showing the grid so
-                // scrollIntoView lands in the right place.
-                document.documentElement.style.overflow = '';
+                document.removeEventListener('touchmove', _blockBodyScroll);
                 archiveView.style.display = 'block';
 
                 if (allArtworkElements[currentArtworkIndex]) {
