@@ -1672,10 +1672,15 @@
 
             // Stretch the element to the full physical screen so iOS can
             // render it behind the translucent tab bar at the bottom.
-            // overflow:hidden on html/body would clip content at the visual
-            // viewport boundary defeating this, so we use a touchmove block
-            // on the document instead to stop the grid from scrolling.
             detailView.style.minHeight = window.screen.height + 'px';
+
+            // iOS Safari auto-hides the address bar when the page has scrolled.
+            // Nudge the page scroll by 1px before locking touch — this can
+            // trigger the address bar to begin collapsing on iOS 15+, which
+            // expands the viewport upward. The 1px is invisible to the user
+            // but signals to iOS that a scroll is underway.
+            if (window.scrollY === 0) window.scrollTo(0, 1);
+
             document.addEventListener('touchmove', _blockBodyScroll, { passive: false });
 
             detailView.style.display = 'block';
