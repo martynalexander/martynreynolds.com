@@ -2018,10 +2018,7 @@
             function lockMediaToViewport() {
                 const el = media();
                 if (!el) return;
-                // Use the detailView container's own clientWidth so the
-                // measurement matches the inset:0 fixed element (full
-                // physical screen), not the smaller visualViewport.
-                const vw = detailView.clientWidth || window.innerWidth;
+                const vw = window.screen.width || detailView.clientWidth || window.innerWidth;
                 el.style.setProperty('width', vw + 'px', 'important');
             }
             function unlockMediaSize() {
@@ -2043,13 +2040,13 @@
                     lockMediaToViewport();
                     el.style.transformOrigin = '0 0';
                     el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
-                    // Clamp so the zoomed image fills the full screen —
-                    // including the areas behind iOS Safari's toolbars.
-                    // detailView uses inset:0 on position:fixed so its
-                    // clientWidth/Height equals the physical screen size.
+                    // Clamp to the full physical screen so the zoomed image
+                    // fills behind iOS Safari's address bar and tab bar.
+                    // screen.height/width are the physical screen dimensions
+                    // in CSS pixels, unaffected by toolbar show/hide.
                     const r = el.getBoundingClientRect();
-                    const vw = detailView.clientWidth || window.innerWidth;
-                    const vh = detailView.clientHeight || window.innerHeight;
+                    const vw = window.screen.width  || detailView.clientWidth;
+                    const vh = window.screen.height || detailView.clientHeight;
                     let clamped = false;
                     if (r.width >= vw) {
                         if (r.left > 0)    { tx -= r.left;       clamped = true; }
@@ -2069,12 +2066,28 @@
             // browser re-rasterises the image from its full source resolution and
             // the zoomed-in view is crisp rather than an up-scaled bitmap.
             let settleTimer = null;
+            // On iOS Safari, position:fixed elements are sized to the VISUAL
+            // viewport (the area between toolbars), not the physical screen.
+            // window.screen.height is the only reliable measure of the full
+            // physical screen in CSS pixels, unaffected by toolbar show/hide.
+            // We push detailView to that height while zoomed so the image can
+            // fill all the way behind the address bar and tab bar (which float
+            // above as an overlay layer once the element extends that far).
+            function fullScreenH() {
+                return window.screen.height || window.innerHeight;
+            }
+            function lockDetailViewToScreen() {
+                detailView.style.setProperty('height', fullScreenH() + 'px', 'important');
+            }
+            function unlockDetailViewHeight() {
+                detailView.style.removeProperty('height');
+            }
+
             function beginGesture() {
                 const el = media();
                 if (el) el.style.willChange = 'transform';
-                // visually lock the viewport and force full-screen sizing
-                // while the user is pinching so there are no letterboxes.
                 try { detailView.classList.add('zooming'); } catch(e) {}
+                lockDetailViewToScreen();
                 lockMediaToViewport();
                 if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
             }
@@ -2083,11 +2096,10 @@
                 settleTimer = setTimeout(function () {
                     const el = media();
                     if (el && scale > 1) el.style.willChange = 'auto'; // force re-raster
-                    // Keep the full-screen, no-letterbox treatment for as long as
-                    // the image stays zoomed in — only drop it once back at 1×.
                     if (scale <= 1) {
                         try { detailView.classList.remove('zooming'); } catch(e) {}
                         unlockMediaSize();
+                        unlockDetailViewHeight();
                     }
                 }, 120);
             }
@@ -2103,6 +2115,7 @@
                     el.style.willChange = 'auto';
                 }
                 unlockMediaSize();
+                unlockDetailViewHeight();
                 try { detailView.classList.remove('zooming'); } catch(e) {}
             };
 
