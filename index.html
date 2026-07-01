@@ -52,14 +52,15 @@
         /* PRESENTATION MAIN PORTFOLIO LAYOUT WINDOW */
         #detail-view {
             display: none;
-            position: fixed;
-            /* inset:0 rather than width/height so iOS Safari's position:fixed
-               fills to the physical screen edges (behind the address bar and
-               tab bar) — 100vh on iOS stops short of those toolbar areas. */
+            /* position:absolute so iOS Safari treats this as document-flow
+               content, which it renders behind the translucent address bar
+               and tab bar — exactly like the grid view. position:fixed is
+               constrained to the visual viewport between the toolbars. */
+            position: absolute;
             top: 0;
-            right: 0;
-            bottom: 0;
             left: 0;
+            width: 100%;
+            min-height: 100%;
             background-color: #fff;
             z-index: 100000;
             box-sizing: border-box;
@@ -1668,6 +1669,12 @@
             archiveView.style.display = 'none';
             detailView.scrollTop = 0;
 
+            // Lock the page scroll so the grid doesn't drift while the detail
+            // view (now position:absolute, not fixed) is shown. Locking <html>
+            // rather than <body> lets the detail view's own overflow-y:scroll
+            // still work for tall images.
+            document.documentElement.style.overflow = 'hidden';
+
             detailView.style.display = 'block';
             detailView.classList.add('active-stage');
 
@@ -1805,6 +1812,9 @@
             setTimeout(() => {
                 detailView.style.display = 'none';
                 mediaTarget.innerHTML = '';
+                // Restore page scroll before showing the grid so
+                // scrollIntoView lands in the right place.
+                document.documentElement.style.overflow = '';
                 archiveView.style.display = 'block';
 
                 if (allArtworkElements[currentArtworkIndex]) {
@@ -2066,28 +2076,10 @@
             // browser re-rasterises the image from its full source resolution and
             // the zoomed-in view is crisp rather than an up-scaled bitmap.
             let settleTimer = null;
-            // On iOS Safari, position:fixed elements are sized to the VISUAL
-            // viewport (the area between toolbars), not the physical screen.
-            // window.screen.height is the only reliable measure of the full
-            // physical screen in CSS pixels, unaffected by toolbar show/hide.
-            // We push detailView to that height while zoomed so the image can
-            // fill all the way behind the address bar and tab bar (which float
-            // above as an overlay layer once the element extends that far).
-            function fullScreenH() {
-                return window.screen.height || window.innerHeight;
-            }
-            function lockDetailViewToScreen() {
-                detailView.style.setProperty('height', fullScreenH() + 'px', 'important');
-            }
-            function unlockDetailViewHeight() {
-                detailView.style.removeProperty('height');
-            }
-
             function beginGesture() {
                 const el = media();
                 if (el) el.style.willChange = 'transform';
                 try { detailView.classList.add('zooming'); } catch(e) {}
-                lockDetailViewToScreen();
                 lockMediaToViewport();
                 if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
             }
@@ -2099,7 +2091,6 @@
                     if (scale <= 1) {
                         try { detailView.classList.remove('zooming'); } catch(e) {}
                         unlockMediaSize();
-                        unlockDetailViewHeight();
                     }
                 }, 120);
             }
@@ -2115,7 +2106,6 @@
                     el.style.willChange = 'auto';
                 }
                 unlockMediaSize();
-                unlockDetailViewHeight();
                 try { detailView.classList.remove('zooming'); } catch(e) {}
             };
 
