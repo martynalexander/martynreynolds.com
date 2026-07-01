@@ -52,10 +52,10 @@
         /* PRESENTATION MAIN PORTFOLIO LAYOUT WINDOW */
         #detail-view {
             display: none;
-            /* position:absolute so iOS Safari treats this as document-flow
-               content, which it renders behind the translucent address bar
-               and tab bar — exactly like the grid view. position:fixed is
-               constrained to the visual viewport between the toolbars. */
+            /* Mobile (touch): position:absolute so iOS Safari treats this as
+               document-flow content, which renders behind the translucent tab
+               bar. position:fixed is constrained to the visual viewport
+               between the toolbars and can't reach the physical screen edges. */
             position: absolute;
             top: 0;
             left: 0;
@@ -72,6 +72,20 @@
             overscroll-behavior: contain;
             pointer-events: none;
             cursor: none;
+        }
+
+        /* Desktop: revert to position:fixed so the element is always
+           viewport-sized. This is what makes overflow-y:scroll work for
+           tall images (the element is height-constrained) and centres
+           them via the scrollTop midpoint logic in applyMediaLayout. */
+        @media (hover: hover) and (pointer: fine) {
+            #detail-view {
+                position: fixed;
+                right: 0;
+                bottom: 0;
+                width: auto;
+                min-height: unset;
+            }
         }
 
         #detail-view.active-stage {
@@ -1670,18 +1684,17 @@
             archiveView.style.display = 'none';
             detailView.scrollTop = 0;
 
-            // Stretch the element to the full physical screen so iOS can
-            // render it behind the translucent tab bar at the bottom.
-            detailView.style.minHeight = window.screen.height + 'px';
-
-            // iOS Safari auto-hides the address bar when the page has scrolled.
-            // Nudge the page scroll by 1px before locking touch — this can
-            // trigger the address bar to begin collapsing on iOS 15+, which
-            // expands the viewport upward. The 1px is invisible to the user
-            // but signals to iOS that a scroll is underway.
-            if (window.scrollY === 0) window.scrollTo(0, 1);
-
-            document.addEventListener('touchmove', _blockBodyScroll, { passive: false });
+            if (!isDesktop()) {
+                // Mobile only: stretch to full physical screen so iOS renders
+                // content behind the translucent tab bar at the bottom.
+                detailView.style.minHeight = window.screen.height + 'px';
+                // Nudge page scroll to encourage iOS to collapse the address
+                // bar, expanding the viewport upward toward the screen top.
+                if (window.scrollY === 0) window.scrollTo(0, 1);
+                // Block page scroll behind the detail view without CSS
+                // overflow:hidden (which clips the element at visual viewport).
+                document.addEventListener('touchmove', _blockBodyScroll, { passive: false });
+            }
 
             detailView.style.display = 'block';
             detailView.classList.add('active-stage');
@@ -1827,9 +1840,11 @@
 
             setTimeout(() => {
                 detailView.style.display = 'none';
-                detailView.style.minHeight = '';
+                if (!isDesktop()) {
+                    detailView.style.minHeight = '';
+                    document.removeEventListener('touchmove', _blockBodyScroll);
+                }
                 mediaTarget.innerHTML = '';
-                document.removeEventListener('touchmove', _blockBodyScroll);
                 archiveView.style.display = 'block';
 
                 if (allArtworkElements[currentArtworkIndex]) {
