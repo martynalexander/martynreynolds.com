@@ -246,13 +246,9 @@
         }
 
         /* When the user is actively pinch-zooming, hide page overflow so
-           the scroll container doesn't interfere with the gesture. Also
-           switch background to black so any uncovered edge area (e.g.
-           below a landscape image on a portrait phone) reads as a dark
-           letterbox rather than washing out to white behind the tab bar. */
+           the scroll container doesn't interfere with the gesture. */
         #detail-view.zooming {
             overflow: hidden !important;
-            background-color: #000;
         }
 
         .artwork-details.light-text h1,
@@ -2140,19 +2136,32 @@
                     //   top   = elLayoutT + ty
                     //   right = elLayoutL + tx + elW0 * scale
                     //   bottom= elLayoutT + ty + elH0 * scale
-                    const vw = window.screen.width  || window.innerWidth;
-                    const vh = window.screen.height || window.innerHeight;
+                    const vw  = window.screen.width  || window.innerWidth;
+                    const vh  = window.screen.height || window.innerHeight;
+                    const vhv = window.innerHeight;   // visible viewport (between toolbars)
                     const curW = elW0 * scale;
                     const curH = elH0 * scale;
                     const vL = elLayoutL + tx;
                     const vT = elLayoutT + ty;
                     if (curW >= vw) {
-                        if (vL > 0)           tx -= vL;
+                        if (vL > 0)              tx -= vL;
                         else if (vL + curW < vw) tx += vw - (vL + curW);
                     }
                     if (curH >= vh) {
-                        if (vT > 0)           ty -= vT;
+                        // Image fills full physical screen — clamp to screen edges.
+                        if (vT > 0)              ty -= vT;
                         else if (vT + curH < vh) ty += vh - (vT + curH);
+                    } else if (curH >= vhv) {
+                        // Image fills visible viewport but not full screen —
+                        // clamp to visible viewport so no white gap shows in
+                        // the area the user actually sees.
+                        if (vT > 0)               ty -= vT;
+                        else if (vT + curH < vhv) ty += vhv - (vT + curH);
+                    } else {
+                        // Image shorter than visible viewport — keep it centred
+                        // so white background never shows below the image in
+                        // the visible area (which bleeds through the tab bar).
+                        ty = (vhv - curH) / 2 - elLayoutT;
                     }
                     // Single transform write — no DOM reads, no second write.
                     // transformOrigin is set once in beginGesture, not here.
