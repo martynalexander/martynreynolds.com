@@ -246,9 +246,13 @@
         }
 
         /* When the user is actively pinch-zooming, hide page overflow so
-           the scroll container doesn't interfere with the gesture. */
+           the scroll container doesn't interfere with the gesture. Also
+           switch background to black so any uncovered edge area (e.g.
+           below a landscape image on a portrait phone) reads as a dark
+           letterbox rather than washing out to white behind the tab bar. */
         #detail-view.zooming {
             overflow: hidden !important;
+            background-color: #000;
         }
 
         .artwork-details.light-text h1,
@@ -2150,9 +2154,8 @@
                         if (vT > 0)           ty -= vT;
                         else if (vT + curH < vh) ty += vh - (vT + curH);
                     }
-                    // Single transform write — no getBoundingClientRect(),
-                    // no lockMediaToViewport(), no second write after clamping.
-                    el.style.transformOrigin = '0 0';
+                    // Single transform write — no DOM reads, no second write.
+                    // transformOrigin is set once in beginGesture, not here.
                     el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
                     isImageZoomed = true;
                 }
@@ -2165,7 +2168,11 @@
             let settleTimer = null;
             function beginGesture() {
                 const el = media();
-                if (el) el.style.willChange = 'transform';
+                if (el) {
+                    el.style.willChange = 'transform';
+                    // Set transform-origin once here, not on every apply() call.
+                    el.style.transformOrigin = '0 0';
+                }
                 try { detailView.classList.add('zooming'); } catch(e) {}
                 // Width lock only needed on mobile (iOS toolbar vw bug).
                 // On desktop, screen.width != window width so skip it.
@@ -2330,11 +2337,12 @@
                     // page scroll (so tall images still scroll at 1×).
                     if (scale > 1 && el) {
                         e.preventDefault();
-                        beginGesture();
+                        // Don't call beginGesture/endGesture on every event —
+                        // that was toggling will-change and the settle timer
+                        // on every scroll tick, causing jank.
                         tx -= e.deltaX;
                         ty -= e.deltaY;
                         apply();
-                        endGesture();
                     }
                     return;
                 }
