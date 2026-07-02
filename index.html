@@ -2123,7 +2123,14 @@
                 el.style.removeProperty('width');
             }
 
-            function apply() {
+            // apply(skipClamp)
+            // skipClamp=true during active two-finger pinch: the focal-point
+            // maths already position the image correctly; applying threshold-
+            // based clamps mid-gesture causes a visible jump every time the
+            // image height crosses innerHeight or screen.height.
+            // skipClamp=false (default) during pan and at gesture end: clamp
+            // so the user can't drag the image off-screen.
+            function apply(skipClamp) {
                 const el = media();
                 if (!el) return;
                 if (scale <= 1.001) {
@@ -2133,45 +2140,30 @@
                     el.style.willChange = 'auto';
                     isImageZoomed = false;
                 } else {
-                    // Clamp using cached layout position and dims — no DOM reads.
-                    // The visual bounding rect of the element with transform-origin
-                    // 0 0 and translate(tx,ty)scale(scale) is:
-                    //   left  = elLayoutL + tx
-                    //   top   = elLayoutT + ty
-                    //   right = elLayoutL + tx + elW0 * scale
-                    //   bottom= elLayoutT + ty + elH0 * scale
-                    const vw  = window.screen.width  || window.innerWidth;
-                    const vh  = window.screen.height || window.innerHeight;
-                    const vhv = window.innerHeight;   // visible area between toolbars
-                    const curW = elW0 * scale;
-                    const curH = elH0 * scale;
-                    const vL = elLayoutL + tx;
-                    const vT = elLayoutT + ty;
-
-                    // Horizontal: clamp when image fills the screen width.
-                    if (curW >= vw) {
-                        if (vL > 0)              tx -= vL;
-                        else if (vL + curW < vw) tx += vw - (vL + curW);
+                    if (!skipClamp) {
+                        const vw  = window.screen.width  || window.innerWidth;
+                        const vh  = window.screen.height || window.innerHeight;
+                        const vhv = window.innerHeight;
+                        const curW = elW0 * scale;
+                        const curH = elH0 * scale;
+                        let vL = elLayoutL + tx;
+                        let vT = elLayoutT + ty;
+                        if (curW >= vw) {
+                            if (vL > 0)              tx -= vL;
+                            else if (vL + curW < vw) tx += vw - (vL + curW);
+                        }
+                        if (curH >= vh) {
+                            vT = elLayoutT + ty;
+                            if (vT > 0)              ty -= vT;
+                            vT = elLayoutT + ty;
+                            if (vT + curH < vh)      ty += vh - (vT + curH);
+                        } else if (curH >= vhv) {
+                            vT = elLayoutT + ty;
+                            if (vT > 0)               ty -= vT;
+                            vT = elLayoutT + ty;
+                            if (vT + curH < vhv)      ty += vhv - (vT + curH);
+                        }
                     }
-
-                    // Vertical: clamp only when the image is large enough
-                    // to fill the relevant boundary — no constraint while
-                    // the image is smaller (prevents the snap-to-edge that
-                    // occurs if clamping fires before the image fills the
-                    // viewport during the initial stages of a pinch).
-                    if (curH >= vh) {
-                        // Image fills full screen: clamp to screen edges.
-                        if (vT > 0)              ty -= vT;
-                        else if (vT + curH < vh) ty += vh - (vT + curH);
-                    } else if (curH >= vhv) {
-                        // Image fills visible viewport: clamp to its edges.
-                        if (vT > 0)               ty -= vT;
-                        else if (vT + curH < vhv) ty += vhv - (vT + curH);
-                    }
-                    // curH < vhv: no constraint — the image is smaller than
-                    // the viewport; let the pinch focal-point math position it.
-                    // Single transform write — no DOM reads, no second write.
-                    // transformOrigin is set once in beginGesture, not here.
                     el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
                     isImageZoomed = true;
                 }
@@ -2290,12 +2282,12 @@
                     tx = m.x - newScale * p0x - startRectL + startTx;
                     ty = m.y - newScale * p0y - startRectT + startTy;
                     scale = newScale;
-                    apply();
+                    apply(true); // skip clamp during pinch — thresholds cause jumps
                 } else if (mode === 'pan' && e.touches.length === 1 && scale > 1) {
                     e.preventDefault();
                     tx = startTx + (e.touches[0].clientX - panStartX);
                     ty = startTy + (e.touches[0].clientY - panStartY);
-                    apply();
+                    apply(); // clamp during pan so image can't be dragged off-screen
                 }
             }, { passive: false });
 
