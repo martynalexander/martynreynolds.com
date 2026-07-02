@@ -2142,30 +2142,35 @@
                     //   bottom= elLayoutT + ty + elH0 * scale
                     const vw  = window.screen.width  || window.innerWidth;
                     const vh  = window.screen.height || window.innerHeight;
-                    const vhv = window.innerHeight;   // visible viewport (between toolbars)
+                    const vhv = window.innerHeight;   // visible area between toolbars
                     const curW = elW0 * scale;
                     const curH = elH0 * scale;
-                    const vL = elLayoutL + tx;
-                    const vT = elLayoutT + ty;
+                    let vL = elLayoutL + tx;
+                    let vT = elLayoutT + ty;
+
+                    // Horizontal: clamp when image fills the screen width.
                     if (curW >= vw) {
                         if (vL > 0)              tx -= vL;
                         else if (vL + curW < vw) tx += vw - (vL + curW);
                     }
+
+                    // Vertical — single continuous constraint, no threshold
+                    // switching (which caused a jump/glitch at the crossover):
+                    //
+                    // Rule 1 (always): image bottom must cover the visible
+                    // viewport bottom so white never shows below the image
+                    // in the area that bleeds through the iOS tab bar.
+                    vT = elLayoutT + ty;
+                    if (vT + curH < vhv) ty += vhv - (vT + curH);
+                    //
+                    // Rule 2 (large images only): when the image fills the
+                    // full physical screen, also clamp the top and far bottom
+                    // so the user can't pan it off-screen.
                     if (curH >= vh) {
-                        // Image fills full physical screen — clamp to screen edges.
+                        vT = elLayoutT + ty;
                         if (vT > 0)              ty -= vT;
-                        else if (vT + curH < vh) ty += vh - (vT + curH);
-                    } else if (curH >= vhv) {
-                        // Image fills visible viewport but not full screen —
-                        // clamp to visible viewport so no white gap shows in
-                        // the area the user actually sees.
-                        if (vT > 0)               ty -= vT;
-                        else if (vT + curH < vhv) ty += vhv - (vT + curH);
-                    } else {
-                        // Image shorter than visible viewport — keep it centred
-                        // so white background never shows below the image in
-                        // the visible area (which bleeds through the tab bar).
-                        ty = (vhv - curH) / 2 - elLayoutT;
+                        vT = elLayoutT + ty;
+                        if (vT + curH < vh)      ty += vh - (vT + curH);
                     }
                     // Single transform write — no DOM reads, no second write.
                     // transformOrigin is set once in beginGesture, not here.
