@@ -2145,8 +2145,8 @@
                     const vhv = window.innerHeight;   // visible area between toolbars
                     const curW = elW0 * scale;
                     const curH = elH0 * scale;
-                    let vL = elLayoutL + tx;
-                    let vT = elLayoutT + ty;
+                    const vL = elLayoutL + tx;
+                    const vT = elLayoutT + ty;
 
                     // Horizontal: clamp when image fills the screen width.
                     if (curW >= vw) {
@@ -2154,24 +2154,22 @@
                         else if (vL + curW < vw) tx += vw - (vL + curW);
                     }
 
-                    // Vertical — single continuous constraint, no threshold
-                    // switching (which caused a jump/glitch at the crossover):
-                    //
-                    // Rule 1 (always): image bottom must cover the visible
-                    // viewport bottom so white never shows below the image
-                    // in the area that bleeds through the iOS tab bar.
-                    vT = elLayoutT + ty;
-                    if (vT + curH < vhv) ty += vhv - (vT + curH);
-                    //
-                    // Rule 2 (large images only): when the image fills the
-                    // full physical screen, also clamp the top and far bottom
-                    // so the user can't pan it off-screen.
+                    // Vertical: clamp only when the image is large enough
+                    // to fill the relevant boundary — no constraint while
+                    // the image is smaller (prevents the snap-to-edge that
+                    // occurs if clamping fires before the image fills the
+                    // viewport during the initial stages of a pinch).
                     if (curH >= vh) {
-                        vT = elLayoutT + ty;
+                        // Image fills full screen: clamp to screen edges.
                         if (vT > 0)              ty -= vT;
-                        vT = elLayoutT + ty;
-                        if (vT + curH < vh)      ty += vh - (vT + curH);
+                        else if (vT + curH < vh) ty += vh - (vT + curH);
+                    } else if (curH >= vhv) {
+                        // Image fills visible viewport: clamp to its edges.
+                        if (vT > 0)               ty -= vT;
+                        else if (vT + curH < vhv) ty += vhv - (vT + curH);
                     }
+                    // curH < vhv: no constraint — the image is smaller than
+                    // the viewport; let the pinch focal-point math position it.
                     // Single transform write — no DOM reads, no second write.
                     // transformOrigin is set once in beginGesture, not here.
                     el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
