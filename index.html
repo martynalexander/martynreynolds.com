@@ -2044,6 +2044,10 @@
             let panTapX = 0, panTapY = 0;      // finger position at pan start (tap detection)
             let startRectL = 0, startRectT = 0; // media rect at gesture start
             let mode = null;                   // 'pinch' | 'pan' | null
+            // Cached element layout position (excluding transform) and CSS
+            // dimensions at scale=1. Updated at every gesture start so apply()
+            // can clamp without any DOM reads mid-gesture.
+            let elLayoutL = 0, elLayoutT = 0, elW0 = 0, elH0 = 0;
 
             function media() { return container.querySelector('img, video'); }
 
@@ -2077,26 +2081,31 @@
                     el.style.willChange = 'auto';
                     isImageZoomed = false;
                 } else {
-                    lockMediaToViewport();
+                    // Clamp using cached layout position and dims — no DOM reads.
+                    // The visual bounding rect of the element with transform-origin
+                    // 0 0 and translate(tx,ty)scale(scale) is:
+                    //   left  = elLayoutL + tx
+                    //   top   = elLayoutT + ty
+                    //   right = elLayoutL + tx + elW0 * scale
+                    //   bottom= elLayoutT + ty + elH0 * scale
+                    const vw = window.screen.width  || window.innerWidth;
+                    const vh = window.screen.height || window.innerHeight;
+                    const curW = elW0 * scale;
+                    const curH = elH0 * scale;
+                    const vL = elLayoutL + tx;
+                    const vT = elLayoutT + ty;
+                    if (curW >= vw) {
+                        if (vL > 0)           tx -= vL;
+                        else if (vL + curW < vw) tx += vw - (vL + curW);
+                    }
+                    if (curH >= vh) {
+                        if (vT > 0)           ty -= vT;
+                        else if (vT + curH < vh) ty += vh - (vT + curH);
+                    }
+                    // Single transform write — no getBoundingClientRect(),
+                    // no lockMediaToViewport(), no second write after clamping.
                     el.style.transformOrigin = '0 0';
                     el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
-                    // Clamp to the full physical screen so the zoomed image
-                    // fills behind iOS Safari's address bar and tab bar.
-                    // screen.height/width are the physical screen dimensions
-                    // in CSS pixels, unaffected by toolbar show/hide.
-                    const r = el.getBoundingClientRect();
-                    const vw = window.screen.width  || detailView.clientWidth;
-                    const vh = window.screen.height || detailView.clientHeight;
-                    let clamped = false;
-                    if (r.width >= vw) {
-                        if (r.left > 0)    { tx -= r.left;       clamped = true; }
-                        if (r.right < vw)  { tx += vw - r.right; clamped = true; }
-                    }
-                    if (r.height >= vh) {
-                        if (r.top > 0)     { ty -= r.top;         clamped = true; }
-                        if (r.bottom < vh) { ty += vh - r.bottom; clamped = true; }
-                    }
-                    if (clamped) el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
                     isImageZoomed = true;
                 }
             }
@@ -2110,7 +2119,9 @@
                 const el = media();
                 if (el) el.style.willChange = 'transform';
                 try { detailView.classList.add('zooming'); } catch(e) {}
-                lockMediaToViewport();
+                // Width lock only needed on mobile (iOS toolbar vw bug).
+                // On desktop, screen.width != window width so skip it.
+                if (!isDesktop()) lockMediaToViewport();
                 if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
             }
             function endGesture() {
@@ -2162,13 +2173,19 @@
                     const el = media();
                     if (!el) return;
                     mode = 'pinch';
-                    beginGesture();
+                    beginGesture();                  // calls lockMediaToViewport()
                     startDist = dist(e.touches) || 1;
                     startScale = scale;
                     const m = mid(e.touches);
                     startTx = tx; startTy = ty;
-                    const r = el.getBoundingClientRect();
+                    const r = el.getBoundingClientRect(); // one reflow here at gesture start
                     startRectL = r.left; startRectT = r.top;
+                    // Cache layout position (= visual pos minus existing translation)
+                    // and CSS dimensions so apply() never needs to read from the DOM.
+                    elLayoutL = r.left - tx;
+                    elLayoutT = r.top  - ty;
+                    elW0 = el.offsetWidth;   // CSS width after lockMediaToViewport
+                    elH0 = el.offsetHeight;  // CSS height:auto at that width
                     // remember the focal point in current screen coords
                     panStartX = m.x; panStartY = m.y;
                     e.preventDefault();
@@ -2278,11 +2295,13 @@
                 e.preventDefault();
                 beginGesture();
 
-                const r = el.getBoundingClientRect();      // includes current transform
-                const L0x = r.left - tx;                   // untransformed layout origin
+                const r = el.getBoundingClientRect();
+                const L0x = r.left - tx;
                 const L0y = r.top  - ty;
-                const px = (e.clientX - L0x - tx) / scale;  // intrinsic point under cursor
+                const px = (e.clientX - L0x - tx) / scale;
                 const py = (e.clientY - L0y - ty) / scale;
+                elLayoutL = L0x; elLayoutT = L0y;
+                elW0 = el.offsetWidth; elH0 = el.offsetHeight;
 
                 // Smooth, frame-rate-independent zoom factor from the wheel delta.
                 let newScale = scale * Math.exp(-e.deltaY * 0.005);
@@ -2320,6 +2339,10 @@
                 gestureL0y = r.top  - ty;
                 gesturePx = (cursorX - gestureL0x - tx) / scale;
                 gesturePy = (cursorY - gestureL0y - ty) / scale;
+                elLayoutL = gestureL0x;
+                elLayoutT = gestureL0y;
+                elW0 = el.offsetWidth;
+                elH0 = el.offsetHeight;
             }, { passive: false });
 
             container.addEventListener('gesturechange', function (e) {
