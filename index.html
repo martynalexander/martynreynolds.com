@@ -1733,8 +1733,11 @@
             detailView.scrollTop = 0;
 
             if (!isDesktop()) {
-                // Mobile only: stretch to full physical screen so iOS renders
-                // content behind the translucent tab bar at the bottom.
+                // Stretch both the body and detail-view to the full physical
+                // screen height. Without the body stretch, iOS renders the
+                // area between innerHeight and screen.height (behind the tab
+                // bar) as its native black underscroll background.
+                document.body.style.minHeight = window.screen.height + 'px';
                 detailView.style.minHeight = window.screen.height + 'px';
                 // Nudge page scroll to encourage iOS to collapse the address
                 // bar, expanding the viewport upward toward the screen top.
@@ -1890,6 +1893,7 @@
                 detailView.style.display = 'none';
                 if (!isDesktop()) {
                     detailView.style.minHeight = '';
+                    document.body.style.minHeight = '';
                     document.removeEventListener('touchmove', _blockBodyScroll);
                 }
                 mediaTarget.innerHTML = '';
