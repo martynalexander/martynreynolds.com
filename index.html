@@ -1840,7 +1840,7 @@
         const preloadedArtwork = new Set();
         function preloadAdjacentArtwork() {
             if (allArtworkElements.length < 2) return;
-            [1, 2, 3, -1, -2, -3].forEach(direction => {
+            [1, 2, 3, 4, 5, -1, -2, -3, -4, -5].forEach(direction => {
                 const idx = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
                 const el = allArtworkElements[idx];
                 if (el.tagName.toLowerCase() === 'video') return;
@@ -1848,7 +1848,7 @@
                 if (!file || preloadedArtwork.has(file)) return;
                 preloadedArtwork.add(file);
                 const img = new Image();
-                img.fetchPriority = 'low';
+                img.fetchPriority = 'auto';
                 img.src = file;
             });
         }
