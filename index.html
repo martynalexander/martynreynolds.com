@@ -1633,12 +1633,15 @@
         // page number (top-left), and the close button (top-right) all sit
         // over different parts of the image and can need opposite colours.
         function applyTextColour(detailsLuminance, pageNumberLuminance, closeButtonLuminance) {
+            // Threshold lowered from 168 to 128 (50% grey): white text only
+            // on genuinely dark backgrounds; medium-light tones (gallery
+            // walls, floors) stay black rather than flipping to white.
             document.getElementById('page-number').classList.toggle('light-text',
-                pageNumberLuminance !== null && pageNumberLuminance < 168);
+                pageNumberLuminance !== null && pageNumberLuminance < 128);
             document.getElementById('close-button').classList.toggle('light-text',
-                closeButtonLuminance !== null && closeButtonLuminance < 168);
+                closeButtonLuminance !== null && closeButtonLuminance < 128);
             artworkDetails.classList.toggle('light-text',
-                detailsLuminance !== null && detailsLuminance < 168);
+                detailsLuminance !== null && detailsLuminance < 128);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -2059,7 +2062,7 @@
                 lastArrowSample = event.timeStamp;
                 const lum = sampleLuminanceAtScreenRect(
                     mediaEl, event.clientX - 20, event.clientY - 12, 40, 24);
-                if (lum !== null) lastArrowColour = lum < 168 ? '#fff' : '#000';
+                if (lum !== null) lastArrowColour = lum < 128 ? '#fff' : '#000';
             }
             active.style.color = lastArrowColour;
         }
