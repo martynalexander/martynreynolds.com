@@ -332,6 +332,39 @@
            element under the pointer instead. */
         @media (hover: hover) and (pointer: fine) {
             .nav-arrow { display: block; }
+
+            /* Desktop: single long line, lower-left */
+            .artwork-details {
+                text-align: left;
+                left: 18px;
+                right: unset;
+                white-space: nowrap;
+            }
+            .artwork-details h1 {
+                display: inline;
+                margin-left: 0;
+                width: auto;
+            }
+            .artwork-details:has(#info-target:not(:empty)) h1::after {
+                content: " | ";
+                font-style: normal;
+            }
+            .artwork-details p {
+                display: inline;
+                margin-left: 0;
+                width: auto;
+            }
+            .artwork-details .info-seg {
+                display: inline;
+            }
+            .artwork-details .info-seg + .info-seg::before {
+                content: " | ";
+            }
+        }
+
+        /* Mobile: info segments stack as separate lines */
+        .artwork-details .info-seg {
+            display: block;
         }
     </style>
 </head>
@@ -1858,10 +1891,10 @@
 
                 if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
                     const url = descriptions.pop();
-                    const content = descriptions.join('<br>');
+                    const content = descriptions.map(d => `<span class="info-seg">${d}</span>`).join('');
                     infoTarget.innerHTML = `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${content}</a>`;
                 } else {
-                    infoTarget.innerHTML = descriptions.join('<br>');
+                    infoTarget.innerHTML = descriptions.map(d => `<span class="info-seg">${d}</span>`).join('');
                 }
             } else {
                 infoTarget.textContent = "";
