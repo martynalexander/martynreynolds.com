@@ -1912,8 +1912,8 @@
         // ─────────────────────────────────────────────────────────────────
         window.addEventListener('keydown', function(event) {
             if (detailView.style.display === 'block') {
-                if (event.key === 'ArrowRight') navigateToAdjacentArtwork(event, 1);
-                else if (event.key === 'ArrowLeft') navigateToAdjacentArtwork(event, -1);
+                if      (event.key === 'ArrowRight' || event.key === 'ArrowDown') navigateToAdjacentArtwork(event, 1);
+                else if (event.key === 'ArrowLeft'  || event.key === 'ArrowUp')   navigateToAdjacentArtwork(event, -1);
                 else if (event.key === 'Escape') hideArtworkPage(event);
             }
         });
