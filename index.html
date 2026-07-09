@@ -1985,21 +1985,22 @@
             });
         }
 
-        // Preload the first 10 full-res images when the page loads so opening
-        // any of the early pages feels instant.
-        (function preloadFirst10() {
-            refreshArtworkList();
-            const first10 = allArtworkElements.slice(0, 10);
-            first10.forEach(function(el) {
-                if (el.tagName.toLowerCase() === 'video') return;
-                const file = el.getAttribute('data-file');
-                if (!file || preloadedArtwork.has(file)) return;
-                preloadedArtwork.add(file);
-                const img = new Image();
-                img.fetchPriority = 'low';
-                img.src = file;
-            });
-        })();
+        // Preload the first 10 full-res images after the page has fully loaded
+        // and settled, so initial grid thumbnail loading is not competed with.
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                refreshArtworkList();
+                allArtworkElements.slice(0, 10).forEach(function(el) {
+                    if (el.tagName.toLowerCase() === 'video') return;
+                    const file = el.getAttribute('data-file');
+                    if (!file || preloadedArtwork.has(file)) return;
+                    preloadedArtwork.add(file);
+                    const img = new Image();
+                    img.fetchPriority = 'low';
+                    img.src = file;
+                });
+            }, 3000);
+        });
 
         function navigateToAdjacentArtwork(event, direction) {
             if (event) event.stopPropagation();
