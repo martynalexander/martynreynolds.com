@@ -242,12 +242,16 @@
         @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 33px);
+                left: 18px;
+                right: 18px;
+                width: auto;
                 text-align: center;
             }
             .artwork-details h1,
             .artwork-details p {
                 margin-left: auto;
                 margin-right: auto;
+                width: fit-content;
             }
             .artwork-details .info-seg {
                 display: block;
