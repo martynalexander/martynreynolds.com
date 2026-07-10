@@ -58,6 +58,22 @@
         .big  { grid-column: span 2; grid-row: span 2; }
 
         /* PRESENTATION MAIN PORTFOLIO LAYOUT WINDOW */
+        @keyframes mediaEnter {
+            from { opacity: 0; transform: scale(0.96); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideFromRight {
+            from { opacity: 0; transform: translateX(28px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideFromLeft {
+            from { opacity: 0; transform: translateX(-28px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        #media-target.anim-enter { animation: mediaEnter    180ms ease-out both; }
+        #media-target.anim-next  { animation: slideFromRight 160ms ease-out both; }
+        #media-target.anim-prev  { animation: slideFromLeft  160ms ease-out both; }
+
         #detail-view {
             display: none;
             /* Mobile (touch): position:absolute so iOS Safari treats this as
@@ -1926,9 +1942,12 @@
             }, 50);
         }
 
-        function loadArtworkData(element, mediaType) {
+        function loadArtworkData(element, mediaType, animClass = 'anim-enter') {
             let rawText = "";
             artworkDetails.classList.remove('light-text');
+            mediaTarget.classList.remove('anim-enter', 'anim-next', 'anim-prev');
+            void mediaTarget.offsetWidth; // force reflow to restart animation
+            mediaTarget.classList.add(animClass);
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
 
@@ -2051,7 +2070,7 @@
             const targetElement = allArtworkElements[currentArtworkIndex];
 
             const detectedType = targetElement.tagName.toLowerCase() === 'video' ? 'video' : 'image';
-            loadArtworkData(targetElement, detectedType);
+            loadArtworkData(targetElement, detectedType, direction > 0 ? 'anim-next' : 'anim-prev');
             detailView.scrollTop = 0;
         }
 
