@@ -94,10 +94,19 @@
                 width: auto;
                 min-height: unset;
             }
-            /* Desktop grid trial: all cells uniform height —
-               tall and big revert to single-cell span */
-            .tall { grid-row: span 1; }
-            .big  { grid-column: span 1; grid-row: span 1; }
+            /* Desktop grid trial: uniform row height, portrait thumbnails at
+               half the column width so they appear portrait-shaped.
+               Base unit is halved (100px); landscape/big span 2 units ≈ same
+               visual width as before; portrait spans 1 unit = portrait shape. */
+            .collage-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            .collage-grid > a:not(.tall),
+            .collage-grid > video {
+                grid-column: span 2;
+            }
+            .tall { grid-column: span 1; grid-row: span 1; }
+            .big  { grid-column: span 2; grid-row: span 1; }
         }
 
         #detail-view.active-stage {
