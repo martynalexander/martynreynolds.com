@@ -96,10 +96,11 @@
             }
             /* Desktop grid trial: uniform row height, portrait thumbnails at
                half the column width so they appear portrait-shaped.
-               Base unit is halved (100px); landscape/big span 2 units ≈ same
-               visual width as before; portrait spans 1 unit = portrait shape. */
+               12 fixed columns (always even) so span-2 landscape items never
+               leave an orphan 1-unit gap. Portrait spans 1 unit, landscape/big
+               spans 2 units — always divisible with no leftover column. */
             .collage-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                grid-template-columns: repeat(12, 1fr);
             }
             .collage-grid > a:not(.tall),
             .collage-grid > video {
@@ -107,6 +108,8 @@
             }
             .tall { grid-column: span 1; grid-row: span 1; }
             .big  { grid-column: span 2; grid-row: span 1; }
+            /* Page ends at last row — no extra min-height padding */
+            .gallery-split-wrapper { min-height: 0; }
         }
 
         #detail-view.active-stage {
