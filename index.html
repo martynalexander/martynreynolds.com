@@ -94,11 +94,11 @@
                 width: auto;
                 min-height: unset;
             }
-            /* Desktop grid: fixed cell sizes, columns reflow on resize.
-               Portrait items: 100×150px. Landscape/big: 200×150px.
-               auto-fill adds/removes columns as window width changes. */
+            /* Desktop grid: cells fill the row but have a minimum width,
+               column count reflows on resize. Portrait unit min 100px,
+               landscape/big span 2 units min 200px. */
             .collage-grid {
-                grid-template-columns: repeat(auto-fill, 100px);
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             }
             .collage-grid > a:not(.tall),
             .collage-grid > video {
