@@ -94,13 +94,11 @@
                 width: auto;
                 min-height: unset;
             }
-            /* Desktop grid trial: uniform row height, portrait thumbnails at
-               half the column width so they appear portrait-shaped.
-               12 fixed columns (always even) so span-2 landscape items never
-               leave an orphan 1-unit gap. Portrait spans 1 unit, landscape/big
-               spans 2 units — always divisible with no leftover column. */
+            /* Desktop grid: fixed cell sizes, columns reflow on resize.
+               Portrait items: 100×150px. Landscape/big: 200×150px.
+               auto-fill adds/removes columns as window width changes. */
             .collage-grid {
-                grid-template-columns: repeat(12, 1fr);
+                grid-template-columns: repeat(auto-fill, 100px);
             }
             .collage-grid > a:not(.tall),
             .collage-grid > video {
