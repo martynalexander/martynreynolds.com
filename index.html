@@ -71,8 +71,8 @@
             to   { opacity: 1; transform: translateX(0); }
         }
         #media-target.anim-enter { animation: mediaEnter    180ms ease-out both; }
-        #media-target.anim-next  { animation: slideFromRight 160ms ease-out both; }
-        #media-target.anim-prev  { animation: slideFromLeft  160ms ease-out both; }
+        #media-target.anim-next  { animation: slideFromRight 240ms ease-out both; }
+        #media-target.anim-prev  { animation: slideFromLeft  240ms ease-out both; }
 
         #detail-view {
             display: none;
@@ -1700,6 +1700,13 @@
         // Called once the media has loaded (so its natural size is known).
         // ─────────────────────────────────────────────────────────────────
         function applyMediaLayout(mediaEl) {
+            // Clear thumbnail placeholder and fire the entry/swipe animation now
+            // that the real media is ready — this is when the animation is visible.
+            mediaTarget.style.backgroundImage = '';
+            mediaTarget.classList.remove('anim-enter', 'anim-next', 'anim-prev');
+            void mediaTarget.offsetWidth;
+            mediaTarget.classList.add(_pendingAnimClass);
+
             const w = mediaEl.naturalWidth  || mediaEl.videoWidth  || 0;
             const h = mediaEl.naturalHeight || mediaEl.videoHeight || 0;
 
@@ -1942,12 +1949,12 @@
             }, 50);
         }
 
+        let _pendingAnimClass = 'anim-enter';
+
         function loadArtworkData(element, mediaType, animClass = 'anim-enter') {
             let rawText = "";
+            _pendingAnimClass = animClass;
             artworkDetails.classList.remove('light-text');
-            mediaTarget.classList.remove('anim-enter', 'anim-next', 'anim-prev');
-            void mediaTarget.offsetWidth; // force reflow to restart animation
-            mediaTarget.classList.add(animClass);
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
 
@@ -1963,6 +1970,7 @@
                 newSource.type = 'video/mp4';
                 newVideo.appendChild(newSource);
                 mediaTarget.innerHTML = '';
+                mediaTarget.style.backgroundImage = '';
                 mediaTarget.appendChild(newVideo);
                 newVideo.addEventListener('loadedmetadata', () => applyMediaLayout(newVideo));
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
@@ -1970,6 +1978,14 @@
             } else {
                 const img = element.querySelector('img');
                 if (img) {
+                    // Show the grid thumbnail immediately as a placeholder so
+                    // there is no white screen while the full-res image loads.
+                    const thumbSrc = img.currentSrc || img.src;
+                    mediaTarget.style.backgroundImage = `url("${thumbSrc}")`;
+                    mediaTarget.style.backgroundSize = 'contain';
+                    mediaTarget.style.backgroundRepeat = 'no-repeat';
+                    mediaTarget.style.backgroundPosition = 'center';
+
                     const newImg = new Image();
                     newImg.alt = 'Focus view';
                     // Full-resolution original, not the grid's small thumbnail —
