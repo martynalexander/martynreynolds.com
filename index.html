@@ -1674,12 +1674,37 @@
             const h = mediaEl.naturalHeight || mediaEl.videoHeight || 0;
 
             if (isDesktop()) {
-                mediaTarget.style.alignItems = 'center';
-                // Centre the scroll position on tall images that overflow.
-                requestAnimationFrame(() => {
-                    const maxScroll = detailView.scrollHeight - detailView.clientHeight;
-                    detailView.scrollTop = maxScroll > 0 ? maxScroll / 2 : 0;
-                });
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                const isWide = w > 0 && h > 0 && (w / h) > (vw / vh);
+                if (isWide) {
+                    // Wide/landscape: fill screen height, allow horizontal scroll
+                    mediaEl.style.height = '100vh';
+                    mediaEl.style.width  = 'auto';
+                    mediaTarget.style.width    = 'fit-content';
+                    mediaTarget.style.maxWidth = 'none';
+                    mediaTarget.style.alignItems = 'center';
+                    detailView.style.overflowY = 'hidden';
+                    detailView.style.overflowX = 'auto';
+                    requestAnimationFrame(() => {
+                        detailView.scrollLeft = Math.max(0, (detailView.scrollWidth - detailView.clientWidth) / 2);
+                        detailView.scrollTop  = 0;
+                    });
+                } else {
+                    // Portrait/square: fill screen width, scroll vertically
+                    mediaEl.style.height = '';
+                    mediaEl.style.width  = '';
+                    mediaTarget.style.width    = '';
+                    mediaTarget.style.maxWidth = '';
+                    mediaTarget.style.alignItems = 'center';
+                    detailView.style.overflowY = 'scroll';
+                    detailView.style.overflowX = 'hidden';
+                    requestAnimationFrame(() => {
+                        const maxScroll = detailView.scrollHeight - detailView.clientHeight;
+                        detailView.scrollTop  = maxScroll > 0 ? maxScroll / 2 : 0;
+                        detailView.scrollLeft = 0;
+                    });
+                }
             } else {
                 const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
                 const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -2039,6 +2064,10 @@
 
             setTimeout(() => {
                 detailView.style.display = 'none';
+                detailView.style.overflowY = '';
+                detailView.style.overflowX = '';
+                mediaTarget.style.width    = '';
+                mediaTarget.style.maxWidth = '';
                 if (!isDesktop()) {
                     detailView.style.minHeight = '';
                     document.body.style.minHeight = '';
