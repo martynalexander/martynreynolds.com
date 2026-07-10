@@ -94,6 +94,10 @@
                 width: auto;
                 min-height: unset;
             }
+            /* Desktop grid trial: all cells uniform height —
+               tall and big revert to single-cell span */
+            .tall { grid-row: span 1; }
+            .big  { grid-column: span 1; grid-row: span 1; }
         }
 
         #detail-view.active-stage {
