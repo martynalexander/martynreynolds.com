@@ -257,14 +257,12 @@
            number it's interactive, so it needs pointer-events/cursor. */
         .close-button {
             position: fixed;
-            /* Hit area enlarged ~50% via padding (not a transform on this
-               element — Safari has a known issue where a transformed
-               element can fail to paint a custom/changed cursor at all).
-               top/right pulled in by the added padding so the visible
-               glyph still lines up at the original 18px corner position. */
-            top: 14.2px;
-            right: 14.7px;
-            padding: 3.8px 3.3px;
+            /* Hit area extends to the screen corner (top-right) with equal
+               padding on all four sides — the X glyph sits at 18px from
+               the corner, matching its previous visual position. */
+            top: 0;
+            right: 0;
+            padding: 18px;
             z-index: 200000 !important;
             pointer-events: auto;
             cursor: pointer;
