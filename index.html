@@ -2100,9 +2100,33 @@
 
         // Preload the first 10 full-res images after the page has fully loaded
         // and settled, so initial grid thumbnail loading is not competed with.
+        // Hide the grid-view spinner once the images currently on screen have loaded.
+        // Only watches images in or near the viewport — ignores the rest of the grid.
+        (function watchVisibleGridImages() {
+            const spinner = document.getElementById('page-spinner');
+            const done = () => {
+                spinner.style.display = 'none';
+                document.body.classList.remove('spinner-loading');
+            };
+            const imgs = Array.from(
+                document.querySelectorAll('.collage-grid img')
+            ).slice(0, 40); // check first 40 — more than enough for any viewport
+            const vh = window.innerHeight;
+            const visible = imgs.filter(img => img.getBoundingClientRect().top < vh + 100);
+            if (!visible.length) { done(); return; }
+            let pending = 0;
+            const dec = () => { if (--pending === 0) done(); };
+            visible.forEach(img => {
+                if (img.complete && img.naturalWidth > 0) return;
+                pending++;
+                img.addEventListener('load',  dec, { once: true });
+                img.addEventListener('error', dec, { once: true });
+            });
+            if (pending === 0) done();
+            else setTimeout(done, 6000); // failsafe
+        })();
+
         window.addEventListener('load', function() {
-            document.getElementById('page-spinner').style.display = 'none';
-            document.body.classList.remove('spinner-loading');
             setTimeout(function() {
                 refreshArtworkList();
                 allArtworkElements.slice(0, 10).forEach(function(el) {
