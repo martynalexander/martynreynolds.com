@@ -458,6 +458,17 @@
 </head>
 <body class="spinner-loading">
 
+    <!-- Global SVG defs reused by chain-link icons throughout the page -->
+    <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+        <defs>
+            <mask id="chain-link-mask" maskUnits="userSpaceOnUse">
+                <rect width="13" height="13" fill="white"/>
+                <rect x="4" y="2.75" width="8" height="4.5" rx="2.25"
+                      transform="rotate(-45 8 5)" fill="black"/>
+            </mask>
+        </defs>
+    </svg>
+
     <!-- LOADING SPINNER — visible during initial page load and image navigation -->
     <div id="page-spinner">
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
@@ -2079,7 +2090,9 @@
                 // Two interlocking diagonal pill-shapes (bottom-left to top-right)
                 // Interlocked diagonal chain links — 12px fits within text line-height,
                 // centres at (4,8)/(8,4) give ~30% overlap for pronounced interlock.
-                const chainIcon = `&ensp;<svg class="link-icon" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><rect x="0" y="6.25" width="8" height="3.5" rx="1.75" transform="rotate(-45 4 8)"/><rect x="4" y="2.25" width="8" height="3.5" rx="1.75" transform="rotate(-45 8 4)"/></svg>`;
+                // Chain icon: two diagonal interlocked ovals with negative space at crossing.
+                // Global mask #chain-link-mask hides Link 1 inside Link 2's interior.
+                const chainIcon = `&ensp;<svg class="link-icon" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" mask="url(#chain-link-mask)"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)"/></svg>`;
 
                 if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
                     const url = descriptions.pop();
