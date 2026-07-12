@@ -376,6 +376,11 @@
             cursor: pointer !important;
         }
 
+        .link-icon {
+            vertical-align: middle;
+            display: inline;
+        }
+
         .artwork-details a:hover {
             color: #666;
         }
@@ -2066,9 +2071,17 @@
                 const descriptions = textSegments.slice(1).map(item => item.trim());
                 const urlPattern = /^https?:\/\//i;
 
+                // Chain-link icon appended to the last segment when a URL is present.
+                // Placed inside the last info-seg so it sits at the end of the
+                // single desktop line and to the right of the last mobile line.
+                const chainIcon = `  <svg class="link-icon" viewBox="0 0 20 10" width="20" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><rect x="0.5" y="2" width="8" height="6" rx="3"/><rect x="11.5" y="2" width="8" height="6" rx="3"/></svg>`;
+
                 if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
                     const url = descriptions.pop();
-                    const content = descriptions.map(d => `<span class="info-seg">${d}</span>`).join('');
+                    const lastIdx = descriptions.length - 1;
+                    const content = descriptions.map((d, i) =>
+                        `<span class="info-seg">${d}${i === lastIdx ? chainIcon : ''}</span>`
+                    ).join('');
                     infoTarget.innerHTML = `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${content}</a>`;
                 } else {
                     infoTarget.innerHTML = descriptions.map(d => `<span class="info-seg">${d}</span>`).join('');
