@@ -1987,6 +1987,8 @@
 
                     const swap = () => {
                         if (gen !== _loadGen) return;
+                        detailView.scrollTop = 0;
+                        detailView.scrollLeft = 0;
                         mediaTarget.innerHTML = '';
                         mediaTarget.appendChild(newImg);
                         applyMediaLayout(newImg);
@@ -2083,7 +2085,6 @@
 
             const detectedType = targetElement.tagName.toLowerCase() === 'video' ? 'video' : 'image';
             loadArtworkData(targetElement, detectedType);
-            detailView.scrollTop = 0;
         }
 
         // Blocks page scroll while the detail view is open without using
