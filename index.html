@@ -61,13 +61,14 @@
         /* ── LOADING SPINNER ─────────────────────────────────────────── */
         #page-spinner {
             position: fixed;
-            top: 50%;
-            left: 50%;
+            top: 0;
+            left: 0;
             transform: translate(-50%, -50%);
             z-index: 300000;
             color: #000;
             pointer-events: none;
             transition: color 0.2s ease;
+            will-change: left, top;
         }
         #page-spinner.light-text { color: #fff; }
         #page-spinner svg { display: block; animation: spinner-rotate 1.4s linear infinite; }
@@ -2324,6 +2325,13 @@
             }
             active.style.color = lastArrowColour;
         }
+
+        // Spinner follows the cursor globally
+        const _spinner = document.getElementById('page-spinner');
+        document.addEventListener('mousemove', function(e) {
+            _spinner.style.left = e.clientX + 'px';
+            _spinner.style.top  = e.clientY + 'px';
+        });
 
         detailView.addEventListener('mousemove', handleDetailMouseMove);
         detailView.addEventListener('mouseleave', () => {
