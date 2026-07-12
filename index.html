@@ -2297,10 +2297,12 @@
         // Clears any cursor we forced directly onto the link/close-button —
         // called whenever the pointer is NOT over one of them, so a stale
         // inline override never lingers on an element the mouse has left.
+        let _lastElAtPoint = null;
         function clearInteractiveCursors() {
             const link = artworkDetails.querySelector('a');
             if (link) link.style.removeProperty('cursor');
             document.getElementById('close-button').style.removeProperty('cursor');
+            if (_lastElAtPoint) { _lastElAtPoint.style.removeProperty('cursor'); _lastElAtPoint = null; }
         }
 
         function handleDetailMouseMove(event) {
@@ -2320,6 +2322,13 @@
                 detailView.style.cursor = '';
                 if (mediaEl) mediaEl.style.removeProperty('cursor');
                 hoveredInteractive.style.setProperty('cursor', 'pointer', 'important');
+                // Also set on the exact element under the pointer — our CSS rule
+                // cursor:none!important applies to all descendants, so the child
+                // element under the cursor needs its own inline override.
+                if (elAtPoint && elAtPoint !== hoveredInteractive) {
+                    elAtPoint.style.setProperty('cursor', 'pointer', 'important');
+                }
+                _lastElAtPoint = elAtPoint;
                 hideArrows();
                 return;
             }
