@@ -2077,7 +2077,9 @@
                 // Two diagonal pill-shapes rotated 45 deg and crossing in the centre,
                 // matching the classic interlocked chain-link reference icon.
                 // Two interlocking diagonal pill-shapes (bottom-left to top-right)
-                const chainIcon = `&ensp;<svg class="link-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><rect x="0" y="9" width="10" height="4" rx="2" transform="rotate(-45 5 11)"/><rect x="6" y="3" width="10" height="4" rx="2" transform="rotate(-45 11 5)"/></svg>`;
+                // Interlocked diagonal chain links — 12px fits within text line-height,
+                // centres at (4,8)/(8,4) give ~30% overlap for pronounced interlock.
+                const chainIcon = `&ensp;<svg class="link-icon" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><rect x="0" y="6.25" width="8" height="3.5" rx="1.75" transform="rotate(-45 4 8)"/><rect x="4" y="2.25" width="8" height="3.5" rx="1.75" transform="rotate(-45 8 4)"/></svg>`;
 
                 if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
                     const url = descriptions.pop();
