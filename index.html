@@ -58,6 +58,30 @@
         .big  { grid-column: span 2; grid-row: span 2; }
 
         /* PRESENTATION MAIN PORTFOLIO LAYOUT WINDOW */
+        /* ── LOADING SPINNER ─────────────────────────────────────────── */
+        #page-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 300000;
+            color: #000;
+            pointer-events: none;
+            transition: color 0.2s ease;
+        }
+        #page-spinner.light-text { color: #fff; }
+        #page-spinner svg { display: block; animation: spinner-rotate 1.4s linear infinite; }
+        #page-spinner circle { animation: spinner-dash 1.4s ease-in-out infinite; }
+        @keyframes spinner-rotate {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes spinner-dash {
+            0%   { stroke-dasharray: 1, 62.83;    stroke-dashoffset: 0; }
+            50%  { stroke-dasharray: 47.12, 62.83; stroke-dashoffset: -18.85; }
+            100% { stroke-dasharray: 1, 62.83;    stroke-dashoffset: -62.83; }
+        }
+
         @keyframes mediaEnter {
             from { opacity: 0; transform: scale(0.96); }
             to   { opacity: 1; transform: scale(1); }
@@ -420,6 +444,13 @@
     </style>
 </head>
 <body>
+
+    <!-- LOADING SPINNER — visible during initial page load and image navigation -->
+    <div id="page-spinner">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+    </div>
 
     <!-- MAIN SEAMLESS COLLAGE IMAGE GRID -->
     <div id="archive-view">
@@ -1823,12 +1854,13 @@
             // Threshold raised from 128 to 154 (~20% toward white): white text
             // on dark and medium-dark backgrounds; only clearly light backgrounds
             // get black text.
-            document.getElementById('page-number').classList.toggle('light-text',
-                pageNumberLuminance !== null && pageNumberLuminance < 154);
+            const isLight = pageNumberLuminance !== null && pageNumberLuminance < 154;
+            document.getElementById('page-number').classList.toggle('light-text', isLight);
             document.getElementById('close-button').classList.toggle('light-text',
                 closeButtonLuminance !== null && closeButtonLuminance < 154);
             artworkDetails.classList.toggle('light-text',
                 detailsLuminance !== null && detailsLuminance < 154);
+            document.getElementById('page-spinner').classList.toggle('light-text', isLight);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -1953,6 +1985,7 @@
             artworkDetails.classList.remove('light-text');
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
+            document.getElementById('page-spinner').style.display = '';
 
             if (mediaType === 'video') {
                 const source = element.querySelector('source');
@@ -1988,6 +2021,7 @@
 
                     const swap = () => {
                         if (gen !== _loadGen) return;
+                        document.getElementById('page-spinner').style.display = 'none';
                         detailView.scrollTop = 0;
                         detailView.scrollLeft = 0;
                         mediaTarget.innerHTML = '';
@@ -2061,6 +2095,7 @@
         // Preload the first 10 full-res images after the page has fully loaded
         // and settled, so initial grid thumbnail loading is not competed with.
         window.addEventListener('load', function() {
+            document.getElementById('page-spinner').style.display = 'none';
             setTimeout(function() {
                 refreshArtworkList();
                 allArtworkElements.slice(0, 10).forEach(function(el) {
@@ -2103,6 +2138,7 @@
             }
             stopBrightnessLoop();
             hideArrows();
+            document.getElementById('page-spinner').style.display = 'none';
             window.resetImageZoom();
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
