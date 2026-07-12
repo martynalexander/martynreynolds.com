@@ -58,6 +58,9 @@
         .big  { grid-column: span 2; grid-row: span 2; }
 
         /* PRESENTATION MAIN PORTFOLIO LAYOUT WINDOW */
+        /* Hide system cursor everywhere while the spinner is active */
+        .spinner-loading, .spinner-loading * { cursor: none !important; }
+
         /* ── LOADING SPINNER ─────────────────────────────────────────── */
         #page-spinner {
             position: fixed;
@@ -444,7 +447,7 @@
 
     </style>
 </head>
-<body>
+<body class="spinner-loading">
 
     <!-- LOADING SPINNER — visible during initial page load and image navigation -->
     <div id="page-spinner">
@@ -1987,6 +1990,8 @@
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
             document.getElementById('page-spinner').style.display = '';
+            detailView.classList.add('spinner-loading');
+            hideArrows();
 
             if (mediaType === 'video') {
                 const source = element.querySelector('source');
@@ -2023,6 +2028,7 @@
                     const swap = () => {
                         if (gen !== _loadGen) return;
                         document.getElementById('page-spinner').style.display = 'none';
+                        detailView.classList.remove('spinner-loading');
                         detailView.scrollTop = 0;
                         detailView.scrollLeft = 0;
                         mediaTarget.innerHTML = '';
@@ -2097,6 +2103,7 @@
         // and settled, so initial grid thumbnail loading is not competed with.
         window.addEventListener('load', function() {
             document.getElementById('page-spinner').style.display = 'none';
+            document.body.classList.remove('spinner-loading');
             setTimeout(function() {
                 refreshArtworkList();
                 allArtworkElements.slice(0, 10).forEach(function(el) {
@@ -2140,6 +2147,7 @@
             stopBrightnessLoop();
             hideArrows();
             document.getElementById('page-spinner').style.display = 'none';
+            detailView.classList.remove('spinner-loading');
             window.resetImageZoom();
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
@@ -2268,6 +2276,7 @@
 
         function handleDetailMouseMove(event) {
             if (!isDesktop()) return;
+            if (detailView.classList.contains('spinner-loading')) return;
             const mediaEl = mediaTarget.querySelector('img, video');
 
             // When hovering a metadata link or the close button, show the
