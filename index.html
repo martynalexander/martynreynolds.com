@@ -1994,12 +1994,51 @@
         function loadArtworkData(element, mediaType) {
             const gen = ++_loadGen;
             let rawText = "";
+
+            // Reset UI chrome immediately so stale colours don't linger
             artworkDetails.classList.remove('light-text');
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
-            document.getElementById('page-spinner').style.display = '';
+
+            // Show spinner; on mobile reset to screen-centre (no mousemove to position it)
+            const _sp = document.getElementById('page-spinner');
+            _sp.style.display = '';
+            if (!isDesktop()) { _sp.style.left = '50%'; _sp.style.top = '50%'; }
             detailView.classList.add('spinner-loading');
             hideArrows();
+
+            // Chain icon used inside captions that have a URL
+            const chainIcon = `&ensp;<svg class="link-icon" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><defs><mask id="m1" maskUnits="userSpaceOnUse"><rect width="13" height="13" fill="white" stroke="none"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)" fill="black" stroke="none"/><polygon points="0,0 0,13 13,13" fill="white" stroke="none"/></mask><mask id="m2" maskUnits="userSpaceOnUse"><rect width="13" height="13" fill="white" stroke="none"/><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" fill="black" stroke="none"/><polygon points="0,0 13,0 13,13" fill="white" stroke="none"/></mask></defs><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" mask="url(#m1)"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)" mask="url(#m2)"/></svg>`;
+
+            // Update caption and page number — deferred to fire when media is ready
+            // so text and image always change together.
+            const applyCaption = (text) => {
+                const textSegments = text.split('|');
+                const rawTitle = textSegments[0] ? textSegments[0].trim() : "Untitled";
+                const titleMatch = rawTitle.match(/^(.*?)(\s*\([^)]*\))$/);
+                if (titleMatch) {
+                    titleTarget.innerHTML = `${titleMatch[1]}<span class="title-roman">${titleMatch[2]}</span>`;
+                } else {
+                    titleTarget.textContent = rawTitle;
+                }
+                document.getElementById('page-number').textContent = currentArtworkIndex + 1;
+                if (textSegments.length > 1) {
+                    const descriptions = textSegments.slice(1).map(item => item.trim());
+                    const urlPattern = /^https?:\/\//i;
+                    if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
+                        const url = descriptions.pop();
+                        const lastIdx = descriptions.length - 1;
+                        const content = descriptions.map((d, i) =>
+                            `<span class="info-seg">${d}${i === lastIdx ? chainIcon : ''}</span>`
+                        ).join('');
+                        infoTarget.innerHTML = `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${content}</a>`;
+                    } else {
+                        infoTarget.innerHTML = descriptions.map(d => `<span class="info-seg">${d}</span>`).join('');
+                    }
+                } else {
+                    infoTarget.textContent = "";
+                }
+            };
 
             if (mediaType === 'video') {
                 const source = element.querySelector('source');
@@ -2014,11 +2053,14 @@
                 newVideo.appendChild(newSource);
                 mediaTarget.innerHTML = '';
                 mediaTarget.appendChild(newVideo);
+                rawText = element.getAttribute('data-title') || "Video Documentation Loop";
                 newVideo.addEventListener('loadedmetadata', () => {
                     if (gen !== _loadGen) return;
+                    _sp.style.display = 'none';
+                    detailView.classList.remove('spinner-loading');
+                    applyCaption(rawText);
                     applyMediaLayout(newVideo);
                 });
-                rawText = element.getAttribute('data-title') || "Video Documentation Loop";
 
             } else {
                 const img = element.querySelector('img');
@@ -2032,69 +2074,27 @@
                     newImg.style.height = '';
                     newImg.style.maxWidth = '';
                     newImg.style.maxHeight = '';
+                    rawText = img.alt || "Untitled";
 
                     const swap = () => {
                         if (gen !== _loadGen) return;
-                        document.getElementById('page-spinner').style.display = 'none';
+                        _sp.style.display = 'none';
                         detailView.classList.remove('spinner-loading');
                         detailView.scrollTop = 0;
                         detailView.scrollLeft = 0;
+                        applyCaption(rawText);
                         mediaTarget.innerHTML = '';
                         mediaTarget.appendChild(newImg);
                         applyMediaLayout(newImg);
                     };
-                    // If already in cache, swap immediately; otherwise keep the
-                    // current image visible until the new one is ready (no white flash).
+                    // If already in cache swap immediately; otherwise hold the current
+                    // image visible until the new one is ready (no white flash).
                     if (newImg.complete && newImg.naturalWidth) {
                         swap();
                     } else {
                         newImg.addEventListener('load', swap);
                     }
-                    rawText = img.alt || "Untitled";
                 }
-            }
-
-            const textSegments = rawText.split('|');
-            const rawTitle = textSegments[0] ? textSegments[0].trim() : "Untitled";
-            const titleMatch = rawTitle.match(/^(.*?)(\s*\([^)]*\))$/);
-            if (titleMatch) {
-                titleTarget.innerHTML = `${titleMatch[1]}<span class="title-roman">${titleMatch[2]}</span>`;
-            } else {
-                titleTarget.textContent = rawTitle;
-            }
-
-            const pageNumber = currentArtworkIndex + 1;
-            const pageNumberTarget = document.getElementById('page-number');
-            pageNumberTarget.textContent = pageNumber;
-
-            if (textSegments.length > 1) {
-                const descriptions = textSegments.slice(1).map(item => item.trim());
-                const urlPattern = /^https?:\/\//i;
-
-                // Chain-link icon appended to the last segment when a URL is present.
-                // Placed inside the last info-seg so it sits at the end of the
-                // single desktop line and to the right of the last mobile line.
-                // Two diagonal pill-shapes rotated 45 deg and crossing in the centre,
-                // matching the classic interlocked chain-link reference icon.
-                // Two interlocking diagonal pill-shapes (bottom-left to top-right)
-                // Interlocked diagonal chain links — 12px fits within text line-height,
-                // centres at (4,8)/(8,4) give ~30% overlap for pronounced interlock.
-                // Chain icon: two diagonal interlocked ovals with negative space at crossing.
-                // Global mask #chain-link-mask hides Link 1 inside Link 2's interior.
-                const chainIcon = `&ensp;<svg class="link-icon" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><defs><mask id="m1" maskUnits="userSpaceOnUse"><rect width="13" height="13" fill="white" stroke="none"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)" fill="black" stroke="none"/><polygon points="0,0 0,13 13,13" fill="white" stroke="none"/></mask><mask id="m2" maskUnits="userSpaceOnUse"><rect width="13" height="13" fill="white" stroke="none"/><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" fill="black" stroke="none"/><polygon points="0,0 13,0 13,13" fill="white" stroke="none"/></mask></defs><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" mask="url(#m1)"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)" mask="url(#m2)"/></svg>`;
-
-                if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
-                    const url = descriptions.pop();
-                    const lastIdx = descriptions.length - 1;
-                    const content = descriptions.map((d, i) =>
-                        `<span class="info-seg">${d}${i === lastIdx ? chainIcon : ''}</span>`
-                    ).join('');
-                    infoTarget.innerHTML = `<a class="info-link" href="${url}" target="_blank" rel="noopener noreferrer">${content}</a>`;
-                } else {
-                    infoTarget.innerHTML = descriptions.map(d => `<span class="info-seg">${d}</span>`).join('');
-                }
-            } else {
-                infoTarget.textContent = "";
             }
 
             preloadAdjacentArtwork();
