@@ -1944,7 +1944,10 @@
             }, 50);
         }
 
+        let _loadGen = 0; // incremented each navigation; stale loads are ignored
+
         function loadArtworkData(element, mediaType) {
+            const gen = ++_loadGen;
             let rawText = "";
             artworkDetails.classList.remove('light-text');
             document.getElementById('page-number').classList.remove('light-text');
@@ -1963,7 +1966,10 @@
                 newVideo.appendChild(newSource);
                 mediaTarget.innerHTML = '';
                 mediaTarget.appendChild(newVideo);
-                newVideo.addEventListener('loadedmetadata', () => applyMediaLayout(newVideo));
+                newVideo.addEventListener('loadedmetadata', () => {
+                    if (gen !== _loadGen) return;
+                    applyMediaLayout(newVideo);
+                });
                 rawText = element.getAttribute('data-title') || "Video Documentation Loop";
 
             } else {
@@ -1978,12 +1984,19 @@
                     newImg.style.height = '';
                     newImg.style.maxWidth = '';
                     newImg.style.maxHeight = '';
-                    mediaTarget.innerHTML = '';
-                    mediaTarget.appendChild(newImg);
-                    if (newImg.complete && newImg.naturalWidth) {
+
+                    const swap = () => {
+                        if (gen !== _loadGen) return;
+                        mediaTarget.innerHTML = '';
+                        mediaTarget.appendChild(newImg);
                         applyMediaLayout(newImg);
+                    };
+                    // If already in cache, swap immediately; otherwise keep the
+                    // current image visible until the new one is ready (no white flash).
+                    if (newImg.complete && newImg.naturalWidth) {
+                        swap();
                     } else {
-                        newImg.addEventListener('load', () => applyMediaLayout(newImg));
+                        newImg.addEventListener('load', swap);
                     }
                     rawText = img.alt || "Untitled";
                 }
