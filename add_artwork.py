@@ -6,8 +6,8 @@ For a given source image and its caption it will:
   1. Derive a filename from the caption title (lowercase, underscores,
      accents/punctuation stripped). Repeated titles get _2, _3, ... suffixes.
   2. Archive the original at the repo root under the new name.
-  3. Make a web-optimized copy in web/  (max 3200px long edge, quality 85;
-     images already <=3200px are just recompressed).
+  3. Make a web-optimized copy in web/  (max 4480px long edge, quality 92;
+     images already <=4480px are just recompressed).
   4. Make a grid thumbnail in thumbs/  (max 2000px long edge, quality 80).
   5. Insert a <!-- cms-item --> block into index.html at the chosen position
      and renumber every data-page sequentially.
@@ -34,7 +34,7 @@ ROOT   = os.path.dirname(os.path.abspath(__file__))
 INDEX  = os.path.join(ROOT, "index.html")
 WEB    = os.path.join(ROOT, "web")
 THUMBS = os.path.join(ROOT, "thumbs")
-WEB_MAX, WEB_Q     = 3200, 85
+WEB_MAX, WEB_Q     = 4480, 92
 THUMB_MAX, THUMB_Q = 2000, 80
 
 
