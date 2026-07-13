@@ -304,6 +304,28 @@
             color: rgba(255, 255, 255, 0.5) !important;
         }
 
+        /* Sound toggle — shown only for videos that opt into audio in the
+           detail view. Mirrors the corner-chrome treatment (fixed, thin,
+           light/dark by luminance). Bottom-left corner. */
+        .mute-button {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 18px;
+            z-index: 200000 !important;
+            pointer-events: auto;
+            cursor: pointer;
+            color: #000;
+            line-height: 0;
+            transition: color 0.2s ease;
+        }
+        .mute-button.visible { display: block; }
+        .mute-button svg { display: block; width: 20px; height: 20px; }
+        .mute-button.light-text { color: #fff !important; }
+        .mute-button:hover { color: #666; }
+        .mute-button.light-text:hover { color: rgba(255, 255, 255, 0.5) !important; }
+
         @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
@@ -776,7 +798,7 @@
 
 <!-- cms-item-start -->
             <!-- primary page identifier: data-page -->
-            <video class="tall" onclick="showArtworkPage(this, 'video')" data-title="Studio visit video for Louis Reed, New York | 2021 | https://www.instagram.com/tv/CYH9eNpppD5/?utm_source=ig_web_copy_link&amp;igsh=MzRlODBiNWFlZA%3D%3D" autoplay loop muted playsinline poster="thumbs/studio_visit_video_for_louis_reed_new_york_2021_poster.jpg" data-file="studio_visit_video_for_louis_reed_new_york_2021.mp4" data-page="39">
+            <video class="tall" data-audio onclick="showArtworkPage(this, 'video')" data-title="Studio visit video for Louis Reed, New York | 2021 | https://www.instagram.com/tv/CYH9eNpppD5/?utm_source=ig_web_copy_link&amp;igsh=MzRlODBiNWFlZA%3D%3D" autoplay loop muted playsinline poster="thumbs/studio_visit_video_for_louis_reed_new_york_2021_poster.jpg" data-file="studio_visit_video_for_louis_reed_new_york_2021.mp4" data-page="39">
                 <source src="studio_visit_video_for_louis_reed_new_york_2021.mp4" type="video/mp4">
             </video>
             <!-- cms-item-end -->
@@ -1715,6 +1737,7 @@
 
             <div class="page-number" id="page-number">1</div>
             <div class="close-button" id="close-button" onclick="hideArtworkPage(event)"><span class="close-button-glyph">X</span></div>
+            <div class="mute-button" id="mute-button" onclick="toggleMute(event)" aria-label="Toggle sound"></div>
             <div class="artwork-details" onclick="if (event.target !== this) event.stopPropagation()">
                 <h1 id="title-target">Artwork Title</h1>
                 <p id="info-target">Metadata text column entries apply cleanly here.</p>
@@ -1782,8 +1805,26 @@
                 const vw = window.innerWidth;
                 const vh = window.innerHeight;
                 const isWide = w > 0 && h > 0 && (w / h) > (vw / vh);
-                if (isWide) {
-                    // Wide/landscape: fill screen height, allow horizontal scroll
+                const isVideo = mediaEl.tagName.toLowerCase() === 'video';
+                if (isVideo && !isWide) {
+                    // Portrait video: fill screen height (top edge to bottom
+                    // edge) and let it be as wide as it is. The container stays
+                    // full-viewport-width and flex-centres the video, so the
+                    // white page shows as left/right pillarbox. No scrolling.
+                    mediaEl.style.height = '100vh';
+                    mediaEl.style.width  = 'auto';
+                    mediaTarget.style.width    = '';
+                    mediaTarget.style.maxWidth = '';
+                    mediaTarget.style.alignItems = 'center';
+                    detailView.style.overflowY = 'hidden';
+                    detailView.style.overflowX = 'hidden';
+                    requestAnimationFrame(() => {
+                        detailView.scrollLeft = 0;
+                        detailView.scrollTop  = 0;
+                    });
+                } else if (isWide) {
+                    // Wide/landscape: fill screen height and scroll horizontally,
+                    // opening scrolled to the centre.
                     mediaEl.style.height = '100vh';
                     mediaEl.style.width  = 'auto';
                     mediaTarget.style.width    = 'fit-content';
@@ -1829,6 +1870,28 @@
                 mediaTarget.style.alignItems = (h > w) ? 'flex-start' : 'center';
                 detailView.scrollTop = 0;
             }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // VIDEO SOUND TOGGLE
+        // Grid videos are always muted (silent autoplay loops). In the detail
+        // view, videos that opt in with `data-audio` play with sound, and this
+        // corner button lets the viewer mute/unmute.
+        // ─────────────────────────────────────────────────────────────────
+        const SPEAKER_ON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M16 8.6a4 4 0 0 1 0 6.8"/><path d="M18.7 6a7 7 0 0 1 0 12"/></g></svg>`;
+        const SPEAKER_OFF = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></g></svg>`;
+
+        function updateMuteIcon(muted) {
+            document.getElementById('mute-button').innerHTML = muted ? SPEAKER_OFF : SPEAKER_ON;
+        }
+
+        function toggleMute(event) {
+            if (event) event.stopPropagation();
+            const v = mediaTarget.querySelector('video');
+            if (!v) return;
+            v.muted = !v.muted;
+            if (!v.muted) v.play().catch(() => {});
+            updateMuteIcon(v.muted);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -1891,7 +1954,7 @@
         // region actually behind IT — the details block (bottom-right), the
         // page number (top-left), and the close button (top-right) all sit
         // over different parts of the image and can need opposite colours.
-        function applyTextColour(detailsLuminance, pageNumberLuminance, closeButtonLuminance) {
+        function applyTextColour(detailsLuminance, pageNumberLuminance, closeButtonLuminance, muteButtonLuminance) {
             // Threshold raised from 128 to 154 (~20% toward white): white text
             // on dark and medium-dark backgrounds; only clearly light backgrounds
             // get black text.
@@ -1901,6 +1964,8 @@
                 closeButtonLuminance !== null && closeButtonLuminance < 154);
             artworkDetails.classList.toggle('light-text',
                 detailsLuminance !== null && detailsLuminance < 154);
+            document.getElementById('mute-button').classList.toggle('light-text',
+                muteButtonLuminance !== null && muteButtonLuminance < 154);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -1943,13 +2008,19 @@
                         const detailsRect = visibleTextRect(artworkDetails);
                         const pageNumberRect = document.getElementById('page-number').getBoundingClientRect();
                         const closeButtonRect = document.getElementById('close-button').getBoundingClientRect();
+                        const muteButton = document.getElementById('mute-button');
                         const detailsLum = sampleLuminanceAtScreenRect(
                             mediaEl, detailsRect.left, detailsRect.top, detailsRect.width, detailsRect.height);
                         const pageNumberLum = sampleLuminanceAtScreenRect(
                             mediaEl, pageNumberRect.left, pageNumberRect.top, pageNumberRect.width, pageNumberRect.height);
                         const closeButtonLum = sampleLuminanceAtScreenRect(
                             mediaEl, closeButtonRect.left, closeButtonRect.top, closeButtonRect.width, closeButtonRect.height);
-                        applyTextColour(detailsLum, pageNumberLum, closeButtonLum);
+                        let muteButtonLum = null;
+                        if (muteButton.classList.contains('visible')) {
+                            const r = muteButton.getBoundingClientRect();
+                            muteButtonLum = sampleLuminanceAtScreenRect(mediaEl, r.left, r.top, r.width, r.height);
+                        }
+                        applyTextColour(detailsLum, pageNumberLum, closeButtonLum, muteButtonLum);
                     }
                 }
                 requestAnimationFrame(loop);
@@ -2027,6 +2098,7 @@
             artworkDetails.classList.remove('light-text');
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
+            document.getElementById('mute-button').classList.remove('visible', 'light-text');
 
             // Show spinner; on mobile reset to screen-centre (no mousemove to position it)
             const _sp = document.getElementById('page-spinner');
@@ -2070,11 +2142,16 @@
 
             if (mediaType === 'video') {
                 const source = element.querySelector('source');
+                const wantAudio = element.hasAttribute('data-audio');
                 const newVideo = document.createElement('video');
                 newVideo.setAttribute('autoplay', '');
                 newVideo.setAttribute('loop', '');
-                newVideo.setAttribute('muted', '');
                 newVideo.setAttribute('playsinline', '');
+                // Videos without opted-in audio stay silent, as in the grid.
+                // Audio videos start unmuted; if the browser blocks unmuted
+                // autoplay we fall back to muted so the loop still plays, and
+                // the corner button lets the viewer turn sound on.
+                newVideo.muted = !wantAudio;
                 const newSource = document.createElement('source');
                 newSource.src = source.src;
                 newSource.type = 'video/mp4';
@@ -2088,6 +2165,16 @@
                     detailView.classList.remove('spinner-loading');
                     applyCaption(rawText);
                     applyMediaLayout(newVideo);
+                    if (wantAudio) {
+                        newVideo.play().catch(() => {
+                            // Autoplay-with-sound blocked: play muted instead.
+                            newVideo.muted = true;
+                            updateMuteIcon(true);
+                            newVideo.play().catch(() => {});
+                        });
+                        updateMuteIcon(newVideo.muted);
+                        document.getElementById('mute-button').classList.add('visible');
+                    }
                     preloadAdjacentArtwork();
                 });
 
@@ -2227,6 +2314,7 @@
             }
             stopBrightnessLoop();
             hideArrows();
+            document.getElementById('mute-button').classList.remove('visible', 'light-text');
             document.getElementById('page-spinner').style.display = 'none';
             detailView.classList.remove('spinner-loading');
             window.resetImageZoom();
