@@ -324,6 +324,21 @@
         .artwork-details .mute-toggle:hover { color: #666; }
         .artwork-details.light-text .mute-toggle:hover { color: rgba(255, 255, 255, 0.5) !important; }
 
+        /* Readability halo for captions shown over a video. A portrait video
+           can fill the mobile viewport so the caption sits over its lower
+           edge, and the video is often mid-tone where a single text colour is
+           hard to read. The halo uses the opposite tone to the text, so it
+           works whether the caption is black or white; over the plain white
+           page it's invisible. */
+        .artwork-details.over-video h1,
+        .artwork-details.over-video p {
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.85), 0 1px 2px rgba(255, 255, 255, 0.85);
+        }
+        .artwork-details.over-video.light-text h1,
+        .artwork-details.over-video.light-text p {
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.6);
+        }
+
         @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
@@ -2094,6 +2109,7 @@
 
             // Reset UI chrome immediately so stale colours don't linger
             artworkDetails.classList.remove('light-text');
+            artworkDetails.classList.remove('over-video');
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
 
@@ -2167,6 +2183,7 @@
                     if (gen !== _loadGen) return;
                     _sp.style.display = 'none';
                     detailView.classList.remove('spinner-loading');
+                    artworkDetails.classList.add('over-video');
                     applyCaption(rawText, wantAudio);
                     applyMediaLayout(newVideo);
                     if (wantAudio) {
