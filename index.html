@@ -2060,6 +2060,7 @@
                     detailView.classList.remove('spinner-loading');
                     applyCaption(rawText);
                     applyMediaLayout(newVideo);
+                    preloadAdjacentArtwork();
                 });
 
             } else {
@@ -2069,6 +2070,9 @@
                     newImg.alt = 'Focus view';
                     // Full-resolution original, not the grid's small thumbnail —
                     // data-file always points at the source file in the repo root.
+                    // High priority so the image the user is waiting on wins the
+                    // bandwidth race against the deferred neighbour preloads.
+                    newImg.fetchPriority = 'high';
                     newImg.src = element.getAttribute('data-file');
                     newImg.style.width = '';
                     newImg.style.height = '';
@@ -2086,6 +2090,9 @@
                         mediaTarget.innerHTML = '';
                         mediaTarget.appendChild(newImg);
                         applyMediaLayout(newImg);
+                        // Only now, with the viewed image on screen, start pulling
+                        // in the neighbours — so they never compete with it.
+                        preloadAdjacentArtwork();
                     };
                     // If already in cache swap immediately; otherwise hold the current
                     // image visible until the new one is ready (no white flash).
@@ -2097,7 +2104,6 @@
                 }
             }
 
-            preloadAdjacentArtwork();
         }
 
         // Quietly fetch the surrounding full-res originals so stepping
@@ -2117,7 +2123,7 @@
                 if (!file || preloadedArtwork.has(file)) return;
                 preloadedArtwork.add(file);
                 const img = new Image();
-                img.fetchPriority = 'auto';
+                img.fetchPriority = 'low';
                 img.src = file;
             });
         }
