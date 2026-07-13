@@ -3,8 +3,11 @@
 add_artwork.py — add a new image to the gallery with the full pipeline automated.
 
 For a given source image and its caption it will:
-  1. Derive a filename from the caption title (lowercase, underscores,
-     accents/punctuation stripped). Repeated titles get _2, _3, ... suffixes.
+  1. Derive a filename from the whole caption — title, date, materials,
+     dimensions, 'exhibition view', venue/place (lowercase, underscores,
+     accents/punctuation stripped; URL and '(with work by ...)' /
+     '(in collaboration with ...)' credits omitted). Repeated results get
+     _2, _3, ... suffixes.
   2. Archive the original at the repo root under the new name.
   3. Make a web-optimized copy in web/  (max 4480px long edge, quality 92;
      images already <=4480px are just recompressed).
@@ -38,8 +41,24 @@ WEB_MAX, WEB_Q     = 4480, 92
 THUMB_MAX, THUMB_Q = 2000, 80
 
 
-def slugify(title):
-    t = unicodedata.normalize("NFKD", title.strip()).encode("ascii", "ignore").decode()
+# parenthetical collaborator/contributor credits are dropped from filenames
+COLLAB = re.compile(r"\((?:in collaboration with|with work by|including work by)[^)]*\)", re.I)
+
+
+def slugify(title, segs=()):
+    """Build a filename slug from the whole caption (title + all segments),
+    minus any URL and any '(with work by ...)' / '(in collaboration with ...)'
+    credit. Everything else — date, materials, dimensions, 'exhibition view',
+    venue/place — is included."""
+    kept = []
+    for s in [title, *segs]:
+        s = s.strip()
+        if re.match(r"https?://", s):
+            continue
+        s = COLLAB.sub("", s).strip()
+        if s:
+            kept.append(s)
+    t = unicodedata.normalize("NFKD", " ".join(kept)).encode("ascii", "ignore").decode()
     t = re.sub(r"[^a-z0-9]+", "_", t.lower()).strip("_")
     return t or "untitled"
 
@@ -131,7 +150,7 @@ def main():
     ext = os.path.splitext(args.source)[1].lower()
     if ext == ".jpeg":
         ext = ".jpeg"
-    newname = unique_name(slugify(args.title), ext)
+    newname = unique_name(slugify(args.title, args.seg), ext)
     caption = build_caption(args.title, args.seg, args.link)
 
     # 1. archive original at root
