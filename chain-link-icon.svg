@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 130 130"
+     width="400" height="400">
+
+  <!-- Chain link icon — two interlocking diagonal pill shapes -->
+  <!-- Coordinate space is 130×130 (original 13×13 scaled ×10).        -->
+  <!-- To use the edited version: scale back to 13×13 in the JS,       -->
+  <!-- or hand the file back and the coordinates will be rescaled.      -->
+
+  <defs>
+    <!-- Mask for lower-left link: hides it inside upper-right link's shape -->
+    <!-- limited to the upper-right half (x > y) so SW end stays visible.  -->
+    <mask id="m1" maskUnits="userSpaceOnUse">
+      <rect width="130" height="130" fill="white"/>
+      <rect x="40" y="27.5" width="80" height="45" rx="22.5"
+            transform="rotate(-45 80 50)" fill="black"/>
+    </mask>
+
+    <!-- Mask for upper-right link: hides it inside lower-left link's shape -->
+    <!-- limited to the lower-left half (y > x) so NE end stays visible.   -->
+    <mask id="m2" maskUnits="userSpaceOnUse">
+      <rect width="130" height="130" fill="white"/>
+      <rect x="10" y="57.5" width="80" height="45" rx="22.5"
+            transform="rotate(-45 50 80)" fill="black"/>
+    </mask>
+  </defs>
+
+  <!-- Lower-left link (Link 1) -->
+  <rect x="10" y="57.5" width="80" height="45" rx="22.5"
+        transform="rotate(-45 50 80)"
+        fill="none" stroke="black" stroke-width="5.6"
+        mask="url(#m1)"/>
+
+  <!-- Upper-right link (Link 2) -->
+  <rect x="40" y="27.5" width="80" height="45" rx="22.5"
+        transform="rotate(-45 80 50)"
+        fill="none" stroke="black" stroke-width="5.6"
+        mask="url(#m2)"/>
+
+  <!-- Centre ring -->
+  <circle cx="65" cy="65" r="16" fill="none" stroke="black" stroke-width="5.6"/>
+
+</svg>

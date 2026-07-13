@@ -874,14 +874,14 @@
             <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="KlassebeiKandlhofer (25 von 84)KlassebeiKandlhofer_edit.jpg" data-page="51">
-                <img src="thumbs/KlassebeiKandlhofer (25 von 84)KlassebeiKandlhofer_edit.jpg" alt="Untitled (Green/Black) | 2017 | anodized aluminium, geared motor, POM plastic, uv print, silk screen print, heat foil on synthetic velvet | 250 x 200 cm" loading="lazy">
+                <img src="thumbs/KlassebeiKandlhofer (25 von 84)KlassebeiKandlhofer_edit.jpg" alt="Untitled (Green/Black) | 2017 | anodized aluminium, geared motor, POM plastic, uv print, silk screen print, heat foil on synthetic velvet | 250 x 200 cm | https://www.kandlhofer.com/de/exhibitions/49-group-exhibition-i-tiefe-kirschen/" loading="lazy">
             </a>
             <!-- cms-item-end -->
 <!-- cms-item-start -->
             <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="KlassebeiKandlhofer (6 von 14)KlassebeiKandlhofer_edit2.jpg" data-page="52">
-                <img src="thumbs/KlassebeiKandlhofer (6 von 14)KlassebeiKandlhofer_edit2.jpg" alt="Untitled (Green/Black) | 2017 | anodized aluminium, geared motor, POM plastic, uv print, silk screen print, heat foil on synthetic velvet | 250 x 200 cm" loading="lazy">
+                <img src="thumbs/KlassebeiKandlhofer (6 von 14)KlassebeiKandlhofer_edit2.jpg" alt="Untitled (Green/Black) | 2017 | anodized aluminium, geared motor, POM plastic, uv print, silk screen print, heat foil on synthetic velvet | 250 x 200 cm | https://www.kandlhofer.com/de/exhibitions/49-group-exhibition-i-tiefe-kirschen/" loading="lazy">
             </a>
             <!-- cms-item-end -->
 
@@ -890,7 +890,7 @@
             <!-- primary page identifier: data-page -->
             <!-- Tall Size -->
             <a class="tall" onclick="showArtworkPage(this, 'image')" data-file="KlassebeiKandlhofer (77 von 84)KlassebeiKandlhofer_edit.jpg" data-page="53">
-                <img src="thumbs/KlassebeiKandlhofer (77 von 84)KlassebeiKandlhofer_edit.jpg" alt="Untitled (Green/Black) (detail) | 2017 | anodized aluminium, geared motor, POM plastic, uv print, silk screen print, heat foil on synthetic velvet | 250 x 200 cm" loading="lazy">
+                <img src="thumbs/KlassebeiKandlhofer (77 von 84)KlassebeiKandlhofer_edit.jpg" alt="Untitled (Green/Black) (detail) | 2017 | anodized aluminium, geared motor, POM plastic, uv print, silk screen print, heat foil on synthetic velvet | 250 x 200 cm | https://www.kandlhofer.com/de/exhibitions/49-group-exhibition-i-tiefe-kirschen/" loading="lazy">
             </a>
             <!-- cms-item-end -->
 
@@ -2008,7 +2008,7 @@
             hideArrows();
 
             // Chain icon used inside captions that have a URL
-            const chainIcon = `&ensp;<svg class="link-icon" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><defs><mask id="m1" maskUnits="userSpaceOnUse"><rect width="13" height="13" fill="white" stroke="none"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)" fill="black" stroke="none"/></mask><mask id="m2" maskUnits="userSpaceOnUse"><rect width="13" height="13" fill="white" stroke="none"/><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" fill="black" stroke="none"/></mask></defs><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" mask="url(#m1)"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)" mask="url(#m2)"/></svg>`;
+            const chainIcon = `&ensp;<svg class="link-icon" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="0.56"><defs><mask id="m1" maskUnits="userSpaceOnUse"><rect width="13" height="13" fill="white" stroke="none"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)" fill="black" stroke="none"/></mask><mask id="m2" maskUnits="userSpaceOnUse"><rect width="13" height="13" fill="white" stroke="none"/><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" fill="black" stroke="none"/></mask></defs><rect x="1" y="5.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 5 8)" mask="url(#m1)"/><rect x="4" y="2.75" width="8" height="4.5" rx="2.25" transform="rotate(-45 8 5)" mask="url(#m2)"/><circle cx="6.5" cy="6.5" r="1.6" fill="none" stroke="currentColor" stroke-width="0.56"/></svg>`;
 
             // Update caption and page number — deferred to fire when media is ready
             // so text and image always change together.
@@ -2109,7 +2109,7 @@
         const preloadedArtwork = new Set();
         function preloadAdjacentArtwork() {
             if (allArtworkElements.length < 2) return;
-            [1, 2, 3, 4, 5, -1, -2, -3, -4, -5].forEach(direction => {
+            [1, 2, 3, -1, -2].forEach(direction => {
                 const idx = (currentArtworkIndex + direction + allArtworkElements.length) % allArtworkElements.length;
                 const el = allArtworkElements[idx];
                 if (el.tagName.toLowerCase() === 'video') return;
