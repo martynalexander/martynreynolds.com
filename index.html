@@ -324,21 +324,6 @@
         .artwork-details .mute-toggle:hover { color: #666; }
         .artwork-details.light-text .mute-toggle:hover { color: rgba(255, 255, 255, 0.5) !important; }
 
-        /* Readability halo for captions shown over a video. A portrait video
-           can fill the mobile viewport so the caption sits over its lower
-           edge, and the video is often mid-tone where a single text colour is
-           hard to read. The halo uses the opposite tone to the text, so it
-           works whether the caption is black or white; over the plain white
-           page it's invisible. */
-        .artwork-details.over-video h1,
-        .artwork-details.over-video p {
-            text-shadow: 0 0 4px rgba(255, 255, 255, 0.85), 0 1px 2px rgba(255, 255, 255, 0.85);
-        }
-        .artwork-details.over-video.light-text h1,
-        .artwork-details.over-video.light-text p {
-            text-shadow: 0 0 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.6);
-        }
-
         @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
@@ -1802,6 +1787,18 @@
             return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
         }
 
+        // Like isPointOverMedia, but a desktop pillarboxed video also counts its
+        // left/right white bars as navigable — so the < > arrows appear there and
+        // a click navigates, instead of the bars reading as "return to grid".
+        function isPointNavigable(mediaEl, cx, cy) {
+            if (!mediaEl) return false;
+            const r = mediaEl.getBoundingClientRect();
+            if (isDesktop() && mediaEl.tagName.toLowerCase() === 'video') {
+                return cy >= r.top && cy <= r.bottom;
+            }
+            return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
+        }
+
         // ─────────────────────────────────────────────────────────────────
         // INITIAL LAYOUT PER DEVICE + IMAGE ORIENTATION
         //   • Desktop: vertical images that overflow open scrolled to centre.
@@ -1863,6 +1860,23 @@
                         detailView.scrollLeft = 0;
                     });
                 }
+            } else if (mediaEl.tagName.toLowerCase() === 'video') {
+                // Mobile video: lift the frame so its bottom edge sits one text
+                // line above the caption, leaving the caption on the clear page
+                // below it. Fill the width and, if the video is taller than the
+                // remaining space, crop the TOP (object-position bottom) — never
+                // the bottom.
+                const capTop = artworkDetails.getBoundingClientRect().top;
+                const lineH = parseFloat(getComputedStyle(document.getElementById('info-target')).lineHeight) || 20;
+                const boxH = Math.max(0, capTop - lineH);
+                mediaEl.style.width = '100vw';
+                mediaEl.style.height = boxH + 'px';
+                mediaEl.style.maxWidth = '100vw';
+                mediaEl.style.maxHeight = 'none';
+                mediaEl.style.objectFit = 'cover';
+                mediaEl.style.objectPosition = 'center bottom';
+                mediaTarget.style.alignItems = 'flex-start';
+                detailView.scrollTop = 0;
             } else {
                 const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
                 const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -2109,7 +2123,6 @@
 
             // Reset UI chrome immediately so stale colours don't linger
             artworkDetails.classList.remove('light-text');
-            artworkDetails.classList.remove('over-video');
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
 
@@ -2183,7 +2196,6 @@
                     if (gen !== _loadGen) return;
                     _sp.style.display = 'none';
                     detailView.classList.remove('spinner-loading');
-                    artworkDetails.classList.add('over-video');
                     applyCaption(rawText, wantAudio);
                     applyMediaLayout(newVideo);
                     if (wantAudio) {
@@ -2426,7 +2438,7 @@
         function handleDetailClick(event) {
             if (isPinching) return;
             const mediaEl = mediaTarget.querySelector('img, video');
-            if (mediaEl && isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
+            if (mediaEl && isPointNavigable(mediaEl, event.clientX, event.clientY)) {
                 // Use screen centre, not image centre — when panned or zoomed
                 // the image centre can be off-screen, so image-relative left/
                 // right doesn't match what the user perceives as left/right.
@@ -2497,7 +2509,7 @@
             // page-number corner, the artwork-details padding around the
             // text) should show the normal arrow cursor and no nav arrow —
             // clicking there returns to the grid, it doesn't navigate.
-            if (!mediaEl || !isPointOverMedia(mediaEl, event.clientX, event.clientY)) {
+            if (!mediaEl || !isPointNavigable(mediaEl, event.clientX, event.clientY)) {
                 detailView.classList.remove('over-media');
                 detailView.style.cursor = '';
                 if (mediaEl) mediaEl.style.removeProperty('cursor');
@@ -2513,6 +2525,8 @@
             detailView.classList.add('over-media');
             mediaEl.style.setProperty('cursor', 'none', 'important');
             const rect = mediaEl.getBoundingClientRect();
+            const overPixels = event.clientX >= rect.left && event.clientX <= rect.right &&
+                               event.clientY >= rect.top  && event.clientY <= rect.bottom;
             const goLeft = event.clientX < (rect.left + rect.width / 2);
             const active = goLeft ? arrowLeft : arrowRight;
             const other  = goLeft ? arrowRight : arrowLeft;
@@ -2522,8 +2536,11 @@
             active.style.top  = event.clientY + 'px';
             active.style.opacity = '1';
 
-            // Throttle the (relatively costly) luminance sample to ~12/sec.
-            if (event.timeStamp - lastArrowSample > 80) {
+            if (!overPixels) {
+                // Over the white pillarbox beside a video: black arrow on white.
+                lastArrowColour = '#000';
+            } else if (event.timeStamp - lastArrowSample > 80) {
+                // Throttle the (relatively costly) luminance sample to ~12/sec.
                 lastArrowSample = event.timeStamp;
                 const lum = sampleLuminanceAtScreenRect(
                     mediaEl, event.clientX - 20, event.clientY - 12, 40, 24);
