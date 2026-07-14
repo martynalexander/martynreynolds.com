@@ -1735,7 +1735,7 @@
 
             <div class="page-number" id="page-number">1</div>
             <div class="close-button" id="close-button" onclick="hideArtworkPage(event)"><span class="close-button-glyph">X</span></div>
-            <div class="artwork-details" onclick="if (event.target !== this) event.stopPropagation()">
+            <div class="artwork-details" onclick="handleDetailsClick(event)">
                 <h1 id="title-target">Artwork Title</h1>
                 <p id="info-target">Metadata text column entries apply cleanly here.</p>
             </div>
@@ -1861,14 +1861,14 @@
                     });
                 }
             } else if (mediaEl.tagName.toLowerCase() === 'video') {
-                // Mobile video: lift the frame so its bottom edge sits one text
-                // line above the caption, leaving the caption on the clear page
+                // Mobile video: lift the frame so its bottom edge sits two text
+                // lines above the caption, leaving the caption on the clear page
                 // below it. Fill the width and, if the video is taller than the
                 // remaining space, crop the TOP (object-position bottom) — never
                 // the bottom.
                 const capTop = artworkDetails.getBoundingClientRect().top;
                 const lineH = parseFloat(getComputedStyle(document.getElementById('info-target')).lineHeight) || 20;
-                const boxH = Math.max(0, capTop - lineH);
+                const boxH = Math.max(0, capTop - lineH * 2);
                 mediaEl.style.width = '100vw';
                 mediaEl.style.height = boxH + 'px';
                 mediaEl.style.maxWidth = '100vw';
@@ -2116,6 +2116,22 @@
         }
 
         let _loadGen = 0; // incremented each navigation; stale loads are ignored
+        let currentCaptionUrl = null; // link URL for the current artwork, if any
+
+        // The caption is the artwork's link. On desktop the WHOLE text block is
+        // clickable (not just the underlined segments); the empty band beside it
+        // still returns to the grid. On mobile the inner <a> handles its own tap.
+        function handleDetailsClick(event) {
+            // Clicks on the empty container band bubble to the grid-return handler.
+            if (event.target === artworkDetails) return;
+            event.stopPropagation();
+            // The sound toggle manages its own click.
+            if (event.target.closest && event.target.closest('.mute-toggle')) return;
+            if (isDesktop() && currentCaptionUrl) {
+                event.preventDefault(); // don't also fire the inner <a>'s navigation
+                window.open(currentCaptionUrl, '_blank', 'noopener,noreferrer');
+            }
+        }
 
         function loadArtworkData(element, mediaType) {
             const gen = ++_loadGen;
@@ -2148,11 +2164,13 @@
                     titleTarget.textContent = rawTitle;
                 }
                 document.getElementById('page-number').textContent = currentArtworkIndex + 1;
+                currentCaptionUrl = null;
                 if (textSegments.length > 1) {
                     const descriptions = textSegments.slice(1).map(item => item.trim());
                     const urlPattern = /^https?:\/\//i;
                     if (descriptions.length > 1 && urlPattern.test(descriptions[descriptions.length - 1])) {
                         const url = descriptions.pop();
+                        currentCaptionUrl = url;
                         const lastIdx = descriptions.length - 1;
                         const content = descriptions.map((d, i) =>
                             `<span class="info-seg">${d}${i === lastIdx ? chainIcon : ''}</span>`
@@ -2487,7 +2505,13 @@
             // has proven unreliable about painting a cursor that's only
             // set via an ancestor while a sibling/descendant disagrees.
             const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
-            const hoveredInteractive = elAtPoint && elAtPoint.closest('.artwork-details a, .close-button');
+            let hoveredInteractive = elAtPoint && elAtPoint.closest('.artwork-details a, .close-button');
+            // Desktop: the whole caption text block is the link, so any text in
+            // it (not the empty band) gets the hand cursor too.
+            if (!hoveredInteractive && currentCaptionUrl && elAtPoint &&
+                elAtPoint.closest('.artwork-details') && elAtPoint !== artworkDetails) {
+                hoveredInteractive = elAtPoint;
+            }
             if (hoveredInteractive) {
                 detailView.classList.remove('over-media');
                 detailView.style.cursor = '';
