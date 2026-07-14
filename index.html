@@ -409,6 +409,22 @@
             color: rgba(255, 255, 255, 0.5) !important;
         }
 
+        /* The whole caption is one link: hovering any of its text greys all of
+           it, matching the inline link hover. Toggled from JS (desktop only). */
+        .artwork-details.hover-link h1,
+        .artwork-details.hover-link p {
+            color: #666;
+        }
+        .artwork-details.light-text.hover-link h1,
+        .artwork-details.light-text.hover-link p {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        /* A video caption is descriptive, not an artwork title — no italics. */
+        .artwork-details.video-caption h1 {
+            font-style: normal;
+        }
+
         /* MINIMAL FLAT ARROW INDICATOR — desktop only, follows the cursor.
            Its colour is set in JS by sampling the image tone directly behind
            the cursor — the same brightness feature that drives the text block. */
@@ -1869,12 +1885,16 @@
                 const capTop = artworkDetails.getBoundingClientRect().top;
                 const lineH = parseFloat(getComputedStyle(document.getElementById('info-target')).lineHeight) || 20;
                 const boxH = Math.max(0, capTop - lineH * 2);
-                mediaEl.style.width = '100vw';
-                mediaEl.style.height = boxH + 'px';
-                mediaEl.style.maxWidth = '100vw';
-                mediaEl.style.maxHeight = 'none';
-                mediaEl.style.objectFit = 'cover';
-                mediaEl.style.objectPosition = 'center bottom';
+                // NB: the mobile media query forces width/height:auto !important
+                // on media, so these must be set with priority to take effect
+                // (iOS Safari otherwise renders the video at full height and the
+                // caption cuts through it).
+                mediaEl.style.setProperty('width', '100vw', 'important');
+                mediaEl.style.setProperty('height', boxH + 'px', 'important');
+                mediaEl.style.setProperty('max-width', '100vw', 'important');
+                mediaEl.style.setProperty('max-height', 'none', 'important');
+                mediaEl.style.setProperty('object-fit', 'cover', 'important');
+                mediaEl.style.setProperty('object-position', 'center bottom', 'important');
                 mediaTarget.style.alignItems = 'flex-start';
                 detailView.scrollTop = 0;
             } else {
@@ -2118,16 +2138,16 @@
         let _loadGen = 0; // incremented each navigation; stale loads are ignored
         let currentCaptionUrl = null; // link URL for the current artwork, if any
 
-        // The caption is the artwork's link. On desktop the WHOLE text block is
-        // clickable (not just the underlined segments); the empty band beside it
-        // still returns to the grid. On mobile the inner <a> handles its own tap.
+        // The caption is the artwork's link. The WHOLE text block is clickable
+        // (not just the underlined segments), the same on mobile and desktop;
+        // the empty band beside it still returns to the grid.
         function handleDetailsClick(event) {
             // Clicks on the empty container band bubble to the grid-return handler.
             if (event.target === artworkDetails) return;
             event.stopPropagation();
             // The sound toggle manages its own click.
             if (event.target.closest && event.target.closest('.mute-toggle')) return;
-            if (isDesktop() && currentCaptionUrl) {
+            if (currentCaptionUrl) {
                 event.preventDefault(); // don't also fire the inner <a>'s navigation
                 window.open(currentCaptionUrl, '_blank', 'noopener,noreferrer');
             }
@@ -2139,6 +2159,7 @@
 
             // Reset UI chrome immediately so stale colours don't linger
             artworkDetails.classList.remove('light-text');
+            artworkDetails.classList.remove('video-caption', 'hover-link');
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
 
@@ -2214,6 +2235,7 @@
                     if (gen !== _loadGen) return;
                     _sp.style.display = 'none';
                     detailView.classList.remove('spinner-loading');
+                    artworkDetails.classList.add('video-caption');
                     applyCaption(rawText, wantAudio);
                     applyMediaLayout(newVideo);
                     if (wantAudio) {
@@ -2512,6 +2534,10 @@
                 elAtPoint.closest('.artwork-details') && elAtPoint !== artworkDetails) {
                 hoveredInteractive = elAtPoint;
             }
+            // Grey the whole caption while hovering any of its text (link).
+            artworkDetails.classList.toggle('hover-link', !!(currentCaptionUrl && elAtPoint &&
+                elAtPoint.closest('.artwork-details') && elAtPoint !== artworkDetails &&
+                !elAtPoint.closest('.mute-toggle')));
             if (hoveredInteractive) {
                 detailView.classList.remove('over-media');
                 detailView.style.cursor = '';
@@ -2604,6 +2630,7 @@
         detailView.addEventListener('mousemove', handleDetailMouseMove);
         detailView.addEventListener('mouseleave', () => {
             detailView.classList.remove('over-media');
+            artworkDetails.classList.remove('hover-link');
             detailView.style.cursor = '';
             const mediaEl = mediaTarget.querySelector('img, video');
             if (mediaEl) mediaEl.style.removeProperty('cursor');
