@@ -304,25 +304,30 @@
             color: rgba(255, 255, 255, 0.5) !important;
         }
 
-        /* Sound toggle — shown inline in the caption for videos that opt into
-           audio. Same minimal treatment as the link icon and the X: thin, sits
-           in the text flow and inherits the caption's light/dark colour. */
+        /* Sound toggle — an Instagram-style round button pinned to the
+           bottom-right corner of the video: a translucent grey disc with a
+           white speaker glyph. Positioned in JS from the video's rendered box. */
         .mute-toggle {
-            display: inline;
-            vertical-align: middle;
+            position: fixed;
+            z-index: 30;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
             cursor: pointer;
-            color: inherit;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.15s ease;
         }
         .mute-toggle svg {
-            display: inline-block;
-            vertical-align: middle;
-            position: relative;
-            top: -2px;
-            width: 15px;
-            height: 15px;
+            display: block;
+            width: 18px;
+            height: 18px;
         }
-        .artwork-details .mute-toggle:hover { color: #666; }
-        .artwork-details.light-text .mute-toggle:hover { color: rgba(255, 255, 255, 0.5) !important; }
+        .mute-toggle:hover { background: rgba(0, 0, 0, 0.62); }
 
         @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
@@ -812,8 +817,8 @@
 
 <!-- cms-item-start -->
             <!-- primary page identifier: data-page -->
-            <video class="tall" data-audio onclick="showArtworkPage(this, 'video')" data-title="Studio visit video for Louis Reed | 2021 | https://www.instagram.com/tv/CYH9eNpppD5/?utm_source=ig_web_copy_link&amp;igsh=MzRlODBiNWFlZA%3D%3D" autoplay loop muted playsinline poster="thumbs/studio_visit_video_for_louis_reed_2021_poster.jpg" data-file="studio_visit_video_for_louis_reed_2021.mp4" data-page="39">
-                <source src="studio_visit_video_for_louis_reed_2021.mp4" type="video/mp4">
+            <video class="tall" data-audio onclick="showArtworkPage(this, 'video')" data-title="Studio visit video for Louis Reed, New York | 2021 | https://www.instagram.com/tv/CYH9eNpppD5/?utm_source=ig_web_copy_link&amp;igsh=MzRlODBiNWFlZA%3D%3D" autoplay loop muted playsinline poster="thumbs/studio_visit_video_for_louis_reed_new_york_2021_poster.jpg" data-file="studio_visit_video_for_louis_reed_new_york_2021.mp4" data-page="39">
+                <source src="studio_visit_video_for_louis_reed_new_york_2021.mp4" type="video/mp4">
             </video>
             <!-- cms-item-end -->
 
@@ -1925,17 +1930,57 @@
         // small speaker toggle placed inline in the caption, right after the
         // link icon — the same minimal, colour-inheriting treatment.
         // ─────────────────────────────────────────────────────────────────
-        const SPEAKER_ON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M16 8.6a4 4 0 0 1 0 6.8"/><path d="M18.7 6a7 7 0 0 1 0 12"/></g></svg>`;
-        const SPEAKER_OFF = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></g></svg>`;
+        // Instagram-style speaker glyphs (white, filled body + waves / slash).
+        const SPEAKER_ON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.7 6a8.5 8.5 0 0 1 0 12"/></svg>`;
+        const SPEAKER_OFF = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 9l6 6M22 9l-6 6"/></svg>`;
 
-        // Two spaces (&ensp;&ensp;) then the speaker glyph, as a caption span.
-        const muteToggleHtml = (muted) =>
-            `&ensp;&ensp;<span class="mute-toggle" id="mute-button" role="button" aria-label="Toggle sound" onclick="toggleMute(event)">${muted ? SPEAKER_OFF : SPEAKER_ON}</span>`;
+        // The round mute button lives outside the caption, pinned to the video's
+        // bottom-right corner. Created once and reused across videos.
+        function getMuteButton() {
+            let btn = document.getElementById('mute-button');
+            if (!btn) {
+                btn = document.createElement('div');
+                btn.id = 'mute-button';
+                btn.className = 'mute-toggle';
+                btn.setAttribute('role', 'button');
+                btn.setAttribute('aria-label', 'Toggle sound');
+                btn.style.display = 'none';
+                btn.addEventListener('click', toggleMute);
+                detailView.appendChild(btn);
+            }
+            return btn;
+        }
+
+        // Position the button at the bottom-right corner of the video's box.
+        function positionMuteButton() {
+            const btn = document.getElementById('mute-button');
+            const v = mediaTarget.querySelector('video');
+            if (!btn || !v || btn.style.display === 'none') return;
+            const r = v.getBoundingClientRect();
+            const m = 14;
+            btn.style.left = (r.right - btn.offsetWidth - m) + 'px';
+            btn.style.top  = (r.bottom - btn.offsetHeight - m) + 'px';
+        }
+
+        function showMuteButton(muted) {
+            const btn = getMuteButton();
+            btn.innerHTML = muted ? SPEAKER_OFF : SPEAKER_ON;
+            btn.style.display = 'flex';
+            positionMuteButton();
+        }
+
+        function hideMuteButton() {
+            const btn = document.getElementById('mute-button');
+            if (btn) btn.style.display = 'none';
+        }
 
         function updateMuteIcon(muted) {
             const el = document.getElementById('mute-button');
             if (el) el.innerHTML = muted ? SPEAKER_OFF : SPEAKER_ON;
         }
+
+        window.addEventListener('resize', positionMuteButton);
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', positionMuteButton);
 
         function toggleMute(event) {
             // preventDefault stops the surrounding caption link from opening;
@@ -2160,6 +2205,7 @@
             // Reset UI chrome immediately so stale colours don't linger
             artworkDetails.classList.remove('light-text');
             artworkDetails.classList.remove('video-caption', 'hover-link');
+            hideMuteButton();
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
 
@@ -2175,7 +2221,7 @@
 
             // Update caption and page number — deferred to fire when media is ready
             // so text and image always change together.
-            const applyCaption = (text, withMute) => {
+            const applyCaption = (text) => {
                 const textSegments = text.split('|');
                 const rawTitle = textSegments[0] ? textSegments[0].trim() : "Untitled";
                 const titleMatch = rawTitle.match(/^(.*?)(\s*\([^)]*\))$/);
@@ -2203,13 +2249,6 @@
                 } else {
                     infoTarget.textContent = "";
                 }
-                // Sound toggle sits inline right after the link icon (two spaces
-                // between), on the last caption segment so it shares that line.
-                if (withMute) {
-                    const segs = infoTarget.querySelectorAll('.info-seg');
-                    const host = segs.length ? segs[segs.length - 1] : infoTarget;
-                    host.insertAdjacentHTML('beforeend', muteToggleHtml(false));
-                }
             };
 
             if (mediaType === 'video') {
@@ -2236,9 +2275,10 @@
                     _sp.style.display = 'none';
                     detailView.classList.remove('spinner-loading');
                     artworkDetails.classList.add('video-caption');
-                    applyCaption(rawText, wantAudio);
+                    applyCaption(rawText);
                     applyMediaLayout(newVideo);
                     if (wantAudio) {
+                        showMuteButton(newVideo.muted);
                         newVideo.play().catch(() => {
                             // Autoplay-with-sound blocked: play muted instead.
                             newVideo.muted = true;
@@ -2389,6 +2429,7 @@
             document.getElementById('page-spinner').style.display = 'none';
             detailView.classList.remove('spinner-loading');
             window.resetImageZoom();
+            hideMuteButton();
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
             detailView.classList.remove('over-media');
