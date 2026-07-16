@@ -2518,6 +2518,9 @@
         // ─────────────────────────────────────────────────────────────────
         function handleDetailClick(event) {
             if (isPinching) return;
+            // The sound button handles its own click (toggle mute) — never let a
+            // click on it fall through to page navigation / return-to-grid.
+            if (event.target.closest && event.target.closest('.mute-toggle')) return;
             const mediaEl = mediaTarget.querySelector('img, video');
             if (mediaEl && isPointNavigable(mediaEl, event.clientX, event.clientY)) {
                 // Use screen centre, not image centre — when panned or zoomed
@@ -2568,7 +2571,7 @@
             // has proven unreliable about painting a cursor that's only
             // set via an ancestor while a sibling/descendant disagrees.
             const elAtPoint = document.elementFromPoint(event.clientX, event.clientY);
-            let hoveredInteractive = elAtPoint && elAtPoint.closest('.artwork-details a, .close-button');
+            let hoveredInteractive = elAtPoint && elAtPoint.closest('.artwork-details a, .close-button, .mute-toggle');
             // Desktop: the whole caption text block is the link, so any text in
             // it (not the empty band) gets the hand cursor too.
             if (!hoveredInteractive && currentCaptionUrl && elAtPoint &&
