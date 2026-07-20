@@ -1975,6 +1975,16 @@
             if (btn) btn.style.display = 'none';
         }
 
+        // Silence the detail video before it's replaced or removed. A playing
+        // <video> can keep its audio going after it's detached from the DOM, so
+        // the page-39 sound would otherwise carry over into the grid or another
+        // page. Pausing preserves the current frame (the image branch holds it
+        // visible until the next media loads); muting guarantees no stray audio.
+        function quietDetailVideo() {
+            const v = mediaTarget.querySelector('video');
+            if (v) { try { v.pause(); } catch (e) {} v.muted = true; }
+        }
+
         function updateMuteIcon(muted) {
             const el = document.getElementById('mute-button');
             if (el) el.innerHTML = muted ? SPEAKER_OFF : SPEAKER_ON;
@@ -2207,6 +2217,7 @@
             artworkDetails.classList.remove('light-text');
             artworkDetails.classList.remove('video-caption', 'hover-link');
             hideMuteButton();
+            quietDetailVideo();
             document.getElementById('page-number').classList.remove('light-text');
             document.getElementById('close-button').classList.remove('light-text');
 
@@ -2431,6 +2442,7 @@
             detailView.classList.remove('spinner-loading');
             window.resetImageZoom();
             hideMuteButton();
+            quietDetailVideo();
             detailView.style.opacity = '0';
             detailView.classList.remove('active-stage');
             detailView.classList.remove('over-media');
