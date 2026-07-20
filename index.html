@@ -2270,11 +2270,11 @@
                 newVideo.setAttribute('autoplay', '');
                 newVideo.setAttribute('loop', '');
                 newVideo.setAttribute('playsinline', '');
-                // Videos without opted-in audio stay silent, as in the grid.
-                // Audio videos start unmuted; if the browser blocks unmuted
-                // autoplay we fall back to muted so the loop still plays, and
-                // the inline caption toggle lets the viewer turn sound on.
-                newVideo.muted = !wantAudio;
+                // Always start muted — silent videos stay silent (as in the
+                // grid), and audio videos open muted too, so the loop plays
+                // quietly until the viewer clicks the sound button to turn
+                // audio on. (Muted autoplay is always permitted.)
+                newVideo.muted = true;
                 const newSource = document.createElement('source');
                 newSource.src = source.src;
                 newSource.type = 'video/mp4';
@@ -2290,14 +2290,10 @@
                     applyCaption(rawText);
                     applyMediaLayout(newVideo);
                     if (wantAudio) {
-                        showMuteButton(newVideo.muted);
-                        newVideo.play().catch(() => {
-                            // Autoplay-with-sound blocked: play muted instead.
-                            newVideo.muted = true;
-                            updateMuteIcon(true);
-                            newVideo.play().catch(() => {});
-                        });
-                        updateMuteIcon(newVideo.muted);
+                        // Show the sound button in its muted state; the viewer
+                        // clicks it to turn audio on (see toggleMute).
+                        showMuteButton(true);
+                        newVideo.play().catch(() => {});
                     }
                     preloadAdjacentArtwork();
                 });
