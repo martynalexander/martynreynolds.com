@@ -329,6 +329,11 @@
             height: 18px;
         }
         .mute-toggle:hover { background: rgba(0, 0, 0, 0.62); }
+        /* The detail view forces cursor:none on all children (custom nav arrow);
+           the sound button must still show the hand cursor. Higher specificity
+           than the #detail-view.active-stage * rule so it wins. */
+        #detail-view.active-stage .mute-toggle,
+        #detail-view.active-stage .mute-toggle * { cursor: pointer !important; }
 
         @media screen and (max-width: 900px), (hover: none) and (pointer: coarse) {
             .artwork-details {
@@ -1975,6 +1980,18 @@
             if (btn) btn.style.display = 'none';
         }
 
+        // True when the pointer is over the visible sound button. Tested against
+        // the button's bounding rect rather than document.elementFromPoint —
+        // Safari mis-hits a position:fixed element when the detail view is
+        // scrolled (tall videos), returning the video behind it, which made the
+        // nav arrow linger and a click fall through to page navigation.
+        function pointerOverMuteButton(x, y) {
+            const btn = document.getElementById('mute-button');
+            if (!btn || btn.style.display === 'none') return false;
+            const r = btn.getBoundingClientRect();
+            return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+        }
+
         // Silence the detail video before it's replaced or removed. A playing
         // <video> can keep its audio going after it's detached from the DOM, so
         // the page-39 sound would otherwise carry over into the grid or another
@@ -2528,8 +2545,15 @@
         function handleDetailClick(event) {
             if (isPinching) return;
             // The sound button handles its own click (toggle mute) — never let a
-            // click on it fall through to page navigation / return-to-grid.
+            // click on it fall through to page navigation / return-to-grid. The
+            // coordinate test covers Safari, where a scrolled tall video makes
+            // the click's target the video behind the fixed button, so the
+            // closest('.mute-toggle') guard alone would miss it.
             if (event.target.closest && event.target.closest('.mute-toggle')) return;
+            if (pointerOverMuteButton(event.clientX, event.clientY)) {
+                toggleMute(event);
+                return;
+            }
             const mediaEl = mediaTarget.querySelector('img, video');
             if (mediaEl && isPointNavigable(mediaEl, event.clientX, event.clientY)) {
                 // Use screen centre, not image centre — when panned or zoomed
@@ -2573,6 +2597,19 @@
             if (!isDesktop()) return;
             if (detailView.classList.contains('spinner-loading')) return;
             const mediaEl = mediaTarget.querySelector('img, video');
+
+            // Over the sound button: no nav arrow, hand cursor (from CSS), and
+            // the click won't navigate (see handleDetailClick). Coordinate test
+            // instead of elementFromPoint — Safari mis-hits the fixed button
+            // when the detail view is scrolled for a tall video.
+            if (pointerOverMuteButton(event.clientX, event.clientY)) {
+                detailView.classList.remove('over-media');
+                detailView.style.cursor = '';
+                if (mediaEl) mediaEl.style.removeProperty('cursor');
+                artworkDetails.classList.remove('hover-link');
+                hideArrows();
+                return;
+            }
 
             // When hovering a metadata link or the close button, show the
             // hand cursor, not the nav arrow. Written directly onto that
