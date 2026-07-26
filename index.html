@@ -1842,11 +1842,12 @@
                 const vh = window.innerHeight;
                 const isWide = w > 0 && h > 0 && (w / h) > (vw / vh);
                 const isVideo = mediaEl.tagName.toLowerCase() === 'video';
-                if (isVideo && !isWide) {
-                    // Portrait video: fill screen height (top edge to bottom
-                    // edge) and let it be as wide as it is. The container stays
-                    // full-viewport-width and flex-centres the video, so the
-                    // white page shows as left/right pillarbox. No scrolling.
+                if (isVideo && h >= w) {
+                    // Portrait video (e.g. page 39): fill screen height (top
+                    // edge to bottom edge) and let it be as wide as it is. The
+                    // container stays full-viewport-width and flex-centres the
+                    // video, so the white page shows as left/right pillarbox.
+                    // No scrolling.
                     mediaEl.style.height = '100vh';
                     mediaEl.style.width  = 'auto';
                     mediaTarget.style.width    = '';
@@ -1857,6 +1858,23 @@
                     requestAnimationFrame(() => {
                         detailView.scrollLeft = 0;
                         detailView.scrollTop  = 0;
+                    });
+                } else if (isVideo) {
+                    // Landscape video (e.g. pages 151 & 154): fill screen width
+                    // edge to edge (no pillarbox). If the video is taller than
+                    // the viewport, scroll vertically, opening centred; if it
+                    // fits, it's simply centred with clear page above/below.
+                    mediaEl.style.width  = '100vw';
+                    mediaEl.style.height = 'auto';
+                    mediaTarget.style.width    = '';
+                    mediaTarget.style.maxWidth = '';
+                    mediaTarget.style.alignItems = 'center';
+                    detailView.style.overflowY = 'scroll';
+                    detailView.style.overflowX = 'hidden';
+                    requestAnimationFrame(() => {
+                        const maxScroll = detailView.scrollHeight - detailView.clientHeight;
+                        detailView.scrollTop  = maxScroll > 0 ? maxScroll / 2 : 0;
+                        detailView.scrollLeft = 0;
                     });
                 } else if (isWide) {
                     // Wide/landscape: fill screen height and scroll horizontally,
