@@ -2605,7 +2605,12 @@
             if (pointerOverMuteButton(event.clientX, event.clientY)) {
                 detailView.classList.remove('over-media');
                 detailView.style.cursor = '';
-                if (mediaEl) mediaEl.style.removeProperty('cursor');
+                // Force the hand cursor on the video too: Safari's cursor is
+                // painted by its own (buggy) hit test, which flip-flops between
+                // the fixed button and the scrolled video behind it. The button
+                // is already pointer via CSS, so making the video pointer here
+                // means the hand shows steadily whichever one Safari picks.
+                if (mediaEl) mediaEl.style.setProperty('cursor', 'pointer', 'important');
                 artworkDetails.classList.remove('hover-link');
                 hideArrows();
                 return;
