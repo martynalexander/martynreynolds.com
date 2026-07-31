@@ -436,6 +436,12 @@
             font-style: normal;
         }
 
+        /* …unless the video documents a titled work (data-italic-title): keep
+           the title italic like an artwork title. */
+        .artwork-details.video-caption.title-italic h1 {
+            font-style: italic;
+        }
+
         /* MINIMAL FLAT ARROW INDICATOR — desktop only, follows the cursor.
            Its colour is set in JS by sampling the image tone directly behind
            the cursor — the same brightness feature that drives the text block. */
@@ -1714,7 +1720,7 @@
 <!-- cms-item-start -->
             <!-- primary page identifier: data-page -->
             <!-- First Frameless Video Loop (Large Size Grid Layout) -->
-            <video class="big" onclick="showArtworkPage(this, 'video')" data-title="Best Wishes Jason Rhoades | bicycle with removed seat, treadmill, hydroponic grow lamp | variable dimensions | Window Gallery, Auckland | 2007 | http://archive.windowgallery.co.nz/archive/2007/08/onsite.html" autoplay loop muted playsinline poster="thumbs/best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_4_poster.jpg" data-file="best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_4.mp4" data-page="151">
+            <video class="big" onclick="showArtworkPage(this, 'video')" data-title="Best Wishes Jason Rhoades | bicycle with removed seat, treadmill, hydroponic grow lamp | variable dimensions | Window Gallery, Auckland | 2007 | http://archive.windowgallery.co.nz/archive/2007/08/onsite.html" autoplay loop muted playsinline poster="thumbs/best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_4_poster.jpg" data-file="best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_4.mp4" data-italic-title data-page="151">
                 <source src="best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_4.mp4" type="video/mp4">
             </video>
             <!-- cms-item-end -->
@@ -1740,7 +1746,7 @@
 <!-- cms-item-start -->
             <!-- primary page identifier: data-page -->
             <!-- Second Frameless Video Loop (Normal Size Grid Layout) -->
-            <video onclick="showArtworkPage(this, 'video')" data-title="Best Wishes Jason Rhoades | bicycle with removed seat, treadmill, hydroponic grow lamp | variable dimensions | Window Gallery, Auckland | 2007 | http://archive.windowgallery.co.nz/archive/2007/08/onsite.html" autoplay loop muted playsinline poster="thumbs/best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_5_poster.jpg" data-file="best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_5.mp4" data-page="154">
+            <video onclick="showArtworkPage(this, 'video')" data-title="Best Wishes Jason Rhoades | bicycle with removed seat, treadmill, hydroponic grow lamp | variable dimensions | Window Gallery, Auckland | 2007 | http://archive.windowgallery.co.nz/archive/2007/08/onsite.html" autoplay loop muted playsinline poster="thumbs/best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_5_poster.jpg" data-file="best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_5.mp4" data-italic-title data-page="154">
                 <source src="best_wishes_jason_rhoades_bicycle_with_removed_seat_treadmill_hydroponic_grow_lamp_variable_dimensions_window_gallery_auckland_2007_5.mp4" type="video/mp4">
             </video>
             <!-- cms-item-end -->
@@ -2250,7 +2256,7 @@
 
             // Reset UI chrome immediately so stale colours don't linger
             artworkDetails.classList.remove('light-text');
-            artworkDetails.classList.remove('video-caption', 'hover-link');
+            artworkDetails.classList.remove('video-caption', 'hover-link', 'title-italic');
             hideMuteButton();
             quietDetailVideo();
             document.getElementById('page-number').classList.remove('light-text');
@@ -2322,6 +2328,7 @@
                     _sp.style.display = 'none';
                     detailView.classList.remove('spinner-loading');
                     artworkDetails.classList.add('video-caption');
+                    artworkDetails.classList.toggle('title-italic', element.hasAttribute('data-italic-title'));
                     applyCaption(rawText);
                     applyMediaLayout(newVideo);
                     if (wantAudio) {
