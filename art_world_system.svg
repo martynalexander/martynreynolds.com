@@ -57,8 +57,8 @@ TILES.forEach(([l,c,px,py],i)=>{const Wt=Math.ceil(tw(l,14,600))+36,g=el('g',{cl
  el('rect',{x:-Wt/2+1,y:-19,width:Wt-2,height:38,rx:6,fill:C[c][0],stroke:C[c][1],'stroke-width':1.2},g);
  const t=el('text',{x:0,y:1,'text-anchor':'middle','dominant-baseline':'central','font-size':14,'font-weight':600,fill:C[c][2]},g);t.textContent=l;
  const Y=1.1+(i%3)*.3+(i===0?.75:0);groups.push({i,Y,cx:px,cy:py,items:[{g,p:[(px-CX)*.056,Y,(py-CY)*.052],k:.82/40}]})});
-FIGS.forEach(([r,px,py])=>{const g=el('g',{class:'tt'},sprites);
- g.innerHTML=`<g fill="none" stroke="#6B6A66" stroke-width="1.6" stroke-linecap="round"><circle cx="0" cy="-20" r="6"/><path d="M0 -14V12M0 12L-8 26M0 12L8 26M0 -10L-14 -6M0 -10L14 -6"/></g><rect x="-32" y="-9" width="64" height="18" rx="3" fill="#FFFFFF" stroke="#5F5E5A" stroke-width=".9"/><text x="0" y=".5" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500" fill="#2C2C2A">${r}</text>`;
+FIGS.forEach(([r,px,py],fi)=>{const g=el('g',{class:'tt'},sprites);const wb=(-(fi%8)*.08).toFixed(2);
+ g.innerHTML=`<g fill="none" stroke="#6B6A66" stroke-width="1.6" stroke-linecap="round"><circle cx="0" cy="-20" r="6"/><path d="M0 -14V12M0 -10L-14 -6M0 -10L14 -6"/><path d="M0 12L-8 26"><animateTransform attributeName="transform" type="rotate" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" values="16 0 12;-16 0 12;16 0 12" dur="0.62s" begin="${wb}s" repeatCount="indefinite"/></path><path d="M0 12L8 26"><animateTransform attributeName="transform" type="rotate" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" values="-16 0 12;16 0 12;-16 0 12" dur="0.62s" begin="${wb}s" repeatCount="indefinite"/></path></g><rect x="-32" y="-9" width="64" height="18" rx="3" fill="#FFFFFF" stroke="#5F5E5A" stroke-width=".9"/><text x="0" y=".5" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500" fill="#2C2C2A">${r}</text>`;
  let G=groups[0],bd=1e9;groups.forEach(q=>{const d=(q.cx-px)**2+(q.cy-py)**2;if(d<bd){bd=d;G=q}});G.items.push({g,p:[(px-CX)*.056,G.Y-.55,(py-CY)*.052],k:.92/56})});
 const LT=el('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':11,'font-weight':600,'letter-spacing':'1.1',fill:GRAY?'#2A2A2A':'#8A6410'},labels);LT.textContent='DIGITAL MEDIATION';
 const LB=el('g',{},labels);
@@ -78,7 +78,7 @@ render(0);if(!(opts&&opts.manual))requestAnimationFrame(loop);
 return{render,pause:v=>{paused=v}}}
 
 (function(){const manual=location.hash==='#manual';const go=()=>{const AS=ArtSphere(document.documentElement,'gray',{manual});window.AS=AS;
-if(!manual){const hold=()=>AS.pause(true),release=()=>AS.pause(false),root=document.documentElement;
+if(!manual){const root=document.documentElement,hold=()=>{AS.pause(true);try{root.pauseAnimations()}catch(e){}},release=()=>{AS.pause(false);try{root.unpauseAnimations()}catch(e){}};
 if(window.PointerEvent){root.addEventListener('pointerdown',hold);window.addEventListener('pointerup',release);window.addEventListener('pointercancel',release);}
 else{root.addEventListener('mousedown',hold);window.addEventListener('mouseup',release);root.addEventListener('touchstart',hold,{passive:true});window.addEventListener('touchend',release);window.addEventListener('touchcancel',release);}}};
 if(document.fonts&&document.fonts.load)Promise.all([document.fonts.load('600 14px Plex'),document.fonts.load('500 11px Plex')]).then(go,go);else go();})();
